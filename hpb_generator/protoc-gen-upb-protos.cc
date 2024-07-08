@@ -22,7 +22,7 @@
 #include "google/protobuf/compiler/hpb/names.h"
 #include "google/protobuf/compiler/hpb/output.h"
 
-namespace protos_generator {
+namespace hpb_generator {
 namespace {
 
 namespace protoc = ::google::protobuf::compiler;
@@ -265,9 +265,9 @@ void WriteHeaderMessageForwardDecls(const protobuf::FileDescriptor* file,
 }
 
 }  // namespace
-}  // namespace protos_generator
+}  // namespace hpb_generator
 
 int main(int argc, char** argv) {
-  protos_generator::Generator generator_cc;
+  hpb_generator::Generator generator_cc;
   return google::protobuf::compiler::PluginMain(argc, argv, &generator_cc);
 }

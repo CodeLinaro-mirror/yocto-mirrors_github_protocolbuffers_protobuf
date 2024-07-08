@@ -11,7 +11,7 @@
 
 #include "upb_generator/keywords.h"
 
-namespace protos_generator {
+namespace hpb_generator {
 
 namespace protobuf = ::proto2;
 
@@ -175,4 +175,4 @@ std::string MessageProxyType(const protobuf::FieldDescriptor* field,
          "Proxy";
 }
 
-}  // namespace protos_generator
+}  // namespace hpb_generator

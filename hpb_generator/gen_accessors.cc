@@ -22,7 +22,7 @@
 #include "upb_generator/keywords.h"
 #include "upb_generator/names.h"
 
-namespace protos_generator {
+namespace hpb_generator {
 
 namespace protobuf = ::proto2;
 
@@ -566,4 +566,4 @@ std::string ResolveFieldName(const protobuf::FieldDescriptor* field,
   return upb::generator::ResolveKeywordConflict(std::string(field_name));
 }
 
-}  // namespace protos_generator
+}  // namespace hpb_generator
