@@ -1044,7 +1044,13 @@ class RepeatedPtrField final : private internal::RepeatedPtrFieldBase {
   void DeleteSubrange(int start, int num);
 
   ABSL_ATTRIBUTE_REINITIALIZES void Clear();
+
+  // Appends the elements from |other| after this instance.
+  // The end result length will be |other.size + this->size()|.
   void MergeFrom(const RepeatedPtrField& other);
+
+  // Copies the elements from |other| into this instance, ignoring the previous
+  // contents of this instance.
   ABSL_ATTRIBUTE_REINITIALIZES void CopyFrom(const RepeatedPtrField& other);
 
   // Replaces the contents with RepeatedPtrField(begin, end).

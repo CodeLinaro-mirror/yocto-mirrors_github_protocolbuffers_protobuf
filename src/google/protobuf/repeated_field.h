@@ -206,7 +206,13 @@ class RepeatedField final
   void ExtractSubrange(int start, int num, Element* elements);
 
   ABSL_ATTRIBUTE_REINITIALIZES void Clear();
+
+  // Appends the elements from |other| after this instance.
+  // The end result length will be |other.size + this->size()|.
   void MergeFrom(const RepeatedField& other);
+
+  // Copies the elements from |other| into this instance, ignoring the previous
+  // contents of this instance.
   ABSL_ATTRIBUTE_REINITIALIZES void CopyFrom(const RepeatedField& other);
 
   // Replaces the contents with RepeatedField(begin, end).
