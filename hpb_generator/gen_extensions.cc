@@ -7,9 +7,14 @@
 
 #include "google/protobuf/compiler/hpb/gen_extensions.h"
 
+#include <cassert>
+#include <string>
+#include <vector>
+
 #include "absl/strings/str_cat.h"
-#include "google/protobuf/compiler/hpb/gen_utils.h"
 #include "google/protobuf/compiler/hpb/names.h"
+#include "google/protobuf/compiler/hpb/output.h"
+#include "google/protobuf/descriptor.h"
 
 namespace google::protobuf::hpb_generator {
 

@@ -8,11 +8,14 @@
 #include "google/protobuf/compiler/hpb/gen_utils.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <string>
 #include <vector>
 
 #include "absl/strings/ascii.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "google/protobuf/descriptor.h"
 
 namespace google::protobuf::hpb_generator {
 
@@ -124,6 +127,46 @@ std::string ToCamelCase(const absl::string_view input, bool lower_first) {
     result[0] = absl::ascii_tolower(result[0]);
   }
 
+  return result;
+}
+
+std::string UnderscoresToCamelCase(absl::string_view input,
+                                   bool cap_next_letter) {
+  std::string result;
+
+  for (size_t i = 0; i < input.size(); i++) {
+    if (absl::ascii_islower(input[i])) {
+      if (cap_next_letter) {
+        result += absl::ascii_toupper(input[i]);
+      } else {
+        result += input[i];
+      }
+      cap_next_letter = false;
+    } else if (absl::ascii_isupper(input[i])) {
+      // Capital letters are left as-is.
+      result += input[i];
+      cap_next_letter = false;
+    } else if (absl::ascii_isdigit(input[i])) {
+      result += input[i];
+      cap_next_letter = true;
+    } else {
+      cap_next_letter = true;
+    }
+  }
+  return result;
+}
+
+std::string FieldConstantName(const protobuf::FieldDescriptor* field) {
+  std::string field_name = UnderscoresToCamelCase(field->name(), true);
+  std::string result = absl::StrCat("k", field_name, "FieldNumber");
+
+  if (!field->is_extension() &&
+      field->containing_type()->FindFieldByCamelcaseName(
+          field->camelcase_name()) != field) {
+    // This field's camelcase name is not unique, add field number to make it
+    // unique.
+    absl::StrAppend(&result, "_", field->number());
+  }
   return result;
 }
 

@@ -123,46 +123,6 @@ void WriteModelAccessDeclaration(const protobuf::Descriptor* descriptor,
   output("};\n");
 }
 
-std::string UnderscoresToCamelCase(absl::string_view input,
-                                   bool cap_next_letter) {
-  std::string result;
-
-  for (size_t i = 0; i < input.size(); i++) {
-    if (absl::ascii_islower(input[i])) {
-      if (cap_next_letter) {
-        result += absl::ascii_toupper(input[i]);
-      } else {
-        result += input[i];
-      }
-      cap_next_letter = false;
-    } else if (absl::ascii_isupper(input[i])) {
-      // Capital letters are left as-is.
-      result += input[i];
-      cap_next_letter = false;
-    } else if (absl::ascii_isdigit(input[i])) {
-      result += input[i];
-      cap_next_letter = true;
-    } else {
-      cap_next_letter = true;
-    }
-  }
-  return result;
-}
-
-std::string FieldConstantName(const protobuf::FieldDescriptor* field) {
-  std::string field_name = UnderscoresToCamelCase(field->name(), true);
-  std::string result = absl::StrCat("k", field_name, "FieldNumber");
-
-  if (!field->is_extension() &&
-      field->containing_type()->FindFieldByCamelcaseName(
-          field->camelcase_name()) != field) {
-    // This field's camelcase name is not unique, add field number to make it
-    // unique.
-    absl::StrAppend(&result, "_", field->number());
-  }
-  return result;
-}
-
 void WriteConstFieldNumbers(Output& output,
                             const protobuf::Descriptor* descriptor) {
   for (auto field : FieldRange(descriptor)) {

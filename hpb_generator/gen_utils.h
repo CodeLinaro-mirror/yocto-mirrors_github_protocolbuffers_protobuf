@@ -38,9 +38,10 @@ std::vector<const protobuf::FieldDescriptor*> SortedExtensions(
     const protobuf::FileDescriptor* file);
 std::vector<const protobuf::FieldDescriptor*> FieldNumberOrder(
     const protobuf::Descriptor* message);
-
+std::string FieldConstantName(const protobuf::FieldDescriptor* field);
 std::string ToCamelCase(absl::string_view input, bool lower_first);
-
+std::string UnderscoresToCamelCase(absl::string_view input,
+                                   bool cap_next_letter);
 }  // namespace protobuf
 }  // namespace google::hpb_generator
 

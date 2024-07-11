@@ -8,11 +8,13 @@
 #ifndef PROTOBUF_HPB_HPB_H_
 #define PROTOBUF_HPB_HPB_H_
 
+#include <cstdint>
 #include <type_traits>
 #include <vector>
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/strings/string_view.h"
 #include "upb/base/status.hpp"
 #include "upb/mem/arena.hpp"
 #include "upb/message/copy.h"
@@ -561,6 +563,12 @@ absl::StatusOr<absl::string_view> Serialize(Ptr<T> message, upb::Arena& arena,
   return ::protos::internal::Serialize(
       internal::GetInternalMsg(message),
       ::protos::internal::GetMiniTable(message), arena.ptr(), options);
+}
+
+template <typename T, typename Extension>
+constexpr uint32_t ExtensionNumber(
+    internal::ExtensionIdentifier<T, Extension> id) {
+  return upb_MiniTableExtension_Number(id.mini_table_ext());
 }
 
 }  // namespace protos
