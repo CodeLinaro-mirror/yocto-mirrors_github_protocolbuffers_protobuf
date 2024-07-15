@@ -489,9 +489,7 @@ public abstract class GeneratedMessage extends AbstractMessage implements Serial
      */
     private Object unknownFieldsOrBuilder = UnknownFieldSet.getDefaultInstance();
 
-    protected Builder() {
-      this(null);
-    }
+    protected Builder() {}
 
     protected Builder(BuilderParent builderParent) {
       this.builderParent = builderParent;
@@ -845,7 +843,7 @@ public abstract class GeneratedMessage extends AbstractMessage implements Serial
      * the generated API only allows us to access it as a map. This method returns the underlying
      * map field directly and thus enables us to access the map field as a list.
      */
-    @SuppressWarnings({"unused", "rawtypes"})
+    @SuppressWarnings("unused")
     protected MapFieldReflectionAccessor internalGetMapFieldReflection(int fieldNumber) {
       return internalGetMapField(fieldNumber);
     }
@@ -860,7 +858,7 @@ public abstract class GeneratedMessage extends AbstractMessage implements Serial
     }
 
     /** Like {@link #internalGetMapFieldReflection} but return a mutable version. */
-    @SuppressWarnings({"unused", "rawtypes"})
+    @SuppressWarnings("unused")
     protected MapFieldReflectionAccessor internalGetMutableMapFieldReflection(int fieldNumber) {
       return internalGetMutableMapField(fieldNumber);
     }
