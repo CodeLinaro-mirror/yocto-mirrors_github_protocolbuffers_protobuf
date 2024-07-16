@@ -51,11 +51,11 @@ def protobuf_deps():
     if not native.existing_rule("bazel_skylib"):
         http_archive(
             name = "bazel_skylib",
+            sha256 = "d00f1389ee20b60018e92644e0948e16e350a7707219e7a390fb0a99b6ec9262",
             urls = [
-                "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.3.0/bazel-skylib-1.3.0.tar.gz",
-                "https://github.com/bazelbuild/bazel-skylib/releases/download/1.3.0/bazel-skylib-1.3.0.tar.gz",
+                "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.7.0/bazel-skylib-1.7.0.tar.gz",
+                "https://github.com/bazelbuild/bazel-skylib/releases/download/1.7.0/bazel-skylib-1.7.0.tar.gz",
             ],
-            sha256 = "74d544d96f4a5bb630d465ca8bbcfe231e3594e5aae57e1edbf17a6eb3ca2506",
         )
 
     if not native.existing_rule("com_google_absl"):
@@ -119,17 +119,6 @@ def protobuf_deps():
                 url = "https://github.com/bazelbuild/rules_java/releases/download/6.5.0/rules_java-6.5.0.tar.gz",
                 sha256 = "160d1ebf33763124766fb35316329d907ca67f733238aa47624a8e3ff3cf2ef4",
             )
-
-    # TODO: remove after toolchain types are moved to protobuf
-    if not native.existing_rule("rules_proto"):
-        http_archive(
-            name = "rules_proto",
-            sha256 = "dc3fb206a2cb3441b485eb1e423165b231235a1ea9b031b4433cf7bc1fa460dd",
-            strip_prefix = "rules_proto-5.3.0-21.7",
-            urls = [
-                "https://github.com/bazelbuild/rules_proto/archive/refs/tags/5.3.0-21.7.tar.gz",
-            ],
-        )
 
     if not native.existing_rule("proto_bazel_features"):
         proto_bazel_features(name = "proto_bazel_features")

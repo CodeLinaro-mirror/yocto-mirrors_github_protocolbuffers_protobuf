@@ -2,11 +2,12 @@
 
 load("//bazel/common:proto_common.bzl", "proto_common")
 load("//bazel/common:proto_lang_toolchain_info.bzl", "ProtoLangToolchainInfo")
+load("//bazel/private:toolchain_helpers.bzl", "toolchains")
 
 def _impl(ctx):
     kwargs = {}
     if getattr(proto_common, "INCOMPATIBLE_PASS_TOOLCHAIN_TYPE", False):
-        kwargs["toolchain_type"] = "@rules_proto//proto:toolchain_type"
+        kwargs["toolchain_type"] = toolchains.PROTO_TOOLCHAIN
 
     return [
         DefaultInfo(
