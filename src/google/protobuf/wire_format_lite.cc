@@ -830,6 +830,84 @@ size_t WireFormatLite::SInt64Size(const RepeatedField<int64_t>& value) {
 
 #endif
 
+size_t WireFormatLite::Int32SizeWithPackedTagSize(
+    const RepeatedField<int32_t>& value, int tag_size,
+    internal::CachedSize& cached_size) {
+  if (value.empty()) {
+    cached_size.Set(0);
+    return 0;
+  }
+  PROTOBUF_ALWAYS_INLINE_CALL size_t res = Int32Size(value);
+  cached_size.Set(ToCachedSize(res));
+  return tag_size + res + Int32Size(static_cast<int32_t>(res));
+}
+size_t WireFormatLite::Int64SizeWithPackedTagSize(
+    const RepeatedField<int64_t>& value, int tag_size,
+    internal::CachedSize& cached_size) {
+  if (value.empty()) {
+    cached_size.Set(0);
+    return 0;
+  }
+  PROTOBUF_ALWAYS_INLINE_CALL size_t res = Int64Size(value);
+  cached_size.Set(ToCachedSize(res));
+  return tag_size + res + Int32Size(static_cast<int32_t>(res));
+}
+size_t WireFormatLite::UInt32SizeWithPackedTagSize(
+    const RepeatedField<uint32_t>& value, int tag_size,
+    internal::CachedSize& cached_size) {
+  if (value.empty()) {
+    cached_size.Set(0);
+    return 0;
+  }
+  PROTOBUF_ALWAYS_INLINE_CALL size_t res = UInt32Size(value);
+  cached_size.Set(ToCachedSize(res));
+  return tag_size + res + Int32Size(static_cast<int32_t>(res));
+}
+size_t WireFormatLite::UInt64SizeWithPackedTagSize(
+    const RepeatedField<uint64_t>& value, int tag_size,
+    internal::CachedSize& cached_size) {
+  if (value.empty()) {
+    cached_size.Set(0);
+    return 0;
+  }
+  PROTOBUF_ALWAYS_INLINE_CALL size_t res = UInt64Size(value);
+  cached_size.Set(ToCachedSize(res));
+  return tag_size + res + Int32Size(static_cast<int32_t>(res));
+}
+size_t WireFormatLite::SInt32SizeWithPackedTagSize(
+    const RepeatedField<int32_t>& value, int tag_size,
+    internal::CachedSize& cached_size) {
+  if (value.empty()) {
+    cached_size.Set(0);
+    return 0;
+  }
+  PROTOBUF_ALWAYS_INLINE_CALL size_t res = SInt32Size(value);
+  cached_size.Set(ToCachedSize(res));
+  return tag_size + res + Int32Size(static_cast<int32_t>(res));
+}
+size_t WireFormatLite::SInt64SizeWithPackedTagSize(
+    const RepeatedField<int64_t>& value, int tag_size,
+    internal::CachedSize& cached_size) {
+  if (value.empty()) {
+    cached_size.Set(0);
+    return 0;
+  }
+  PROTOBUF_ALWAYS_INLINE_CALL size_t res = SInt64Size(value);
+  cached_size.Set(ToCachedSize(res));
+  return tag_size + res + Int32Size(static_cast<int32_t>(res));
+}
+size_t WireFormatLite::EnumSizeWithPackedTagSize(
+    const RepeatedField<int>& value, int tag_size,
+    internal::CachedSize& cached_size) {
+  if (value.empty()) {
+    cached_size.Set(0);
+    return 0;
+  }
+  PROTOBUF_ALWAYS_INLINE_CALL size_t res = EnumSize(value);
+  cached_size.Set(ToCachedSize(res));
+  return tag_size + res + Int32Size(static_cast<int32_t>(res));
+}
+
 }  // namespace internal
 }  // namespace protobuf
 }  // namespace google
