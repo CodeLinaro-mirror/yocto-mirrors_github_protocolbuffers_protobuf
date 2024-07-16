@@ -28,7 +28,7 @@ pub mod __public {
     pub use crate::proto;
     pub use crate::proxied::{IntoProxied, Mut, MutProxied, MutProxy, Proxied, View, ViewProxy};
     pub use crate::repeated::{
-        ProxiedInRepeated, Repeated, RepeatedIter, RepeatedMut, RepeatedView,
+        ProxiedInRepeated, Repeated, RepeatedIter, RepeatedMut, RepeatedValue, RepeatedView,
     };
     pub use crate::string::{ProtoBytes, ProtoStr, ProtoString};
     pub use crate::{ParseError, SerializeError};
@@ -88,4 +88,10 @@ impl fmt::Display for SerializeError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "Couldn't serialize proto into bytes (depth too deep or missing required fields)")
     }
+}
+
+pub fn get_repeated_default_value<T: repeated::ProxiedInRepeated + Default>(
+    _: repeated::RepeatedView<'_, T>,
+) -> T {
+    Default::default()
 }

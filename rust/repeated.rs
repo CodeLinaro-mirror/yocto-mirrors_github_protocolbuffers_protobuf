@@ -232,6 +232,21 @@ where
     }
 }
 
+pub trait RepeatedValue {
+    type Value;
+    fn default_value() -> Self::Value;
+}
+
+impl<T> RepeatedValue for Repeated<T>
+where
+    T: ProxiedInRepeated + Default,
+{
+    type Value = T;
+    fn default_value() -> T {
+        T::default()
+    }
+}
+
 impl<T> IntoProxied<Repeated<T>> for Repeated<T>
 where
     T: ProxiedInRepeated,
