@@ -698,7 +698,7 @@ TEST(CppGeneratedCode, ClearExtensionWithEmptyExtension) {
 
 TEST(CppGeneratedCode, ClearExtensionWithEmptyExtensionPtr) {
   TestModel model;
-  ::protos::Ptr<TestModel> recursive_child = model.mutable_recursive_child();
+  ::hpb::Ptr<TestModel> recursive_child = model.mutable_recursive_child();
   ::protos::ClearExtension(recursive_child, theme);
   EXPECT_EQ(false, ::protos::HasExtension(recursive_child, theme));
 }
@@ -724,13 +724,12 @@ TEST(CppGeneratedCode, SetExtension) {
 
 TEST(CppGeneratedCode, SetExtensionWithPtr) {
   ::hpb::Arena arena_model;
-  ::protos::Ptr<TestModel> model =
-      ::protos::CreateMessage<TestModel>(arena_model);
+  ::hpb::Ptr<TestModel> model = ::protos::CreateMessage<TestModel>(arena_model);
   void* prior_message;
   {
     // Use a nested scope to make sure the arenas are fused correctly.
     ::hpb::Arena arena;
-    ::protos::Ptr<ThemeExtension> extension1 =
+    ::hpb::Ptr<ThemeExtension> extension1 =
         ::protos::CreateMessage<ThemeExtension>(arena);
     extension1->set_ext_name("Hello World");
     prior_message = ::protos::internal::GetInternalMsg(extension1);
@@ -747,7 +746,7 @@ TEST(CppGeneratedCode, SetExtensionWithPtr) {
 #ifndef _MSC_VER
 TEST(CppGeneratedCode, SetExtensionShouldNotCompileForWrongType) {
   ::hpb::Arena arena;
-  ::protos::Ptr<TestModel> model = ::protos::CreateMessage<TestModel>(arena);
+  ::hpb::Ptr<TestModel> model = ::protos::CreateMessage<TestModel>(arena);
   ThemeExtension extension1;
   ContainerExtension extension2;
 
@@ -768,11 +767,11 @@ TEST(CppGeneratedCode, SetExtensionShouldNotCompileForWrongType) {
 
 TEST(CppGeneratedCode, SetExtensionWithPtrSameArena) {
   ::hpb::Arena arena;
-  ::protos::Ptr<TestModel> model = ::protos::CreateMessage<TestModel>(arena);
+  ::hpb::Ptr<TestModel> model = ::protos::CreateMessage<TestModel>(arena);
   void* prior_message;
   {
     // Use a nested scope to make sure the arenas are fused correctly.
-    ::protos::Ptr<ThemeExtension> extension1 =
+    ::hpb::Ptr<ThemeExtension> extension1 =
         ::protos::CreateMessage<ThemeExtension>(arena);
     extension1->set_ext_name("Hello World");
     prior_message = ::protos::internal::GetInternalMsg(extension1);
@@ -789,9 +788,9 @@ TEST(CppGeneratedCode, SetExtensionWithPtrSameArena) {
 TEST(CppGeneratedCode, SetExtensionFusingFailureShouldCopy) {
   // Use an initial block to disallow fusing.
   char initial_block[1000];
-  protos::Arena arena(initial_block, sizeof(initial_block));
+  hpb::Arena arena(initial_block, sizeof(initial_block));
 
-  protos::Ptr<TestModel> model = protos::CreateMessage<TestModel>(arena);
+  hpb::Ptr<TestModel> model = ::protos::CreateMessage<TestModel>(arena);
 
   ThemeExtension extension1;
   extension1.set_ext_name("Hello World");
@@ -859,7 +858,7 @@ TEST(CppGeneratedCode, GetExtensionOnMutableChild) {
   TestModel model;
   ThemeExtension extension1;
   extension1.set_ext_name("Hello World");
-  ::protos::Ptr<TestModel> mutable_recursive_child =
+  ::hpb::Ptr<TestModel> mutable_recursive_child =
       model.mutable_recursive_child();
   EXPECT_EQ(false, ::protos::HasExtension(mutable_recursive_child, theme));
   EXPECT_EQ(
@@ -875,13 +874,13 @@ TEST(CppGeneratedCode, GetExtensionOnImmutableChild) {
   TestModel model;
   ThemeExtension extension1;
   extension1.set_ext_name("Hello World");
-  ::protos::Ptr<TestModel> mutable_recursive_child =
+  ::hpb::Ptr<TestModel> mutable_recursive_child =
       model.mutable_recursive_child();
   EXPECT_EQ(false, ::protos::HasExtension(mutable_recursive_child, theme));
   EXPECT_EQ(
       true,
       ::protos::SetExtension(mutable_recursive_child, theme, extension1).ok());
-  ::protos::Ptr<const TestModel> recursive_child = model.recursive_child();
+  ::hpb::Ptr<const TestModel> recursive_child = model.recursive_child();
   EXPECT_EQ("Hello World",
             ::protos::GetExtension(recursive_child, theme).value()->ext_name());
 }
@@ -913,7 +912,7 @@ TEST(CppGeneratedCode, SerializeNestedMessageUsingArena) {
   TestModel model;
   model.mutable_recursive_child()->set_str1("Hello World");
   ::upb::Arena arena;
-  ::protos::Ptr<const TestModel> child = model.recursive_child();
+  ::hpb::Ptr<const TestModel> child = model.recursive_child();
   absl::StatusOr<absl::string_view> bytes = ::protos::Serialize(child, arena);
   EXPECT_EQ(true, bytes.ok());
   TestModel parsed_model = ::protos::Parse<TestModel>(bytes.value()).value();
@@ -943,7 +942,7 @@ TEST(CppGeneratedCode, ParseIntoPtrToModel) {
   ::upb::Arena arena;
   auto bytes = ::protos::Serialize(&model, arena);
   EXPECT_EQ(true, bytes.ok());
-  ::protos::Ptr<TestModel> parsed_model =
+  ::hpb::Ptr<TestModel> parsed_model =
       ::protos::CreateMessage<TestModel>(arena);
   EXPECT_TRUE(::protos::Parse(parsed_model, bytes.value()));
   EXPECT_EQ("Test123", parsed_model->str1());
@@ -990,15 +989,15 @@ TEST(CppGeneratedCode, NameCollisions) {
 TEST(CppGeneratedCode, SharedPointer) {
   std::shared_ptr<TestModel> model = std::make_shared<TestModel>();
   ::upb::Arena arena;
-  auto bytes = protos::Serialize(model.get(), arena);
-  EXPECT_TRUE(protos::Parse(model.get(), bytes.value()));
+  auto bytes = ::protos::Serialize(model.get(), arena);
+  EXPECT_TRUE(::protos::Parse(model.get(), bytes.value()));
 }
 
 TEST(CppGeneratedCode, UniquePointer) {
   auto model = std::make_unique<TestModel>();
   ::upb::Arena arena;
-  auto bytes = protos::Serialize(model.get(), arena);
-  EXPECT_TRUE(protos::Parse(model.get(), bytes.value()));
+  auto bytes = ::protos::Serialize(model.get(), arena);
+  EXPECT_TRUE(::protos::Parse(model.get(), bytes.value()));
 }
 
 TEST(CppGeneratedCode, Assignment) {
@@ -1037,21 +1036,21 @@ TEST(CppGeneratedCode, PtrConstructor) {
 
 TEST(CppGeneratedCode, MutableToProxy) {
   TestModel model;
-  ::protos::Ptr<ChildModel1> child = model.mutable_child_model_1();
+  ::hpb::Ptr<ChildModel1> child = model.mutable_child_model_1();
   (void)child;
 }
 
 TEST(CppGeneratedCode, ProxyToCProxy) {
   TestModel model;
-  ::protos::Ptr<ChildModel1> child = model.mutable_child_model_1();
-  ::protos::Ptr<const ChildModel1> child2 = child;
+  ::hpb::Ptr<ChildModel1> child = model.mutable_child_model_1();
+  ::hpb::Ptr<const ChildModel1> child2 = child;
   (void)child2;
 }
 
 TEST(CppGeneratedCode, MutableAccessorsAreHiddenInCProxy) {
   TestModel model;
-  ::protos::Ptr<TestModel> proxy = &model;
-  ::protos::Ptr<const TestModel> cproxy = proxy;
+  ::hpb::Ptr<TestModel> proxy = &model;
+  ::hpb::Ptr<const TestModel> cproxy = proxy;
 
   const auto test_const_accessors = [](auto p) {
     // We don't want to run it, just check it compiles.
@@ -1103,7 +1102,7 @@ TEST(CppGeneratedCode, MutableAccessorsAreHiddenInCProxy) {
   test_mutable_accessors(cproxy, false);
 }
 
-bool ProxyToCProxyMethod(::protos::Ptr<const ChildModel1> child) {
+bool ProxyToCProxyMethod(::hpb::Ptr<const ChildModel1> child) {
   return child->child_str1() == "text in child";
 }
 
@@ -1116,7 +1115,7 @@ TEST(CppGeneratedCode, PassProxyToCProxy) {
 TEST(CppGeneratedCode, PtrImplicitConversion) {
   TestModel model;
   model.set_int64(5);
-  ::protos::Ptr<TestModel> model_ptr = &model;
+  ::hpb::Ptr<TestModel> model_ptr = &model;
   EXPECT_EQ(model_ptr->int64(), 5);
 }
 
@@ -1161,7 +1160,7 @@ TEST(CppGeneratedCode, CanInvokeClearMessageWithPtr) {
   model.set_int64(5);
   auto new_child = model.add_child_models();
   // Clear using Ptr<T>
-  auto ptr = ::protos::Ptr<TestModel>(&model);
+  auto ptr = ::hpb::Ptr<TestModel>(&model);
   ::protos::ClearMessage(ptr);
   // Successful clear
   EXPECT_FALSE(model.has_int64());
@@ -1184,8 +1183,8 @@ bool CanCallClearMessage() {
 }
 
 TEST(CppGeneratedCode, CannotInvokeClearMessageWithConstPtr) {
-  EXPECT_TRUE(CanCallClearMessage<::protos::Ptr<TestModel>>());
-  EXPECT_FALSE(CanCallClearMessage<::protos::Ptr<const TestModel>>());
+  EXPECT_TRUE(CanCallClearMessage<::hpb::Ptr<TestModel>>());
+  EXPECT_FALSE(CanCallClearMessage<::hpb::Ptr<const TestModel>>());
 }
 
 TEST(CppGeneratedCode, CannotInvokeClearMessageWithConstRawPtr) {

@@ -22,11 +22,6 @@
 
 namespace hpb {
 using Arena = ::upb::Arena;
-}
-
-namespace protos {
-using hpb::Arena;
-class ExtensionRegistry;
 
 template <typename T>
 using Proxy = std::conditional_t<std::is_const<T>::value,
@@ -85,6 +80,13 @@ class Ptr final {
 template <typename T>
 Ptr(T* m) -> Ptr<T>;
 
+}  // namespace hpb
+
+namespace protos {
+using hpb::Arena;
+using hpb::Ptr;
+class ExtensionRegistry;
+
 inline absl::string_view UpbStrToStringView(upb_StringView str) {
   return absl::string_view(str.data, str.size);
 }
@@ -99,7 +101,7 @@ inline upb_StringView UpbStrFromStringView(absl::string_view str,
 }
 
 template <typename T>
-typename T::Proxy CreateMessage(::protos::Arena& arena) {
+typename T::Proxy CreateMessage(::hpb::Arena& arena) {
   return typename T::Proxy(upb_Message_New(T::minitable(), arena.ptr()),
                            arena.ptr());
 }
@@ -299,19 +301,19 @@ typename T::Proxy CloneMessage(Ptr<T> message, upb_Arena* arena) {
 template <typename T>
 void DeepCopy(Ptr<const T> source_message, T* target_message) {
   static_assert(!std::is_const_v<T>);
-  DeepCopy(source_message, protos::Ptr(target_message));
+  DeepCopy(source_message, ::hpb::Ptr(target_message));
 }
 
 template <typename T>
 void DeepCopy(const T* source_message, Ptr<T> target_message) {
   static_assert(!std::is_const_v<T>);
-  DeepCopy(protos::Ptr(source_message), target_message);
+  DeepCopy(::hpb::Ptr(source_message), target_message);
 }
 
 template <typename T>
 void DeepCopy(const T* source_message, T* target_message) {
   static_assert(!std::is_const_v<T>);
-  DeepCopy(protos::Ptr(source_message), protos::Ptr(target_message));
+  DeepCopy(::hpb::Ptr(source_message), ::hpb::Ptr(target_message));
 }
 
 template <typename T>
@@ -360,7 +362,7 @@ template <typename T, typename Extendee, typename Extension,
 ABSL_MUST_USE_RESULT bool HasExtension(
     const T* message,
     const ::protos::internal::ExtensionIdentifier<Extendee, Extension>& id) {
-  return HasExtension(protos::Ptr(message), id);
+  return HasExtension(::hpb::Ptr(message), id);
 }
 
 template <typename T, typename Extension,
@@ -379,7 +381,7 @@ template <typename T, typename Extension,
 void ClearExtension(
     T* message,
     const ::protos::internal::ExtensionIdentifier<T, Extension>& id) {
-  ClearExtension(::protos::Ptr(message), id);
+  ClearExtension(::hpb::Ptr(message), id);
 }
 
 template <typename T, typename Extension,
@@ -431,7 +433,7 @@ template <typename T, typename Extension,
 absl::Status SetExtension(
     T* message, const ::protos::internal::ExtensionIdentifier<T, Extension>& id,
     const Extension& value) {
-  return ::protos::SetExtension(::protos::Ptr(message), id, value);
+  return ::protos::SetExtension(::hpb::Ptr(message), id, value);
 }
 
 template <typename T, typename Extension,
@@ -439,7 +441,7 @@ template <typename T, typename Extension,
 absl::Status SetExtension(
     T* message, const ::protos::internal::ExtensionIdentifier<T, Extension>& id,
     Extension&& value) {
-  return ::protos::SetExtension(::protos::Ptr(message), id,
+  return ::protos::SetExtension(::hpb::Ptr(message), id,
                                 std::forward<Extension>(value));
 }
 
@@ -448,7 +450,7 @@ template <typename T, typename Extension,
 absl::Status SetExtension(
     T* message, const ::protos::internal::ExtensionIdentifier<T, Extension>& id,
     Ptr<Extension> value) {
-  return ::protos::SetExtension(::protos::Ptr(message), id, value);
+  return ::protos::SetExtension(::hpb::Ptr(message), id, value);
 }
 
 template <typename T, typename Extendee, typename Extension,
@@ -474,7 +476,7 @@ template <typename T, typename Extendee, typename Extension,
 absl::StatusOr<Ptr<const Extension>> GetExtension(
     const T* message,
     const ::protos::internal::ExtensionIdentifier<Extendee, Extension>& id) {
-  return GetExtension(protos::Ptr(message), id);
+  return GetExtension(::hpb::Ptr(message), id);
 }
 
 template <typename T>
@@ -511,7 +513,7 @@ ABSL_MUST_USE_RESULT bool Parse(
     T* message, absl::string_view bytes,
     const ::protos::ExtensionRegistry& extension_registry) {
   static_assert(!std::is_const_v<T>);
-  return Parse(protos::Ptr(message, bytes, extension_registry));
+  return Parse(::hpb::Ptr(message, bytes, extension_registry));
 }
 
 template <typename T>
