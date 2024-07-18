@@ -229,8 +229,7 @@ bool MayEmitIfNonDefaultCheck(io::Printer* p, const std::string& prefix,
 
   p->Emit({{"condition", [&] { EmitNonDefaultCheck(p, prefix, field); }}},
           R"cc(
-            if ($condition$) {
-          )cc");
+            if ($condition$) )cc");
   return true;
 }
 
@@ -1204,6 +1203,56 @@ class AccessorVerifier {
   // it means the previous accessor didn't add the required code.
   SourceLocation loc_;
 };
+
+void EmitUpdateByteSizeForField(const FieldDescriptor* field,
+                                const Options& options,
+                                const FieldGeneratorTable& field_generators,
+                                const std::vector<int>& has_bit_indices,
+                                int& cached_has_word_index, io::Printer* p) {
+  p->Emit(
+      {{"comment", [&] { PrintFieldComment(Formatter{p}, field, options); }},
+       {"update_byte_size_for_field",
+        [&] { field_generators.get(field).GenerateByteSize(p); }},
+       {"update_cached_has_bits",
+        [&] {
+          if (!HasHasbit(field) || field->options().weak()) return;
+
+          int has_bit_index = has_bit_indices[field->index()];
+
+          if (cached_has_word_index == (has_bit_index / 32)) return;
+
+          cached_has_word_index = (has_bit_index / 32);
+          p->Emit({{"index", cached_has_word_index}},
+                  R"cc(
+                    cached_has_bits = this_.$has_bits$[$index$];
+                  )cc");
+        }},
+       {"check_if_field_present",
+        [&] {
+          if (HasHasbit(field)) {
+            if (field->options().weak()) {
+              p->Emit("if (has_$name$())");
+              return;
+            }
+
+            int has_bit_index = has_bit_indices[field->index()];
+            p->Emit({{"mask",
+                      absl::StrFormat("0x%08xu", 1u << (has_bit_index % 32))}},
+                    "if (cached_has_bits & $mask$)");
+            return;
+          }
+
+          MayEmitIfNonDefaultCheck(p, "this_.", field);
+        }}},
+      R"cc(
+        $comment$;
+        $update_cached_has_bits$;
+        $check_if_field_present$ {
+          //~ Force newline.
+          $update_byte_size_for_field$;
+        }
+      )cc");
+}
 
 }  // namespace
 
@@ -3952,10 +4001,13 @@ void MessageGenerator::GenerateClassSpecificMergeImpl(io::Printer* p) {
         } else if (field->is_optional() && !HasHasbit(field)) {
           // Merge semantics without true field presence: primitive fields are
           // merged only if non-zero (numeric) or non-empty (string).
-          bool have_enclosing_if = MayEmitIfNonDefaultCheck(p, "from.", field);
-          if (have_enclosing_if) format.Indent();
+          bool emitted_check = MayEmitIfNonDefaultCheck(p, "from.", field);
+          if (emitted_check) {
+            format("{\n");
+            format.Indent();
+          }
           generator.GenerateMergingCode(p);
-          if (have_enclosing_if) {
+          if (emitted_check) {
             format.Outdent();
             format("}\n");
           }
@@ -4225,10 +4277,14 @@ void MessageGenerator::GenerateSerializeOneField(io::Printer* p,
           }
         )cc");
   } else if (field->is_optional()) {
-    bool have_enclosing_if = MayEmitIfNonDefaultCheck(p, "this_.", field);
-    if (have_enclosing_if) p->Indent();
+    bool emitted_check = MayEmitIfNonDefaultCheck(p, "this_.", field);
+    if (emitted_check) {
+      p->Emit(R"cc({
+      )cc");
+      p->Indent();
+    }
     emit_body();
-    if (have_enclosing_if) {
+    if (emitted_check) {
       p->Outdent();
       p->Emit(R"cc(
         }
@@ -4738,69 +4794,9 @@ void MessageGenerator::GenerateByteSize(io::Printer* p) {
                       // Go back and emit checks for each of the fields we
                       // processed.
                       for (const auto* field : fields) {
-                        p->Emit(
-                            {{"comment",
-                              [&] {
-                                PrintFieldComment(Formatter{p}, field,
-                                                  options_);
-                              }},
-                             {"update_byte_size_for_field",
-                              [&] {
-                                field_generators_.get(field).GenerateByteSize(
-                                    p);
-                              }},
-                             {"update_cached_has_bits",
-                              [&] {
-                                if (!HasHasbit(field) ||
-                                    field->options().weak())
-                                  return;
-                                int has_bit_index =
-                                    has_bit_indices_[field->index()];
-                                if (cached_has_word_index ==
-                                    (has_bit_index / 32))
-                                  return;
-                                cached_has_word_index = (has_bit_index / 32);
-                                p->Emit({{"index", cached_has_word_index}},
-                                        R"cc(
-                                          cached_has_bits =
-                                              this_.$has_bits$[$index$];
-                                        )cc");
-                              }},
-                             {"check_if_field_present",
-                              [&] {
-                                if (HasHasbit(field)) {
-                                  if (field->options().weak()) {
-                                    p->Emit("if (has_$name$())");
-                                    return;
-                                  }
-
-                                  int has_bit_index =
-                                      has_bit_indices_[field->index()];
-                                  p->Emit({{"mask",
-                                            absl::StrFormat(
-                                                "0x%08xu",
-                                                1u << (has_bit_index % 32))}},
-                                          "if (cached_has_bits & $mask$)");
-                                } else if (ShouldEmitNonDefaultCheck(field)) {
-                                  // Without field presence: field is
-                                  // serialized only if it has a non-default
-                                  // value.
-                                  p->Emit({{"non_default_check",
-                                            [&] {
-                                              EmitNonDefaultCheck(p, "this_.",
-                                                                  field);
-                                            }}},
-                                          "if ($non_default_check$)");
-                                }
-                              }}},
-                            R"cc(
-                              $comment$;
-                              $update_cached_has_bits$;
-                              $check_if_field_present$ {
-                                //~ Force newline.
-                                $update_byte_size_for_field$;
-                              }
-                            )cc");
+                        EmitUpdateByteSizeForField(
+                            field, options_, field_generators_,
+                            has_bit_indices_, cached_has_word_index, p);
                       }
                     }},
                    {"may_update_cached_has_word_index",
