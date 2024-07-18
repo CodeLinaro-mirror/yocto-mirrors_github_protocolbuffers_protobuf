@@ -4766,11 +4766,13 @@ void MessageGenerator::GenerateByteSize(io::Printer* p) {
                                               this_.$has_bits$[$index$];
                                         )cc");
                               }},
-                             {"check_if_field_present",
+                             // Note that the following subsitution will always
+                             // emit an enclosing brace character '{'.
+                             {"enclosing_check_if_field_present",
                               [&] {
                                 if (HasHasbit(field)) {
                                   if (field->options().weak()) {
-                                    p->Emit("if (has_$name$())");
+                                    p->Emit("if (has_$name$()) {");
                                     return;
                                   }
 
@@ -4780,27 +4782,25 @@ void MessageGenerator::GenerateByteSize(io::Printer* p) {
                                             absl::StrFormat(
                                                 "0x%08xu",
                                                 1u << (has_bit_index % 32))}},
-                                          "if (cached_has_bits & $mask$)");
-                                } else if (ShouldEmitNonDefaultCheck(field)) {
-                                  // Without field presence: field is
-                                  // serialized only if it has a non-default
-                                  // value.
-                                  p->Emit({{"non_default_check",
-                                            [&] {
-                                              EmitNonDefaultCheck(p, "this_.",
-                                                                  field);
-                                            }}},
-                                          "if ($non_default_check$)");
+                                          "if (cached_has_bits & $mask$) {");
+                                  return;
+                                }
+                                bool has_enclosing_if =
+                                    MayEmitIfNonDefaultCheck(p, "this_.",
+                                                             field);
+
+                                if (!has_enclosing_if) {
+                                  p->Emit(" {");
                                 }
                               }}},
                             R"cc(
                               $comment$;
                               $update_cached_has_bits$;
-                              $check_if_field_present$ {
-                                //~ Force newline.
-                                $update_byte_size_for_field$;
+                              $enclosing_check_if_field_present$
+                                  //~ Force newline.
+                                  $update_byte_size_for_field$;
                               }
-                            )cc");
+                            )cc");  // Note the enclosing brace '}'.
                       }
                     }},
                    {"may_update_cached_has_word_index",
