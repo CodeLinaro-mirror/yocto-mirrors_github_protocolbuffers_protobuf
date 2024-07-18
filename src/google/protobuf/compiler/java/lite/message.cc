@@ -259,6 +259,9 @@ void ImmutableMessageLiteGenerator::Generate(io::Printer* printer) {
           "  return forNumber(value);\n"
           "}\n"
           "\n");
+    } else {
+      printer->Print(
+          "@com.google.protobuf.Internal.ProtoMethodMayReturnNull\n");
     }
     printer->Print(
         vars,
