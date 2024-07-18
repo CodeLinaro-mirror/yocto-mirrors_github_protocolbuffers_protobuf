@@ -229,8 +229,7 @@ bool MayEmitIfNonDefaultCheck(io::Printer* p, const std::string& prefix,
 
   p->Emit({{"condition", [&] { EmitNonDefaultCheck(p, prefix, field); }}},
           R"cc(
-            if ($condition$) {
-          )cc");
+            if ($condition$) )cc");
   return true;
 }
 
@@ -3952,10 +3951,13 @@ void MessageGenerator::GenerateClassSpecificMergeImpl(io::Printer* p) {
         } else if (field->is_optional() && !HasHasbit(field)) {
           // Merge semantics without true field presence: primitive fields are
           // merged only if non-zero (numeric) or non-empty (string).
-          bool have_enclosing_if = MayEmitIfNonDefaultCheck(p, "from.", field);
-          if (have_enclosing_if) format.Indent();
+          bool emitted_check = MayEmitIfNonDefaultCheck(p, "from.", field);
+          if (emitted_check) {
+            format("{\n");
+            format.Indent();
+          }
           generator.GenerateMergingCode(p);
-          if (have_enclosing_if) {
+          if (emitted_check) {
             format.Outdent();
             format("}\n");
           }
@@ -4225,10 +4227,14 @@ void MessageGenerator::GenerateSerializeOneField(io::Printer* p,
           }
         )cc");
   } else if (field->is_optional()) {
-    bool have_enclosing_if = MayEmitIfNonDefaultCheck(p, "this_.", field);
-    if (have_enclosing_if) p->Indent();
+    bool emitted_check = MayEmitIfNonDefaultCheck(p, "this_.", field);
+    if (emitted_check) {
+      p->Emit(R"cc({
+      )cc");
+      p->Indent();
+    }
     emit_body();
-    if (have_enclosing_if) {
+    if (emitted_check) {
       p->Outdent();
       p->Emit(R"cc(
         }
