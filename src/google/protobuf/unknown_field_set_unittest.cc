@@ -39,6 +39,14 @@
 
 namespace google {
 namespace protobuf {
+namespace internal {
+struct UnknownFieldSetTestPeer {
+  static auto AddLengthDelimitedUninitialized(UnknownFieldSet& set, int number,
+                                              size_t length) {
+    return set.AddLengthDelimitedUninitialized(number, length);
+  }
+};
+}  // namespace internal
 
 using internal::WireFormat;
 using ::testing::ElementsAre;
@@ -181,7 +189,13 @@ static void PopulateUFS(UnknownFieldSet& set) {
     node->AddVarint(1, 100);
     const char* long_str = "This is a very long string, not sso";
     node->AddLengthDelimited(2, long_str);
+    node->AddLengthDelimited(2, std::string(long_str));
+    node->AddLengthDelimited(2, absl::Cord(long_str));
+    internal::UnknownFieldSetTestPeer::AddLengthDelimitedUninitialized(*node, 2,
+                                                                       100);
+#if !defined(PROTOBUF_FUTURE_STRING_VIEW_RETURN_TYPE)
     *node->AddLengthDelimited(3) = long_str;
+#endif  // PROTOBUF_FUTURE_STRING_VIEW_RETURN_TYPE
     // Test some recursion too.
     node = node->AddGroup(4);
   }
@@ -643,12 +657,20 @@ TEST_F(UnknownFieldSetTest, SpaceUsed) {
   shadow_vector.Add();
   EXPECT_EQ(total(), empty_message.SpaceUsedLong()) << "Var";
 
+#if !defined(PROTOBUF_FUTURE_STRING_VIEW_RETURN_TYPE)
   str = unknown_fields->AddLengthDelimited(1);
   shadow_vector.Add();
   EXPECT_EQ(total(), empty_message.SpaceUsedLong()) << "Str";
 
   str->assign(sizeof(std::string) + 1, 'x');
   EXPECT_EQ(total(), empty_message.SpaceUsedLong()) << "Str2";
+#else
+  std::string fake_str(31, 'a');
+  str = &fake_str;
+  unknown_fields->AddLengthDelimited(1, fake_str);
+  shadow_vector.Add();
+  EXPECT_EQ(total(), empty_message.SpaceUsedLong()) << "Str2";
+#endif  // PROTOBUF_FUTURE_STRING_VIEW_RETURN_TYPE
 
   group = unknown_fields->AddGroup(1);
   shadow_vector.Add();
