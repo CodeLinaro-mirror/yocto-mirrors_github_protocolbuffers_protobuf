@@ -28,12 +28,14 @@ pub mod __public {
         write::{Clear, ClearAndParse},
         Message, MessageMut, MessageView,
     };
+    pub use crate::cord::{ProtoBytesCow, ProtoStringCow};
     pub use crate::r#enum::{Enum, UnknownEnumValue};
     pub use crate::map::{Map, MapIter, MapMut, MapView, ProxiedInMapValue};
     pub use crate::optional::Optional;
     pub use crate::proto;
     pub use crate::proxied::{
-        IntoProxied, Mut, MutProxied, MutProxy, Proxied, Proxy, View, ViewProxy,
+        AsMut, AsView, IntoMut, IntoProxied, IntoView, Mut, MutProxied, MutProxy, Proxied, Proxy,
+        View, ViewProxy,
     };
     pub use crate::repeated::{
         ProxiedInRepeated, Repeated, RepeatedIter, RepeatedMut, RepeatedView,
@@ -60,6 +62,7 @@ pub mod __runtime;
 pub mod __runtime;
 
 mod codegen_traits;
+mod cord;
 #[path = "enum.rs"]
 mod r#enum;
 mod map;
