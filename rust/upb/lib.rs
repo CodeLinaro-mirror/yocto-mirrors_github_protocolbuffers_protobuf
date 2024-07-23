@@ -4,8 +4,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file or at
 // https://developers.google.com/open-source/licenses/bsd
+#![deny(unsafe_op_in_unsafe_fn)]
+#![cfg_attr(not(bzl), allow(unused_imports))]
 
 mod arena;
+
 pub use arena::{upb_Arena, Arena, RawArena};
 
 mod array;

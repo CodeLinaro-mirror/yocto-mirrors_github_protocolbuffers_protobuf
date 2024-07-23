@@ -8,6 +8,10 @@
 
 #include <stddef.h>
 
+#ifdef PROTOBUF_CARGO
+// #include "upb.h"
+#else
+
 #define UPB_BUILD_API
 
 // go/keep-sorted start
@@ -21,5 +25,6 @@
 #include "upb/mini_table/message.h"  // IWYU pragma: keep
 #include "upb/text/debug_string.h"   // IWYU pragma: keep
 // go/keep-sorted end
+#endif
 
 const size_t __rust_proto_kUpb_Map_Begin = kUpb_Map_Begin;

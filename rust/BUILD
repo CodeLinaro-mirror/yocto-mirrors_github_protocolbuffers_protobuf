@@ -72,7 +72,10 @@ rust_library(
     proc_macro_deps = [
         "@crate_index//:paste",
     ],
-    rustc_flags = ["--cfg=upb_kernel"],
+    rustc_flags = [
+        "--cfg=upb_kernel",
+        "--cfg=bzl",
+    ],
     visibility = [
         "//rust:__subpackages__",
         "//src/google/protobuf:__subpackages__",
@@ -88,6 +91,7 @@ rust_test(
     crate = ":protobuf_upb",
     rustc_flags = [
         "--cfg=upb_kernel",
+        "--cfg=bzl",
     ],
     deps = [
         "@crate_index//:googletest",
@@ -131,6 +135,7 @@ rust_test(
     crate = ":protobuf_cpp",
     rustc_flags = [
         "--cfg=cpp_kernel",
+        "--cfg=bzl",
     ],
     deps = [
         "@crate_index//:googletest",
@@ -192,4 +197,23 @@ config_setting(
     flag_values = {
         ":rust_proto_library_kernel": "upb",
     },
+)
+
+Fileset(
+    name = "protobuf_crate_files",
+    out = "protobuf_crate",
+    entries = [
+        FilesetEntry(
+            files = glob(["cargo/**"]),
+            strip_prefix = "cargo",
+        ),
+        FilesetEntry(
+            files = glob(["*.rs"]),
+            destdir = "src",
+        ),
+        FilesetEntry(
+            srcdir = "//rust/upb:upb_api_files",
+            destdir = "src/upb",
+        ),
+    ],
 )

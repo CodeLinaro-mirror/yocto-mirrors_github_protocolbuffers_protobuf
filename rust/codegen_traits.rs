@@ -16,7 +16,7 @@ use write::ClearAndParse;
 /// A trait that all generated owned message types implement.
 pub trait Message: MutProxied
   // Create traits:
-  + create::Parse + Default
+  + Parse + Default
   // Read traits:
   + Debug + Serialize
   // Write traits:

@@ -28,6 +28,7 @@ rust_library(
         "text.rs",
         "wire.rs",
     ],
+    rustc_flags = ["--cfg=bzl"],
     visibility = [
         "//rust:__subpackages__",
         "//src/google/protobuf:__subpackages__",
@@ -50,5 +51,19 @@ cc_library(
         "//upb:message_copy",
         "//upb/mini_table",
         "//upb/text:debug",
+    ],
+)
+
+Fileset(
+    name = "upb_api_files",
+    out = "upb_api",
+    entries = [
+        FilesetEntry(
+            files = glob(["**"]),
+        ),
+    ],
+    visibility = [
+        "//rust:__subpackages__",
+        "//src/google/protobuf:__subpackages__",
     ],
 )
