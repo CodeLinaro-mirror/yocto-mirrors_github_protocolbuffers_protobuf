@@ -374,6 +374,40 @@ where
     }
 }
 
+impl<K, V> IntoProxied<Map<K, V>> for Map<K, V>
+where
+    K: Proxied,
+    V: ProxiedInMapValue<K>,
+{
+    fn into_proxied(self, _private: Private) -> Map<K, V> {
+        self
+    }
+}
+
+impl<'msg, K, V> IntoProxied<Map<K, V>> for MapView<'msg, K, V>
+where
+    K: Proxied,
+    V: ProxiedInMapValue<K>,
+    View<'msg, V>: IntoProxied<V>,
+{
+    fn into_proxied(self, _private: Private) -> Map<K, V> {
+        let mut m: Map<K, V> = Map::new();
+        m.as_mut().copy_from(self);
+        m
+    }
+}
+
+impl<'msg, K, V> IntoProxied<Map<K, V>> for MapMut<'msg, K, V>
+where
+    K: Proxied,
+    V: ProxiedInMapValue<K>,
+    View<'msg, V>: IntoProxied<V>,
+{
+    fn into_proxied(self, _private: Private) -> Map<K, V> {
+        self.into_view().into_proxied(Private)
+    }
+}
+
 /// An iterator visiting all key-value pairs in arbitrary order.
 ///
 /// The iterator element type is `(View<Key>, View<Value>)`.
