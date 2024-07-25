@@ -342,7 +342,7 @@ cc_library(
         "//src/google/protobuf:__subpackages__",
     ],
     deps = [
-        "//src/google/protobuf:port",
+        ":port",
         "//src/google/protobuf/stubs:lite",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/log:absl_check",
@@ -2065,4 +2065,14 @@ filegroup(
         "lite_unittest.cc",
     ],
     visibility = ["//pkg:__pkg__"],
+)
+
+cc_library(
+    name = "endian",
+    hdrs = ["endian.h"],
+    strip_include_prefix = "/src",
+    deps = [
+        ":port",
+        "@com_google_absl//absl/base:config",
+    ],
 )
