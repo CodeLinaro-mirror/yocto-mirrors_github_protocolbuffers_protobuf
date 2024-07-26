@@ -26,6 +26,9 @@ namespace protobuf {
 namespace compiler {
 namespace java {
 
+class Context;
+class ClassNameResolver;
+
 // Whether unknown enum values are kept (i.e., not stored in UnknownFieldSet
 // but in the message and can be queried using additional getters that return
 // ints.

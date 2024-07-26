@@ -64,6 +64,11 @@ class EnumGenerator {
  public:
   virtual ~EnumGenerator() = default;
   virtual void Generate(io::Printer* printer) = 0;
+
+  struct Alias {
+    const EnumValueDescriptor* value;
+    const EnumValueDescriptor* canonical_value;
+  };
 };
 
 // Generates code for an extension, which may be within the scope of some
