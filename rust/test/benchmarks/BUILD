@@ -5,7 +5,7 @@ load(
 )
 load("//bazel:cc_proto_library.bzl", "cc_proto_library")
 load(
-    "//protos/bazel:upb_cc_proto_library.bzl",
+    "//hpb/bazel:upb_cc_proto_library.bzl",
     "upb_cc_proto_library",
 )
 load(
