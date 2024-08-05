@@ -1,0 +1,8 @@
+sh_test(
+    name = "update_failure_list_tests",
+    srcs = ["update_failure_list_test.sh"],
+    data = glob(["*.txt"]),
+    deps = [
+        "//conformance:update_failure_list",
+    ],
+)

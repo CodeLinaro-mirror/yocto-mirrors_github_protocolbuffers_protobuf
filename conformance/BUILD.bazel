@@ -178,7 +178,10 @@ cc_test(
 # Add more meta-testing here. This is not to be confused with a conformance test itself.
 test_suite(
     name = "conformance_framework_tests",
-    tests = ["failure_list_trie_node_test"],
+    tests = [
+        "failure_list_trie_node_test",
+        "//conformance/update_failure_list_tests",
+    ],
 )
 
 cc_library(
@@ -333,6 +336,7 @@ py_binary(
 py_binary(
     name = "update_failure_list",
     srcs = ["update_failure_list.py"],
+    visibility = ["__subpackages__"],
 )
 
 inline_sh_binary(
