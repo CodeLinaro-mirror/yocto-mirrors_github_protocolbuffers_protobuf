@@ -35,7 +35,6 @@ GeneratedProtocolMessageType = message_factory._GENERATED_PROTOCOL_MESSAGE_TYPE
 
 MESSAGE_CLASS_CACHE = {}
 
-
 # Deprecated. Please NEVER use reflection.ParseMessage().
 def ParseMessage(descriptor, byte_str):
   """Generate a new Message instance from this Descriptor and a byte string.
