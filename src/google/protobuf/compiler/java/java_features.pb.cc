@@ -82,25 +82,25 @@ const char descriptor_table_protodef_google_2fprotobuf_2fcompiler_2fjava_2fjava_
     protodesc_cold) = {
     "\n1google/protobuf/compiler/java/java_fea"
     "tures.proto\022\002pb\032 google/protobuf/descrip"
-    "tor.proto\"\367\004\n\014JavaFeatures\022\374\001\n\022legacy_cl"
-    "osed_enum\030\001 \001(\010B\337\001\210\001\001\230\001\004\230\001\001\242\001\t\022\004true\030\204\007\242"
-    "\001\n\022\005false\030\347\007\262\001\271\001\010\350\007\020\350\007\032\260\001The legacy clos"
-    "ed enum treatment in Java is deprecated "
-    "and is scheduled to be removed in editio"
-    "n 2025.  Mark enum type on the enum defi"
-    "nitions themselves rather than on fields"
-    ".\022\237\002\n\017utf8_validation\030\002 \001(\0162\037.pb.JavaFea"
-    "tures.Utf8ValidationB\344\001\210\001\001\230\001\004\230\001\001\242\001\014\022\007DEF"
-    "AULT\030\204\007\262\001\310\001\010\350\007\020\351\007\032\277\001The Java-specific ut"
-    "f8 validation feature is deprecated and "
-    "is scheduled to be removed in edition 20"
-    "25.  Utf8 validation behavior should use"
-    " the global cross-language utf8_validati"
-    "on feature.\"F\n\016Utf8Validation\022\033\n\027UTF8_VA"
-    "LIDATION_UNKNOWN\020\000\022\013\n\007DEFAULT\020\001\022\n\n\006VERIF"
-    "Y\020\002:<\n\004java\022\033.google.protobuf.FeatureSet"
-    "\030\351\007 \001(\0132\020.pb.JavaFeaturesB(\n\023com.google."
-    "protobufB\021JavaFeaturesProto"
+    "tor.proto\"\343\004\n\014JavaFeatures\022\350\001\n\022legacy_cl"
+    "osed_enum\030\001 \001(\010B\313\001\210\001\001\230\001\004\230\001\001\242\001\t\022\004true\030\204\007\242"
+    "\001\n\022\005false\030\347\007\262\001\245\001\010\350\007\020\350\007\032\234\001The legacy clos"
+    "ed enum behavior in Java is deprecated a"
+    "nd is scheduled to be removed in edition"
+    " 2025.  See http://protobuf.dev/programming-guides/enum/#java "
+    "for more information.\022\237\002\n\017utf8_validatio"
+    "n\030\002 \001(\0162\037.pb.JavaFeatures.Utf8Validation"
+    "B\344\001\210\001\001\230\001\004\230\001\001\242\001\014\022\007DEFAULT\030\204\007\262\001\310\001\010\350\007\020\351\007\032\277\001"
+    "The Java-specific utf8 validation featur"
+    "e is deprecated and is scheduled to be r"
+    "emoved in edition 2025.  Utf8 validation"
+    " behavior should use the global cross-la"
+    "nguage utf8_validation feature.\"F\n\016Utf8V"
+    "alidation\022\033\n\027UTF8_VALIDATION_UNKNOWN\020\000\022\013"
+    "\n\007DEFAULT\020\001\022\n\n\006VERIFY\020\002:<\n\004java\022\033.google"
+    ".protobuf.FeatureSet\030\351\007 \001(\0132\020.pb.JavaFea"
+    "turesB(\n\023com.google.protobufB\021JavaFeatur"
+    "esProto"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_google_2fprotobuf_2fcompiler_2fjava_2fjava_5ffeatures_2eproto_deps[1] =
     {
@@ -110,7 +110,7 @@ static ::absl::once_flag descriptor_table_google_2fprotobuf_2fcompiler_2fjava_2f
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_google_2fprotobuf_2fcompiler_2fjava_2fjava_5ffeatures_2eproto = {
     false,
     false,
-    827,
+    807,
     descriptor_table_protodef_google_2fprotobuf_2fcompiler_2fjava_2fjava_5ffeatures_2eproto,
     "google/protobuf/compiler/java/java_features.proto",
     &descriptor_table_google_2fprotobuf_2fcompiler_2fjava_2fjava_5ffeatures_2eproto_once,

@@ -84,22 +84,21 @@ static const ::_pb::Message* const file_default_instances[] = {
 const char descriptor_table_protodef_google_2fprotobuf_2fcpp_5ffeatures_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
     "\n\"google/protobuf/cpp_features.proto\022\002pb"
-    "\032 google/protobuf/descriptor.proto\"\374\003\n\013C"
-    "ppFeatures\022\373\001\n\022legacy_closed_enum\030\001 \001(\010B"
-    "\336\001\210\001\001\230\001\004\230\001\001\242\001\t\022\004true\030\204\007\242\001\n\022\005false\030\347\007\262\001\270\001"
-    "\010\350\007\020\350\007\032\257\001The legacy closed enum treatmen"
-    "t in C++ is deprecated and is scheduled "
-    "to be removed in edition 2025.  Mark enu"
-    "m type on the enum definitions themselve"
-    "s rather than on fields.\022Z\n\013string_type\030"
-    "\002 \001(\0162\032.pb.CppFeatures.StringTypeB)\210\001\001\230\001"
-    "\004\230\001\001\242\001\013\022\006STRING\030\204\007\242\001\t\022\004VIEW\030\351\007\262\001\003\010\350\007\022L\n\032"
-    "enum_name_uses_string_view\030\003 \001(\010B(\210\001\002\230\001\006"
-    "\230\001\001\242\001\n\022\005false\030\204\007\242\001\t\022\004true\030\351\007\262\001\003\010\351\007\"E\n\nSt"
-    "ringType\022\027\n\023STRING_TYPE_UNKNOWN\020\000\022\010\n\004VIE"
-    "W\020\001\022\010\n\004CORD\020\002\022\n\n\006STRING\020\003::\n\003cpp\022\033.googl"
-    "e.protobuf.FeatureSet\030\350\007 \001(\0132\017.pb.CppFea"
-    "tures"
+    "\032 google/protobuf/descriptor.proto\"\346\003\n\013C"
+    "ppFeatures\022\345\001\n\022legacy_closed_enum\030\001 \001(\010B"
+    "\310\001\210\001\001\230\001\004\230\001\001\242\001\t\022\004true\030\204\007\242\001\n\022\005false\030\347\007\262\001\242\001"
+    "\010\350\007\020\350\007\032\231\001The legacy closed enum behavior"
+    " in C++ is deprecated and is scheduled t"
+    "o be removed in edition 2025.  See go/pr"
+    "oto-enum-behavior#cpp for more informati"
+    "on\022Z\n\013string_type\030\002 \001(\0162\032.pb.CppFeatures"
+    ".StringTypeB)\210\001\001\230\001\004\230\001\001\242\001\013\022\006STRING\030\204\007\242\001\t\022"
+    "\004VIEW\030\351\007\262\001\003\010\350\007\022L\n\032enum_name_uses_string_"
+    "view\030\003 \001(\010B(\210\001\002\230\001\006\230\001\001\242\001\n\022\005false\030\204\007\242\001\t\022\004t"
+    "rue\030\351\007\262\001\003\010\351\007\"E\n\nStringType\022\027\n\023STRING_TYP"
+    "E_UNKNOWN\020\000\022\010\n\004VIEW\020\001\022\010\n\004CORD\020\002\022\n\n\006STRIN"
+    "G\020\003::\n\003cpp\022\033.google.protobuf.FeatureSet\030"
+    "\350\007 \001(\0132\017.pb.CppFeatures"
 };
 static const ::_pbi::DescriptorTable* const descriptor_table_google_2fprotobuf_2fcpp_5ffeatures_2eproto_deps[1] =
     {
@@ -109,7 +108,7 @@ static ::absl::once_flag descriptor_table_google_2fprotobuf_2fcpp_5ffeatures_2ep
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_google_2fprotobuf_2fcpp_5ffeatures_2eproto = {
     false,
     false,
-    645,
+    623,
     descriptor_table_protodef_google_2fprotobuf_2fcpp_5ffeatures_2eproto,
     "google/protobuf/cpp_features.proto",
     &descriptor_table_google_2fprotobuf_2fcpp_5ffeatures_2eproto_once,
