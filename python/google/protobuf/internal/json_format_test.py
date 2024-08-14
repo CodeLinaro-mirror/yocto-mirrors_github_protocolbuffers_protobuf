@@ -1668,6 +1668,13 @@ class JsonFormatTest(JsonFormatBase):
         "Failed to parse JSON: TypeError: 'int' object is not iterable.",
     )
 
+  def testManyRecursionsRaisesRecursionError(self):
+    num_recursions = 1050
+    text = ('{"a":' * num_recursions) + '""' + ('}' * num_recursions)
+    self.CheckError(
+        text,
+        "maximum recursion depth exceeded",
+    )
 
 if __name__ == '__main__':
   unittest.main()
