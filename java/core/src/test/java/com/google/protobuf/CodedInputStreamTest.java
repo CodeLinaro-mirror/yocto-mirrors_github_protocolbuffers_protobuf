@@ -740,6 +740,17 @@ public class CodedInputStreamTest {
     }
   }
 
+  @Test
+  public void testMaliciousRecursion_unknownFields() throws Exception {
+    var thrown =
+        assertThrows(
+            InvalidProtocolBufferException.class,
+            () ->
+                TestRecursiveMessage.parseFrom(
+                    NESTING_SGROUP, ExtensionRegistry.getGeneratedRegistry()));
+    assertThat(thrown).hasMessageThat().contains("Protocol message had too many levels of nesting");
+  }
+
   private void checkSizeLimitExceeded(InvalidProtocolBufferException e) {
     assertThat(e)
         .hasMessageThat()
