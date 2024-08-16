@@ -36,6 +36,10 @@ PROTOBUF_EXPORT extern const char kTypeGoogleProdComPrefix[];
 std::string GetTypeUrl(absl::string_view message_name,
                        absl::string_view type_url_prefix);
 
+// Returns true if the |type_url| describes the same type as |type_name|.
+// This is an implementation detail. Do not use.
+bool InternalTypeMatch(absl::string_view type_url, absl::string_view type_name);
+
 // Helper class used to implement google::protobuf::Any.
 class PROTOBUF_EXPORT AnyMetadata {
   typedef ArenaStringPtr UrlType;
