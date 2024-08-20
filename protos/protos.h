@@ -25,12 +25,9 @@ using hpb::internal::PrivateAccess;
 using hpb::internal::Serialize;
 using hpb::internal::SetExtension;
 }  // namespace internal
-using hpb::CreateMessage;
 using hpb::Parse;
 using hpb::Serialize;
 
-using hpb::ClearExtension;
-using hpb::ExtensionNotFoundError;
 using hpb::ExtensionNumber;
 using hpb::GetExtension;
 using hpb::HasExtension;
