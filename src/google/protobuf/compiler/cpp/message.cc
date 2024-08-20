@@ -1905,7 +1905,7 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* p) {
 
                 private:
                 void SharedCtor(::$proto_ns$::Arena* arena);
-                void SharedDtor();
+                static void SharedDtor(MessageLite& self);
                 void InternalSwap($classname$* other);
               )cc");
         }},
@@ -2865,8 +2865,8 @@ void MessageGenerator::GenerateSharedDestructorCode(io::Printer* p) {
                       [&] { emit_field_dtors(/* split_fields= */ true); }},
                  },
                  R"cc(
-                   if (PROTOBUF_PREDICT_FALSE(!IsSplitMessageDefault())) {
-                     auto* $cached_split_ptr$ = $split$;
+                   if (PROTOBUF_PREDICT_FALSE(!this_.IsSplitMessageDefault())) {
+                     auto* $cached_split_ptr$ = this_.$split$;
                      $split_field_dtors_impl$;
                      delete $cached_split_ptr$;
                    }
@@ -2877,8 +2877,8 @@ void MessageGenerator::GenerateSharedDestructorCode(io::Printer* p) {
              for (const auto* oneof : OneOfRange(descriptor_)) {
                p->Emit({{"name", oneof->name()}},
                        R"cc(
-                         if (has_$name$()) {
-                           clear_$name$();
+                         if (this_.has_$name$()) {
+                           this_.clear_$name$();
                          }
                        )cc");
              }
@@ -2888,14 +2888,16 @@ void MessageGenerator::GenerateSharedDestructorCode(io::Printer* p) {
              if (num_weak_fields_ == 0) return;
              // Generate code to destruct oneofs. Clearing should do the work.
              p->Emit(R"cc(
-               $weak_field_map$.ClearAll();
+               this_.$weak_field_map$.ClearAll();
              )cc");
            }},
-          {"impl_dtor", [&] { p->Emit("_impl_.~Impl_();\n"); }},
+          {"impl_dtor", [&] { p->Emit("this_._impl_.~Impl_();\n"); }},
       },
       R"cc(
-        inline void $classname$::SharedDtor() {
-          $DCHK$(GetArena() == nullptr);
+        inline void $classname$::SharedDtor(MessageLite& self) {
+          $classname$& this_ = static_cast<$classname$&>(self);
+          this_._internal_metadata_.Delete<$unknown_fields_type$>();
+          $DCHK$(this_.GetArena() == nullptr);
           $WeakDescriptorSelfPin$;
           $field_dtors$;
           $split_field_dtors$;
@@ -3400,8 +3402,7 @@ void MessageGenerator::GenerateStructors(io::Printer* p) {
         R"cc(
           $classname$::~$classname$() {
             // @@protoc_insertion_point(destructor:$full_name$)
-            _internal_metadata_.Delete<$unknown_fields_type$>();
-            SharedDtor();
+            SharedDtor(*this);
           }
         )cc");
   }
@@ -4052,7 +4053,7 @@ void MessageGenerator::GenerateClassData(io::Printer* p) {
                       &$classname$::MergeImpl,
                       $superclass$::GetNewImpl<$classname$>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-                      $superclass$::GetDeleteImpl<$classname$>(),
+                      &$classname$::SharedDtor,
                       $custom_vtable_methods$,
 #endif  // PROTOBUF_CUSTOM_VTABLE
                       PROTOBUF_FIELD_OFFSET($classname$, $cached_size$),
@@ -4090,7 +4091,7 @@ void MessageGenerator::GenerateClassData(io::Printer* p) {
                       &$classname$::MergeImpl,
                       $superclass$::GetNewImpl<$classname$>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-                      $superclass$::GetDeleteImpl<$classname$>(),
+                      &$classname$::SharedDtor,
                       $custom_vtable_methods$,
 #endif  // PROTOBUF_CUSTOM_VTABLE
                       PROTOBUF_FIELD_OFFSET($classname$, $cached_size$),

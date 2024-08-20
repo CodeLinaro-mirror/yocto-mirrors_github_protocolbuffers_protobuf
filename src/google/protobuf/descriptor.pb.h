@@ -819,7 +819,7 @@ class PROTOBUF_EXPORT UninterpretedOption_NamePart final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(UninterpretedOption_NamePart* other);
  private:
   template <typename T>
@@ -1024,7 +1024,7 @@ class PROTOBUF_EXPORT SourceCodeInfo_Location final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(SourceCodeInfo_Location* other);
  private:
   template <typename T>
@@ -1301,7 +1301,7 @@ class PROTOBUF_EXPORT GeneratedCodeInfo_Annotation final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(GeneratedCodeInfo_Annotation* other);
  private:
   template <typename T>
@@ -1573,7 +1573,7 @@ class PROTOBUF_EXPORT FieldOptions_FeatureSupport final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(FieldOptions_FeatureSupport* other);
  private:
   template <typename T>
@@ -1804,7 +1804,7 @@ class PROTOBUF_EXPORT FieldOptions_EditionDefault final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(FieldOptions_EditionDefault* other);
  private:
   template <typename T>
@@ -2014,7 +2014,7 @@ class PROTOBUF_EXPORT FeatureSet final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(FeatureSet* other);
  private:
   template <typename T>
@@ -2566,7 +2566,7 @@ class PROTOBUF_EXPORT ExtensionRangeOptions_Declaration final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(ExtensionRangeOptions_Declaration* other);
  private:
   template <typename T>
@@ -2816,7 +2816,7 @@ class PROTOBUF_EXPORT EnumDescriptorProto_EnumReservedRange final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(EnumDescriptorProto_EnumReservedRange* other);
  private:
   template <typename T>
@@ -3015,7 +3015,7 @@ class PROTOBUF_EXPORT DescriptorProto_ReservedRange final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(DescriptorProto_ReservedRange* other);
  private:
   template <typename T>
@@ -3219,7 +3219,7 @@ class PROTOBUF_EXPORT UninterpretedOption final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(UninterpretedOption* other);
  private:
   template <typename T>
@@ -3508,7 +3508,7 @@ class PROTOBUF_EXPORT SourceCodeInfo final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(SourceCodeInfo* other);
  private:
   template <typename T>
@@ -3700,7 +3700,7 @@ class PROTOBUF_EXPORT GeneratedCodeInfo final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(GeneratedCodeInfo* other);
  private:
   template <typename T>
@@ -3897,7 +3897,7 @@ class PROTOBUF_EXPORT FeatureSetDefaults_FeatureSetEditionDefault final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(FeatureSetDefaults_FeatureSetEditionDefault* other);
  private:
   template <typename T>
@@ -4122,7 +4122,7 @@ class PROTOBUF_EXPORT ServiceOptions final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(ServiceOptions* other);
  private:
   template <typename T>
@@ -4529,7 +4529,7 @@ class PROTOBUF_EXPORT OneofOptions final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(OneofOptions* other);
  private:
   template <typename T>
@@ -4923,7 +4923,7 @@ class PROTOBUF_EXPORT MethodOptions final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(MethodOptions* other);
  private:
   template <typename T>
@@ -5363,7 +5363,7 @@ class PROTOBUF_EXPORT MessageOptions final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(MessageOptions* other);
  private:
   template <typename T>
@@ -5822,7 +5822,7 @@ class PROTOBUF_EXPORT FileOptions final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(FileOptions* other);
  private:
   template <typename T>
@@ -6543,7 +6543,7 @@ class PROTOBUF_EXPORT FieldOptions final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(FieldOptions* other);
  private:
   template <typename T>
@@ -7200,7 +7200,7 @@ class PROTOBUF_EXPORT FeatureSetDefaults final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(FeatureSetDefaults* other);
  private:
   template <typename T>
@@ -7424,7 +7424,7 @@ class PROTOBUF_EXPORT ExtensionRangeOptions final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(ExtensionRangeOptions* other);
  private:
   template <typename T>
@@ -7870,7 +7870,7 @@ class PROTOBUF_EXPORT EnumValueOptions final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(EnumValueOptions* other);
  private:
   template <typename T>
@@ -8307,7 +8307,7 @@ class PROTOBUF_EXPORT EnumOptions final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(EnumOptions* other);
  private:
   template <typename T>
@@ -8740,7 +8740,7 @@ class PROTOBUF_EXPORT OneofDescriptorProto final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(OneofDescriptorProto* other);
  private:
   template <typename T>
@@ -8954,7 +8954,7 @@ class PROTOBUF_EXPORT MethodDescriptorProto final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(MethodDescriptorProto* other);
  private:
   template <typename T>
@@ -9232,7 +9232,7 @@ class PROTOBUF_EXPORT FieldDescriptorProto final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(FieldDescriptorProto* other);
  private:
   template <typename T>
@@ -9642,7 +9642,7 @@ class PROTOBUF_EXPORT EnumValueDescriptorProto final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(EnumValueDescriptorProto* other);
  private:
   template <typename T>
@@ -9869,7 +9869,7 @@ class PROTOBUF_EXPORT DescriptorProto_ExtensionRange final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(DescriptorProto_ExtensionRange* other);
  private:
   template <typename T>
@@ -10090,7 +10090,7 @@ class PROTOBUF_EXPORT ServiceDescriptorProto final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(ServiceDescriptorProto* other);
  private:
   template <typename T>
@@ -10323,7 +10323,7 @@ class PROTOBUF_EXPORT EnumDescriptorProto final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(EnumDescriptorProto* other);
  private:
   template <typename T>
@@ -10600,7 +10600,7 @@ class PROTOBUF_EXPORT DescriptorProto final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(DescriptorProto* other);
  private:
   template <typename T>
@@ -10973,7 +10973,7 @@ class PROTOBUF_EXPORT FileDescriptorProto final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(FileDescriptorProto* other);
  private:
   template <typename T>
@@ -11395,7 +11395,7 @@ class PROTOBUF_EXPORT FileDescriptorSet final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(FileDescriptorSet* other);
  private:
   template <typename T>

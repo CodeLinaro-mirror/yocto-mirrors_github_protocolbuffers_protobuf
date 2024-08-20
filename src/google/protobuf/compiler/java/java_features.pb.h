@@ -211,7 +211,7 @@ class PROTOC_EXPORT JavaFeatures final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(JavaFeatures* other);
  private:
   template <typename T>

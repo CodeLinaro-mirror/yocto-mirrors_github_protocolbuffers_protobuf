@@ -212,7 +212,7 @@ class PROTOBUF_EXPORT CppFeatures final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(CppFeatures* other);
  private:
   template <typename T>

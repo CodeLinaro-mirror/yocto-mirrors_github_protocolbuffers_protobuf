@@ -228,7 +228,7 @@ class PROTOC_EXPORT Version final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(Version* other);
  private:
   template <typename T>
@@ -459,7 +459,7 @@ class PROTOC_EXPORT CodeGeneratorResponse_File final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(CodeGeneratorResponse_File* other);
  private:
   template <typename T>
@@ -706,7 +706,7 @@ class PROTOC_EXPORT CodeGeneratorResponse final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(CodeGeneratorResponse* other);
  private:
   template <typename T>
@@ -982,7 +982,7 @@ class PROTOC_EXPORT CodeGeneratorRequest final
 
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
+  static void SharedDtor(MessageLite& self);
   void InternalSwap(CodeGeneratorRequest* other);
  private:
   template <typename T>
