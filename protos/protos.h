@@ -18,7 +18,6 @@ using hpb::internal::PrivateAccess;
 using hpb::internal::Serialize;
 using hpb::internal::SetExtension;
 }  // namespace internal
-using hpb::Parse;
 using hpb::Serialize;
 
 using hpb::ExtensionNumber;
