@@ -10,7 +10,6 @@
 #include "google/protobuf/hpb/hpb.h"
 namespace protos {
 namespace internal {
-using hpb::internal::CreateMessage;
 using hpb::internal::CreateMessageProxy;
 using hpb::internal::ExtensionIdentifier;
 using hpb::internal::GetArena;
@@ -19,6 +18,10 @@ using hpb::internal::PrivateAccess;
 using hpb::internal::Serialize;
 using hpb::internal::SetExtension;
 using hpb::interop::upb::GetMiniTable;
+template <typename T>
+typename T::CProxy CreateMessage(const upb_Message* msg, upb_Arena* arena) {
+  return hpb::interop::upb::MakeCHandle<T>(msg, arena);
+}
 }  // namespace internal
 using hpb::Parse;
 using hpb::Serialize;

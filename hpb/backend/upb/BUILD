@@ -33,6 +33,9 @@ cc_library(
     ],
     deps = [
         "//hpb:ptr",
+        "//hpb/internal",
+        "//upb:mem",
+        "//upb:message",
         "//upb:mini_table",
     ],
 )

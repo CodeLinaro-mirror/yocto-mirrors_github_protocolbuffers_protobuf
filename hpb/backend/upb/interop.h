@@ -10,7 +10,10 @@
 
 // The sole public header in hpb/backend/upb
 
+#include "google/protobuf/hpb/internal/internal.h"
 #include "google/protobuf/hpb/ptr.h"
+#include "upb/mem/arena.h"
+#include "upb/message/message.h"
 #include "upb/mini_table/message.h"
 
 namespace hpb::interop::upb {
@@ -23,6 +26,22 @@ const upb_MiniTable* GetMiniTable(const T*) {
 template <typename T>
 const upb_MiniTable* GetMiniTable(Ptr<T>) {
   return T::minitable();
+}
+
+/**
+ * Creates a const Handle to a upb message.
+ *
+ * The supplied arena must outlive the hpb handle.
+ * The supplied upb message must outlive the hpb handle.
+ * The upb message must not be mutated directly; all operations
+ * hpb side are const-friendly.
+ *
+ * Manual mutation of the arena or upb message may result in
+ * undefined behavior.
+ */
+template <typename T>
+typename T::CProxy MakeCHandle(const upb_Message* msg, upb_Arena* arena) {
+  return hpb::internal::PrivateAccess::CProxy<T>(msg, arena);
 }
 
 }  // namespace hpb::interop::upb
