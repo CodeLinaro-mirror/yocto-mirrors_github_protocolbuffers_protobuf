@@ -113,7 +113,7 @@ void RepeatedField::InMsgImpl(Context& ctx, const FieldDescriptor& field,
                ctx.Emit({{"field_number", field.number()}}, R"rs(
                     pub fn set_$raw_field_name$(&mut self, src: impl $pb$::IntoProxied<$pb$::Repeated<$RsType$>>) {
                       let minitable_field = unsafe {
-                        $pbr$::upb_MiniTable_FindFieldByNumber(
+                        $pbr$::upb_MiniTable_GetFieldByIndex(
                           <Self as $pbr$::AssociatedMiniTable>::mini_table(),
                           $field_number$
                         )
