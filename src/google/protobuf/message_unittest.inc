@@ -782,10 +782,11 @@ TEST(MESSAGE_TEST_NAME, DynamicCastMessage) {
 TEST(MESSAGE_TEST_NAME, DynamicCastMessageInvalidReferenceType) {
   UNITTEST::TestAllTypes test_all_types;
   const MessageLite& test_all_types_pointer_const_ref = test_all_types;
-  ASSERT_DEATH(DynamicCastMessage<UNITTEST::TestRequired>(
-                   test_all_types_pointer_const_ref),
-               "Cannot downcast " + test_all_types.GetTypeName() + " to " +
-                   UNITTEST::TestRequired::default_instance().GetTypeName());
+  ASSERT_DEATH(
+      DynamicCastMessage<UNITTEST::TestRequired>(
+          test_all_types_pointer_const_ref),
+      absl::StrCat("Cannot downcast ", test_all_types.GetTypeName(), " to ",
+                   UNITTEST::TestRequired::default_instance().GetTypeName()));
 }
 
 TEST(MESSAGE_TEST_NAME, DownCastMessageValidType) {
@@ -819,8 +820,8 @@ TEST(MESSAGE_TEST_NAME, DownCastMessageInvalidPointerType) {
 
   ASSERT_DEBUG_DEATH(
       DownCastMessage<UNITTEST::TestRequired>(test_all_types_pointer),
-      "Cannot downcast " + test_all_types.GetTypeName() + " to " +
-          UNITTEST::TestRequired::default_instance().GetTypeName());
+      absl::StrCat("Cannot downcast ", test_all_types.GetTypeName(), " to ",
+                   UNITTEST::TestRequired::default_instance().GetTypeName()));
 }
 
 TEST(MESSAGE_TEST_NAME, DownCastMessageInvalidReferenceType) {
@@ -830,8 +831,8 @@ TEST(MESSAGE_TEST_NAME, DownCastMessageInvalidReferenceType) {
 
   ASSERT_DEBUG_DEATH(
       DownCastMessage<UNITTEST::TestRequired>(test_all_types_ref),
-      "Cannot downcast " + test_all_types.GetTypeName() + " to " +
-          UNITTEST::TestRequired::default_instance().GetTypeName());
+      absl::StrCat("Cannot downcast ", test_all_types.GetTypeName(), " to ",
+                   UNITTEST::TestRequired::default_instance().GetTypeName()));
 }
 
 TEST(MESSAGE_TEST_NAME, MessageDebugStringMatchesBehindPointerAndLitePointer) {
