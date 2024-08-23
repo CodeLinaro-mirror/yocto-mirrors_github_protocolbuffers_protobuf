@@ -226,7 +226,6 @@ cc_dist_library(
     name = "protoc-gen-upb",
     dist_deps = [
         ":protobuf",
-        ":protoc",
         ":upb",
     ],
     tags = ["manual"],
