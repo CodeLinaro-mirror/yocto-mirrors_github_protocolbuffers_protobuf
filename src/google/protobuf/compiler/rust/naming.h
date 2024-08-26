@@ -43,6 +43,13 @@ std::string RawMapThunk(Context& ctx, const EnumDescriptor& desc,
 // It may be crate-relative, or directly reference the owning crate of the type.
 std::string RsTypePath(Context& ctx, const FieldDescriptor& field);
 
+// The 'simple spelling' of the View type is for the provided field (which is
+// eg `i32` for int32 fields and `SomeMsgView<'$lifetime$>` for message fields).
+// The returned type should always be functionally substitutable for the
+// corresponding View<'$lifetime$, $sometype$> of the field's type.
+std::string RsViewType(Context& ctx, const FieldDescriptor& field,
+                       absl::string_view lifetime);
+
 std::string EnumRsName(const EnumDescriptor& desc);
 std::string EnumValueRsName(const EnumValueDescriptor& value);
 
