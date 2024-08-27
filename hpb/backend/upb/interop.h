@@ -29,7 +29,7 @@ const upb_MiniTable* GetMiniTable(Ptr<T>) {
 }
 
 /**
- * Creates a const Handle to a upb message.
+ * Creates a Handle to a const upb message.
  *
  * The supplied arena must outlive the hpb handle.
  * All messages reachable from from the upb message must
@@ -48,6 +48,18 @@ const upb_MiniTable* GetMiniTable(Ptr<T>) {
 template <typename T>
 typename T::CProxy MakeCHandle(const upb_Message* msg, upb_Arena* arena) {
   return hpb::internal::PrivateAccess::CProxy<T>(msg, arena);
+}
+
+/**
+ * Creates a Handle to a mutable upb message.
+ *
+ * The supplied arena must outlive the hpb handle.
+ * All messages reachable from from the upb message must
+ * outlive the hpb handle.
+ */
+template <typename T>
+typename T::Proxy MakeHandle(upb_Message* msg, upb_Arena* arena) {
+  return typename T::Proxy(msg, arena);
 }
 
 }  // namespace hpb::interop::upb
