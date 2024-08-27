@@ -20,7 +20,6 @@ using hpb::internal::SetExtension;
 using hpb::Serialize;
 
 using hpb::GetExtension;
-using hpb::HasExtension;
 using hpb::SetExtension;
 
 using hpb::Arena;
