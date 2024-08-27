@@ -115,16 +115,6 @@ class ExtensionIdentifier : public ExtensionMiniTableProvider {
   friend class PrivateAccess;
 };
 
-template <typename T>
-upb_Arena* GetArena(Ptr<T> message) {
-  return static_cast<upb_Arena*>(message->GetInternalArena());
-}
-
-template <typename T>
-upb_Arena* GetArena(T* message) {
-  return static_cast<upb_Arena*>(message->GetInternalArena());
-}
-
 upb_ExtensionRegistry* GetUpbExtensions(
     const ExtensionRegistry& extension_registry);
 
@@ -296,13 +286,13 @@ absl::StatusOr<Ptr<const Extension>> GetExtension(
   upb_MessageValue value;
   const bool ok = ::hpb::internal::GetOrPromoteExtension(
       const_cast<upb_Message*>(::hpb::internal::GetInternalMsg(message)),
-      id.mini_table_ext(), ::hpb::internal::GetArena(message), &value);
+      id.mini_table_ext(), hpb::interop::upb::GetArena(message), &value);
   if (!ok) {
     return ExtensionNotFoundError(
         upb_MiniTableExtension_Number(id.mini_table_ext()));
   }
   return Ptr<const Extension>(::hpb::interop::upb::MakeCHandle<Extension>(
-      (upb_Message*)value.msg_val, ::hpb::internal::GetArena(message)));
+      (upb_Message*)value.msg_val, hpb::interop::upb::GetArena(message)));
 }
 
 template <typename T, typename Extendee, typename Extension,
