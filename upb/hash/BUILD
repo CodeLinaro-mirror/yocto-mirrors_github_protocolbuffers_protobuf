@@ -7,7 +7,9 @@
 
 load("//upb/bazel:build_defs.bzl", "UPB_DEFAULT_COPTS")
 
-package(default_applicable_licenses = ["//:license"])
+package(
+    default_applicable_licenses = ["//:license"],
+)
 
 cc_library(
     name = "hash",

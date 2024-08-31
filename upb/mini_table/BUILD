@@ -10,6 +10,10 @@ load(
     "UPB_DEFAULT_COPTS",
 )
 
+package(
+    default_applicable_licenses = ["//:license"],
+)
+
 cc_library(
     name = "mini_table",
     srcs = [

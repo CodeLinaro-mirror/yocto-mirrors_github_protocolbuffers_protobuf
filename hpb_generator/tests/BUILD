@@ -7,6 +7,8 @@
 
 # todo: re-add post migration
 
-package(default_applicable_licenses = ["//:license"])
+package(
+    default_applicable_licenses = ["//:license"],
+)
 
 # todo: re-add post migration

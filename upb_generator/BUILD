@@ -25,7 +25,9 @@ load(
     "bootstrap_upb_proto_library",
 )
 
-package(default_applicable_licenses = ["//:license"])
+package(
+    default_applicable_licenses = ["//:license"],
+)
 
 licenses(["notice"])
 
@@ -201,6 +203,7 @@ cc_library(
 cc_binary(
     name = "libupb_generator.so",
     srcs = ["upb_generator_so.c"],
+    compatible_with = [],
     copts = UPB_DEFAULT_COPTS + ["-DUPB_BUILD_API"],
     linkshared = 1,
     linkstatic = 1,
@@ -223,6 +226,7 @@ cc_library(
         "get_used_fields.h",
         "upbdev.h",
     ],
+    compatible_with = [],
     copts = UPB_DEFAULT_COPTS,
     visibility = ["//visibility:private"],
     deps = [

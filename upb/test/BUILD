@@ -19,7 +19,9 @@ load(
     "UPB_DEFAULT_CPPOPTS",
 )
 
-package(default_applicable_licenses = ["//:license"])
+package(
+    default_applicable_licenses = ["//:license"],
+)
 
 cc_library(
     name = "parse_text_proto",
