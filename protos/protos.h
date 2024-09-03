@@ -11,7 +11,6 @@ namespace protos {
 namespace internal {
 using hpb::internal::ExtensionIdentifier;
 using hpb::internal::GetInternalMsg;
-using hpb::internal::PrivateAccess;
 using hpb::internal::Serialize;
 using hpb::internal::SetExtension;
 }  // namespace internal
