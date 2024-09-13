@@ -40,12 +40,12 @@ bazel_dep(
 
 bazel_dep(
     name = "rules_java",
-    version = "5.3.5",
+    version = "7.11.1",
 )
 
 bazel_dep(
     name = "rules_jvm_external",
-    version = "6.0",
+    version = "6.3",
 )
 
 bazel_dep(
@@ -55,7 +55,7 @@ bazel_dep(
 
 bazel_dep(
     name = "rules_license",
-    version = "0.0.8",
+    version = "1.0.0",
 )
 
 bazel_dep(
@@ -87,6 +87,13 @@ bazel_dep(
     name = "bazel_features",
     version = "1.16.0",
     repo_name = "proto_bazel_features",
+)
+
+# TODO: upgrade version
+archive_override(
+    module_name = "bazel_features",
+    urls = ["https://github.com/bazel-contrib/bazel_features/archive/refs/heads/main.zip"],
+    strip_prefix = "bazel_features-main",
 )
 
 SUPPORTED_PYTHON_VERSIONS = [
