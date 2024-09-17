@@ -95,6 +95,19 @@ typename T::Proxy MakeHandle(upb_Message* msg, upb_Arena* arena) {
   return typename T::Proxy(msg, arena);
 }
 
+/**
+ * Creates a Handle to a mutable upb message. This message is
+ * default-initialized for convenience.
+ *
+ * The supplied arena must outlive the hpb handle.
+ * All messages reachable from from the upb message must
+ * outlive the hpb handle.
+ */
+template <typename T>
+typename T::Proxy MakeHandle(upb_Arena* arena) {
+  return hpb::internal::PrivateAccess::CreateMessage<T>(arena);
+}
+
 inline absl::string_view FromUpbStringView(upb_StringView str) {
   return absl::string_view(str.data, str.size);
 }
