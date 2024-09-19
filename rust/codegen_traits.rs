@@ -11,7 +11,7 @@ use crate::__internal::SealedInternal;
 use crate::{MutProxied, MutProxy, ViewProxy};
 use create::Parse;
 use interop::{MessageMutInterop, MessageViewInterop, OwnedMessageInterop};
-use read::Serialize;
+use read::{DefaultInstance, Serialize};
 use std::fmt::Debug;
 use write::{Clear, ClearAndParse, MergeFrom};
 
@@ -37,7 +37,7 @@ pub trait Message: SealedInternal
 pub trait MessageView<'msg>: SealedInternal
     + ViewProxy<'msg, Proxied = Self::Message>
     // Read traits:
-    + Debug + Serialize
+    + Debug + Serialize + DefaultInstance
     // Thread safety:
     + Send + Sync
     // Copy/Clone:
@@ -85,6 +85,10 @@ pub(crate) mod read {
 
     pub trait Serialize: SealedInternal {
         fn serialize(&self) -> Result<Vec<u8>, crate::SerializeError>;
+    }
+
+    pub trait DefaultInstance: SealedInternal {
+        fn get_default_instance() -> Self;
     }
 }
 

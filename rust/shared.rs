@@ -25,7 +25,7 @@ pub mod __public {
     pub use crate::codegen_traits::{
         create::Parse,
         interop::{MessageMutInterop, MessageViewInterop, OwnedMessageInterop},
-        read::Serialize,
+        read::{DefaultInstance, Serialize},
         write::{Clear, ClearAndParse, MergeFrom},
         Message, MessageMut, MessageView,
     };
