@@ -19,9 +19,11 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "google/protobuf/compiler/hpb/tests/child_model.upb.proto.h"
+#include "google/protobuf/compiler/hpb/tests/foobar.upb.proto.h"
 #include "google/protobuf/compiler/hpb/tests/no_package.upb.proto.h"
 #include "google/protobuf/compiler/hpb/tests/test_extension.upb.proto.h"
 #include "google/protobuf/compiler/hpb/tests/test_model.upb.proto.h"
+#include "google/protobuf/hpb/arena.h"
 #include "google/protobuf/hpb/backend/upb/interop.h"
 #include "google/protobuf/hpb/hpb.h"
 #include "google/protobuf/hpb/ptr.h"
@@ -33,9 +35,11 @@
 namespace {
 
 using ::hpb::internal::Requires;
+using ::hpb_unittest::protos::Bar;
 using ::hpb_unittest::protos::ChildModel1;
 using ::hpb_unittest::protos::container_ext;
 using ::hpb_unittest::protos::ContainerExtension;
+using ::hpb_unittest::protos::Foo;
 using ::hpb_unittest::protos::other_ext;
 using ::hpb_unittest::protos::RED;
 using ::hpb_unittest::protos::TestEnum;
@@ -1242,6 +1246,26 @@ TEST(CppGeneratedCode, ClearConstMessageShouldFailForConstChild) {
   TestModel model;
   EXPECT_FALSE(CanCallClearMessage<decltype(model.child_model_1())>());
   EXPECT_TRUE(CanCallClearMessage<decltype(model.mutable_child_model_1())>());
+}
+
+TEST(CppGeneratedCode, Playground) {
+  hpb::Arena arena;
+  auto foo = hpb::CreateMessage<Foo>(arena);
+  foo.set_peeps(12);
+  auto bar1 = hpb::CreateMessage<Bar>(arena);
+  auto bar2 = hpb::CreateMessage<Bar>(arena);
+  bar1.set_alias_foo(foo);
+  bar2.set_alias_foo(foo);
+
+  ASSERT_EQ(bar1.foo()->peeps(), bar2.foo()->peeps());
+}
+
+TEST(CppGeneratedCode, Kaboooom) {
+  hpb::Arena azura;
+  auto foo = hpb::CreateMessage<Foo>(azura);
+  hpb::Arena sheogorath;
+  auto bar1 = hpb::CreateMessage<Bar>(sheogorath);
+  EXPECT_DEATH(bar1.set_alias_foo(foo), "hpb::interop::upb::GetArena");
 }
 
 }  // namespace
