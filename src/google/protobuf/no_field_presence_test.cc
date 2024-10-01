@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 #include "google/protobuf/descriptor.pb.h"
 #include <gmock/gmock.h>
@@ -255,6 +256,87 @@ TEST(NoFieldPresenceTest, MessageFieldPresenceTest) {
   // Test field presence of a message field on the default instance.
   EXPECT_EQ(false,
             TestAllTypes::default_instance().has_optional_nested_message());
+}
+
+TEST(NoFieldPresenceTest, ReflectionListFieldsScalarTest) {
+  // check that HasField reports true on all scalar fields. Check that it
+  // behaves properly for message fields.
+
+  TestAllTypes message;
+  const Reflection* r = message.GetReflection();
+
+  // Check initial state: scalars not present (due to need to be consistent with
+  // MergeFrom()), message fields not present, oneofs not present.
+  std::vector<const FieldDescriptor*> fields;
+  r->ListFields(message, &fields);
+  EXPECT_EQ(0, fields.size());
+
+  // Check zero/empty-means-not-present semantics.
+  fields.clear();
+  message.Clear();
+  message.set_optional_int32(0);
+  r->ListFields(message, &fields);
+  EXPECT_EQ(0, fields.size());
+
+  fields.clear();
+  message.Clear();
+  message.set_optional_int32(42);
+  r->ListFields(message, &fields);
+  EXPECT_EQ(1, fields.size());
+}
+
+TEST(NoFieldPresenceTest, ReflectionListFieldsMessageTest) {
+  // check that HasField reports true on all scalar fields. Check that it
+  // behaves properly for message fields.
+
+  TestAllTypes message;
+  const Reflection* r = message.GetReflection();
+
+  // Check initial state: scalars not present (due to need to be consistent with
+  // MergeFrom()), message fields not present, oneofs not present.
+  std::vector<const FieldDescriptor*> fields;
+  r->ListFields(message, &fields);
+  EXPECT_EQ(0, fields.size());
+
+  // Message fields always have explicit presence.
+  fields.clear();
+  message.Clear();
+  message.mutable_optional_nested_message();
+  r->ListFields(message, &fields);
+  EXPECT_EQ(1, fields.size());
+
+  fields.clear();
+  message.Clear();
+  message.mutable_optional_nested_message()->set_bb(123);
+  r->ListFields(message, &fields);
+  EXPECT_EQ(1, fields.size());
+}
+
+TEST(NoFieldPresenceTest, ReflectionListFieldsOneofTest) {
+  // check that HasField reports true on all scalar fields. Check that it
+  // behaves properly for message fields.
+
+  TestAllTypes message;
+  const Reflection* r = message.GetReflection();
+
+  // Check initial state: scalars not present (due to need to be consistent with
+  // MergeFrom()), message fields not present, oneofs not present.
+  std::vector<const FieldDescriptor*> fields;
+  r->ListFields(message, &fields);
+  EXPECT_EQ(0, fields.size());
+
+  // Oneof fields behave essentially like an explicit presence field.
+  fields.clear();
+  message.Clear();
+  message.set_oneof_uint32(0);
+  r->ListFields(message, &fields);
+  EXPECT_EQ(1, fields.size());
+
+  fields.clear();
+  message.Clear();
+  message.set_oneof_uint32(42);
+  r->ListFields(message, &fields);
+  EXPECT_EQ(1, fields.size());
 }
 
 TEST(NoFieldPresenceTest, ReflectionHasFieldTest) {
