@@ -35,23 +35,26 @@ mkdir $CARGO_HOME
 CRATE_ROOT=$TMP_DIR/protobuf
 mkdir $CRATE_ROOT
 
-PROTOBUF_ZIP=$(rlocation com_google_protobuf/rust/rust_crate.zip)
+PROTOBUF_TAR=$(rlocation com_google_protobuf/rust/protobuf_crate_dist.tar)
 
-unzip -d $CRATE_ROOT $PROTOBUF_ZIP
+echo "Expanding protobuf_crate_dist.tar"
+tar -xvf $PROTOBUF_TAR -C $CRATE_ROOT 
 
 CODEGEN_ROOT=$TMP_DIR/protobuf_codegen
 mkdir $CODEGEN_ROOT
 
-CODEGEN_ZIP=$(rlocation com_google_protobuf/rust/codegen_crate.zip)
+CODEGEN_TAR=$(rlocation com_google_protobuf/rust/codegen_crate_dist.tar)
 
-unzip -d $CODEGEN_ROOT $CODEGEN_ZIP
+echo "Expanding codegen_crate_dist.tar"
+tar -xvf $CODEGEN_TAR -C $CODEGEN_ROOT 
 
 EXAMPLE_ROOT=$TMP_DIR/codegen_example
 mkdir $EXAMPLE_ROOT
 
-EXAMPLE_ZIP=$(rlocation com_google_protobuf/rust/codegen_example.zip)
+EXAMPLE_TAR=$(rlocation com_google_protobuf/rust/codegen_example_dist.tar)
 
-unzip -d $EXAMPLE_ROOT $EXAMPLE_ZIP
+echo "Expanding codegen_example_dist.tar"
+tar -xvf $EXAMPLE_TAR -C $EXAMPLE_ROOT 
 
 cd $CRATE_ROOT
 # Run all tests except doctests
@@ -60,8 +63,5 @@ CARGO_HOME=$CARGO_HOME cargo test --lib --bins --tests
 cd $CODEGEN_ROOT
 CARGO_HOME=$CARGO_HOME cargo test --lib --bins --tests
 
-PROTOC=$(rlocation com_google_protobuf/protoc)
-PROTOC_GEN_UPB_MINITABLE=$(rlocation com_google_protobuf/upb_generator/minitable/protoc-gen-upb_minitable)
-
 cd $EXAMPLE_ROOT
-CARGO_HOME=$CARGO_HOME PROTOC=$PROTOC PROTOC_GEN_UPB_MINITABLE=$PROTOC_GEN_UPB_MINITABLE cargo test
+CARGO_HOME=$CARGO_HOME cargo test
