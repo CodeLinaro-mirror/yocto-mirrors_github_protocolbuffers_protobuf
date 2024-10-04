@@ -36,6 +36,46 @@ public abstract class GeneratedMessageV3
     super(builder);
   }
 
+  /* @deprecated This method is deprecated, and slated for removal in the next Java breaking change
+   * (5.x). Users should update gencode to >= 4.26.x which uses makeMutableCopy() instead.
+   */
+  @Deprecated
+  protected static IntList mutableCopy(IntList list) {
+    return makeMutableCopy(list);
+  }
+
+  /* @deprecated This method is deprecated, and slated for removal in the next Java breaking change
+   * (5.x). Users should update gencode to >= 4.26.x which uses makeMutableCopy() instead.
+   */
+  @Deprecated
+  protected static LongList mutableCopy(LongList list) {
+    return makeMutableCopy(list);
+  }
+
+  /* @deprecated This method is deprecated, and slated for removal in the next Java breaking change
+   * (5.x). Users should update gencode to >= 4.26.x which uses makeMutableCopy() instead.
+   */
+  @Deprecated
+  protected static FloatList mutableCopy(FloatList list) {
+    return makeMutableCopy(list);
+  }
+
+  /* @deprecated This method is deprecated, and slated for removal in the next Java breaking change
+   * (5.x). Users should update gencode to >= 4.26.x which uses makeMutableCopy() instead.
+   */
+  @Deprecated
+  protected static DoubleList mutableCopy(DoubleList list) {
+    return makeMutableCopy(list);
+  }
+
+  /* @deprecated This method is deprecated, and slated for removal in the next Java breaking change
+   * (5.x). Users should update gencode to >= 4.26.x which uses makeMutableCopy() instead.
+   */
+  @Deprecated
+  protected static BooleanList mutableCopy(BooleanList list) {
+    return makeMutableCopy(list);
+  }
+
   /* Overrides abstract GeneratedMessage.internalGetFieldAccessorTable().
    *
    * @deprecated This method is deprecated, and slated for removal in the next Java breaking change
