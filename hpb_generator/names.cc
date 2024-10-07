@@ -28,6 +28,10 @@ std::string DotsToColons(const absl::string_view name) {
   return absl::StrReplaceAll(name, {{".", "::"}});
 }
 
+std::string DotsToUnderscores(const absl::string_view package) {
+  return absl::StrReplaceAll(package, {{".", "_"}});
+}
+
 std::string Namespace(const absl::string_view package) {
   if (package.empty()) return "";
   return "::" + DotsToColons(package);
@@ -159,6 +163,13 @@ std::string MessagePtrConstType(const protobuf::FieldDescriptor* field,
   std::string maybe_const = is_const ? "const " : "";
   return "::hpb::Ptr<" + maybe_const +
          QualifiedClassName(field->message_type()) + ">";
+}
+
+std::string MessageWithoutAddendum(const protobuf::FieldDescriptor* field) {
+  ABSL_DCHECK(field->cpp_type() == protobuf::FieldDescriptor::CPPTYPE_MESSAGE);
+  auto desc = field->message_type();
+  return absl::StrCat(DotsToUnderscores(desc->file()->package()), "_",
+                      ClassName(desc));
 }
 
 std::string MessageCProxyType(const protobuf::FieldDescriptor* field,
