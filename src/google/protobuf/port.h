@@ -293,6 +293,19 @@ constexpr bool DebugHardenFuzzMessageSpaceUsedLong() {
   return false;
 }
 
+// Reads N bytes from p, if PerformDebugChecks() is true. This allows ASAN to
+// detect if a range of memory is not valid when we expect it to be. The
+// volatile keyword is necessary here to prevent the compiler from optimizing
+// away the memory reads below.
+template <int N>
+void AssertBytesAreReadable(const volatile char* p) {
+  if (PerformDebugChecks()) {
+    for (int i = 0; i < N; ++i) {
+      p[i];
+    }
+  }
+}
+
 // Returns true if pointers are 8B aligned, leaving least significant 3 bits
 // available.
 inline constexpr bool PtrIsAtLeast8BAligned() { return alignof(void*) >= 8; }
