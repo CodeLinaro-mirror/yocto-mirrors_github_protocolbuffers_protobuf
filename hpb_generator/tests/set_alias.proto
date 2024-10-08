@@ -17,3 +17,11 @@ message Parent {
   optional int32 x = 1;
   optional Child child = 2;
 }
+
+message ParentWithRepeated {
+  repeated Child children = 1;
+}
+
+message ParentWithMap {
+  map<int32, Child> child_map = 1;
+}
