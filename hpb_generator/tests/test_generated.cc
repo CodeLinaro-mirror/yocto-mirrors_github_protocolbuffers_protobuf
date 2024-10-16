@@ -54,6 +54,7 @@ using ::hpb_unittest::protos::TestModel_Category_NEWS;
 using ::hpb_unittest::protos::TestModel_Category_VIDEO;
 using ::hpb_unittest::protos::theme;
 using ::hpb_unittest::protos::ThemeExtension;
+using ::hpb_unittest::someotherpackage::protos::int_ext;
 using ::testing::ElementsAre;
 
 TEST(CppGeneratedCode, Constructor) { TestModel test_model; }
@@ -876,6 +877,13 @@ TEST(CppGeneratedCode, GetExtension) {
   EXPECT_EQ(true, ::hpb::SetExtension(&model, theme, extension1).ok());
   EXPECT_EQ("Hello World",
             hpb::GetExtension(&model, theme).value()->ext_name());
+}
+
+TEST(CppGeneratedCode, GetExtensionInt32WithDefault) {
+  TestModel model;
+  auto res = hpb::GetExtension(&model, int_ext);
+  EXPECT_TRUE(res.ok());
+  EXPECT_EQ(res.value(), 644);
 }
 
 TEST(CppGeneratedCode, GetExtensionOnMutableChild) {
