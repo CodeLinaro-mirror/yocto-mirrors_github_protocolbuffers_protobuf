@@ -75,6 +75,29 @@ TEST(GENERATED_MESSAGE_TEST_NAME, TestConflictingSymbolNames) {
   EXPECT_EQ(123, message.GetExtension(ExtensionMessage::repeated_int32_ext, 0));
 }
 
+TEST(GENERATED_MESSAGE_TEST_NAME, TestSwapNameIsNotMangledForFields) {
+  // For backwards compatibility we do not mangle `swap`. It works thanks to
+  // overload resolution.
+  int v =
+      protobuf_unittest::TestConflictingSymbolNames::BadKnownNamesFields().swap();
+
+  // But we do mangle `swap` for extensions because there is no overloading
+  // there.
+  v = protobuf_unittest::TestConflictingSymbolNames::BadKnownNamesValues()
+          .GetExtension(protobuf_unittest::TestConflictingSymbolNames::
+                            BadKnownNamesValues::swap_);
+}
+
+TEST(GENERATED_MESSAGE_TEST_NAME, TestNoStandardDescriptorOption) {
+  // When no_standard_descriptor_accessor = true, we should not mangle fields
+  // named `descriptor`.
+  int v = protobuf_unittest::TestConflictingSymbolNames::BadKnownNamesFields()
+              .descriptor_();
+  v = protobuf_unittest::TestConflictingSymbolNames::
+          BadKnownNamesFieldsNoStandardDescriptor()
+              .descriptor();
+}
+
 TEST(GENERATED_MESSAGE_TEST_NAME, TestConflictingEnumNames) {
   protobuf_unittest::TestConflictingEnumNames message;
   message.set_conflicting_enum(
