@@ -197,19 +197,6 @@ class PROTOBUF_EXPORT PROTOBUF_ALIGNAS(8) Arena final {
 
   inline ~Arena() = default;
 
-#ifndef PROTOBUF_FUTURE_REMOVE_CREATEMESSAGE
-  // Deprecated. Use Create<T> instead.
-  template <typename T, typename... Args>
-  ABSL_DEPRECATED("Use Create")
-  static T* CreateMessage(Arena* arena, Args&&... args) {
-    using Type = std::remove_const_t<T>;
-    static_assert(
-        is_arena_constructable<Type>::value,
-        "CreateMessage can only construct types that are ArenaConstructable");
-    return Create<Type>(arena, std::forward<Args>(args)...);
-  }
-#endif  // !PROTOBUF_FUTURE_REMOVE_CREATEMESSAGE
-
   // Allocates an object type T if the arena passed in is not nullptr;
   // otherwise, returns a heap-allocated object.
   template <typename T, typename... Args>
@@ -356,19 +343,6 @@ class PROTOBUF_EXPORT PROTOBUF_ALIGNAS(8) Arena final {
   PROTOBUF_ALWAYS_INLINE void OwnCustomDestructor(void* object,
                                                   void (*destruct)(void*)) {
     impl_.AddCleanup(object, destruct);
-  }
-
-  // Retrieves the arena associated with |value| if |value| is an arena-capable
-  // message, or nullptr otherwise. If possible, the call resolves at compile
-  // time. Note that we can often devirtualize calls to `value->GetArena()` so
-  // usually calling this method is unnecessary.
-  // TODO: remove this function.
-  template <typename T>
-  ABSL_DEPRECATED(
-      "This will be removed in a future release. Call value->GetArena() "
-      "instead.")
-  PROTOBUF_ALWAYS_INLINE static Arena* GetArena(T* value) {
-    return GetArenaInternal(value);
   }
 
   template <typename T>
