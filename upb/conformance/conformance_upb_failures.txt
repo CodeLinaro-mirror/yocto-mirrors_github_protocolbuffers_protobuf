@@ -22,3 +22,15 @@ Required.Proto3.JsonInput.Int32FieldEmptyString           # Should have failed t
 Required.Proto3.JsonInput.Int64FieldEmptyString           # Should have failed to parse, but didn't.
 Required.Proto3.JsonInput.Uint32FieldEmptyString          # Should have failed to parse, but didn't.
 Required.Proto3.JsonInput.Uint64FieldEmptyString          # Should have failed to parse, but didn't.
+Required.Proto2.JsonInput.DoubleFieldQuotedScientificValue.JsonOutput # Failed to parse input or produce output.
+Required.Proto2.JsonInput.DoubleFieldQuotedScientificValue.ProtobufOutput # Failed to parse input or produce output.
+Required.Proto2.JsonInput.FloatFieldQuotedScientificValue.JsonOutput # Failed to parse input or produce output.
+Required.Proto2.JsonInput.FloatFieldQuotedScientificValue.ProtobufOutput # Failed to parse input or produce output.
+Required.Proto2.JsonInput.Int32FieldStringValueZero.JsonOutput # Failed to parse input or produce output.
+Required.Proto2.JsonInput.Int32FieldStringValueZero.ProtobufOutput # Failed to parse input or produce output.
+Required.Proto3.JsonInput.DoubleFieldQuotedScientificValue.JsonOutput # Failed to parse input or produce output.
+Required.Proto3.JsonInput.DoubleFieldQuotedScientificValue.ProtobufOutput # Failed to parse input or produce output.
+Required.Proto3.JsonInput.FloatFieldQuotedScientificValue.JsonOutput # Failed to parse input or produce output.
+Required.Proto3.JsonInput.FloatFieldQuotedScientificValue.ProtobufOutput # Failed to parse input or produce output.
+Required.Proto3.JsonInput.Int32FieldStringValueZero.JsonOutput # Failed to parse input or produce output.
+Required.Proto3.JsonInput.Int32FieldStringValueZero.ProtobufOutput # Failed to parse input or produce output.
