@@ -130,9 +130,6 @@ const ::google::protobuf::EnumDescriptor* CppFeatures_StringType_descriptor() {
 }
 PROTOBUF_CONSTINIT const uint32_t CppFeatures_StringType_internal_data_[] = {
     262144u, 0u, };
-bool CppFeatures_StringType_IsValid(int value) {
-  return 0 <= value && value <= 3;
-}
 // ===================================================================
 
 class CppFeatures::_Internal {
