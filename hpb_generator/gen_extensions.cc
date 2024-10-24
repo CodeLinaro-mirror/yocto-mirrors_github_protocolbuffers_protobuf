@@ -63,27 +63,28 @@ void WriteExtensionIdentifiersHeader(
 
 void WriteExtensionIdentifier(const protobuf::FieldDescriptor* ext,
                               Context& ctx) {
-  std::string mini_table_name =
+  auto mini_table_name =
       absl::StrCat(ExtensionIdentifierBase(ext), "_", ext->name(), "_ext");
-  if (ext->extension_scope()) {
-    ctx.EmitLegacy(
-        R"cc(
-          constexpr ::hpb::internal::ExtensionIdentifier<$0, $3> $4::$2 =
-              ::hpb::internal::PrivateAccess::InvokeConstructor<
-                  ::hpb::internal::ExtensionIdentifier<$0, $3>>(&$1);
-        )cc",
-        ContainingTypeName(ext), mini_table_name, ext->name(),
-        CppTypeParameterName(ext), ClassName(ext->extension_scope()));
-  } else {
-    ctx.EmitLegacy(
-        R"cc(
-          constexpr ::hpb::internal::ExtensionIdentifier<$0, $3> $2 =
-              ::hpb::internal::PrivateAccess::InvokeConstructor<
-                  ::hpb::internal::ExtensionIdentifier<$0, $3>>(&$1);
-        )cc",
-        ContainingTypeName(ext), mini_table_name, ext->name(),
-        CppTypeParameterName(ext));
-  }
+  auto scope_prefix =
+      ext->extension_scope() ? ClassName(ext->extension_scope()) + "::" : "";
+  auto class_prefix =
+      ext->extension_scope() ? ClassName(ext->extension_scope()) + "::" : "";
+  ctx.Emit(
+      {{"containing_type_name", ContainingTypeName(ext)},
+       {"scope_prefix", scope_prefix},
+       {"mini_table_name", mini_table_name},
+       {"ext_name", ext->name()},
+       {"ext_type", CppTypeParameterName(ext)},
+       {"class_prefix", class_prefix}},
+      R"cc(
+        constexpr ::hpb::internal::ExtensionIdentifier<$containing_type_name$,
+                                                       $ext_type$>
+            $class_prefix$$ext_name$ =
+                ::hpb::internal::PrivateAccess::InvokeConstructor<
+                    ::hpb::internal::ExtensionIdentifier<$containing_type_name$,
+                                                         $ext_type$>>(
+                    &$mini_table_name$);
+      )cc");
 }
 
 void WriteExtensionIdentifiers(
