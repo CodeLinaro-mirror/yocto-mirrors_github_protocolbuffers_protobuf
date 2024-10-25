@@ -35,7 +35,7 @@ typedef struct upb_MemBlock {
 typedef struct upb_ArenaInternal {
   // upb_alloc* together with a low bit which signals if there is an initial
   // block.
-  uintptr_t block_alloc;
+  UPB_ATOMIC(uintptr_t) block_alloc;
 
   // When multiple arenas are fused together, each arena points to a parent
   // arena (root points to itself). The root tracks how many live arenas
@@ -111,8 +111,13 @@ static uintptr_t _upb_Arena_TaggedFromPointer(upb_ArenaInternal* ai) {
   return parent_or_count;
 }
 
+static uintptr_t _upb_Arena_BlockAllocRaw(upb_ArenaInternal* ai) {
+  // Immutable after init.
+  return upb_Atomic_Load(&ai->block_alloc, memory_order_relaxed);
+}
+
 static upb_alloc* _upb_ArenaInternal_BlockAlloc(upb_ArenaInternal* ai) {
-  return (upb_alloc*)(ai->block_alloc & ~0x1);
+  return (upb_alloc*)(_upb_Arena_BlockAllocRaw(ai) & ~0x1);
 }
 
 static uintptr_t _upb_Arena_MakeBlockAlloc(upb_alloc* alloc, bool has_initial) {
@@ -122,7 +127,7 @@ static uintptr_t _upb_Arena_MakeBlockAlloc(upb_alloc* alloc, bool has_initial) {
 }
 
 static bool _upb_ArenaInternal_HasInitialBlock(upb_ArenaInternal* ai) {
-  return ai->block_alloc & 0x1;
+  return _upb_Arena_BlockAllocRaw(ai) & 0x1;
 }
 
 #ifdef UPB_TRACING_ENABLED
@@ -157,7 +162,7 @@ void upb_Arena_LogFree(const upb_Arena* arena) {
 }
 #endif  // UPB_TRACING_ENABLED
 
-static upb_ArenaRoot _upb_Arena_FindRoot(upb_Arena* a) {
+static upb_ArenaRoot _upb_Arena_FindRoot(const upb_Arena* a) {
   upb_ArenaInternal* ai = upb_Arena_Internal(a);
   uintptr_t poc = upb_Atomic_Load(&ai->parent_or_count, memory_order_acquire);
   while (_upb_Arena_IsTaggedPointer(poc)) {
@@ -259,7 +264,7 @@ static void _upb_Arena_AddBlock(upb_Arena* a, void* ptr, size_t size) {
 
 static bool _upb_Arena_AllocBlock(upb_Arena* a, size_t size) {
   upb_ArenaInternal* ai = upb_Arena_Internal(a);
-  if (!ai->block_alloc) return false;
+  if (!_upb_Arena_BlockAllocRaw(ai)) return false;
   upb_MemBlock* last_block = upb_Atomic_Load(&ai->blocks, memory_order_acquire);
   size_t last_size = last_block != NULL ? last_block->size : 128;
 
@@ -431,7 +436,8 @@ static void _upb_Arena_DoFuseArenaLists(upb_ArenaInternal* const parent,
   upb_Atomic_Store(&parent->tail, parent_tail, memory_order_relaxed);
 }
 
-static upb_ArenaInternal* _upb_Arena_DoFuse(upb_Arena* a1, upb_Arena* a2,
+static upb_ArenaInternal* _upb_Arena_DoFuse(const upb_Arena* a1,
+                                            const upb_Arena* a2,
                                             uintptr_t* ref_delta) {
   // `parent_or_count` has two distinct modes
   // -  parent pointer mode
@@ -503,7 +509,7 @@ static bool _upb_Arena_FixupRefs(upb_ArenaInternal* new_root,
                                           memory_order_relaxed);
 }
 
-bool upb_Arena_Fuse(upb_Arena* a1, upb_Arena* a2) {
+bool upb_Arena_Fuse(const upb_Arena* a1, const upb_Arena* a2) {
   if (a1 == a2) return true;  // trivial fuse
 
 #ifdef UPB_TRACING_ENABLED
@@ -530,7 +536,7 @@ bool upb_Arena_Fuse(upb_Arena* a1, upb_Arena* a2) {
   }
 }
 
-bool upb_Arena_IncRefFor(upb_Arena* a, const void* owner) {
+bool upb_Arena_IncRefFor(const upb_Arena* a, const void* owner) {
   upb_ArenaInternal* ai = upb_Arena_Internal(a);
   if (_upb_ArenaInternal_HasInitialBlock(ai)) return false;
   upb_ArenaRoot r;
@@ -549,14 +555,17 @@ retry:
   goto retry;
 }
 
-void upb_Arena_DecRefFor(upb_Arena* a, const void* owner) { upb_Arena_Free(a); }
+void upb_Arena_DecRefFor(const upb_Arena* a, const void* owner) {
+  upb_Arena_Free((upb_Arena*)a);
+}
 
 void UPB_PRIVATE(_upb_Arena_SwapIn)(upb_Arena* des, const upb_Arena* src) {
   upb_ArenaInternal* desi = upb_Arena_Internal(des);
   upb_ArenaInternal* srci = upb_Arena_Internal(src);
 
   *des = *src;
-  desi->block_alloc = srci->block_alloc;
+  upb_Atomic_Store(&desi->block_alloc, _upb_Arena_BlockAllocRaw(srci),
+                   memory_order_relaxed);
   upb_MemBlock* blocks = upb_Atomic_Load(&srci->blocks, memory_order_relaxed);
   upb_Atomic_Init(&desi->blocks, blocks);
 }
