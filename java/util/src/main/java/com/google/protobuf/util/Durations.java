@@ -429,15 +429,15 @@ public final class Durations {
 
   /**
    * Add two durations.
+   * <!-- copybara:strip_begin -->
    *
-   * <!-- MOE:begin_intracomment_strip -->
    * @deprecated Do not use this method for new code. Instead, convert to {@link java.time.Duration}
    *     using {@link com.google.protobuf.util.JavaTimeConversions#toJavaDuration}, do the
    *     arithmetic there, and convert back using {@link
    *     com.google.protobuf.util.JavaTimeConversions#toProtoDuration}.
-   * <!-- MOE:end_intracomment_strip -->
+   *     <!-- copybara:strip_end -->
    */
-  @Deprecated // MOE:strip_line
+  @Deprecated // copybara:strip
   public static Duration add(Duration d1, Duration d2) {
     checkValid(d1);
     checkValid(d2);
@@ -447,15 +447,15 @@ public final class Durations {
 
   /**
    * Subtract a duration from another.
+   * <!-- copybara:strip_begin -->
    *
-   * <!-- MOE:begin_intracomment_strip -->
    * @deprecated Do not use this method for new code. Instead, convert to {@link java.time.Duration}
    *     using {@link com.google.protobuf.util.JavaTimeConversions#toJavaDuration}, do the
    *     arithmetic there, and convert back using {@link
    *     com.google.protobuf.util.JavaTimeConversions#toProtoDuration}.
-   * <!-- MOE:end_intracomment_strip -->
+   *     <!-- copybara:strip_end -->
    */
-  @Deprecated // MOE:strip_line
+  @Deprecated // copybara:strip
   public static Duration subtract(Duration d1, Duration d2) {
     checkValid(d1);
     checkValid(d2);
