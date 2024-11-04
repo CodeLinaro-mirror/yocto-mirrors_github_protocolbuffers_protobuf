@@ -8,6 +8,7 @@
 #include "google/protobuf/compiler/java/generator.h"
 
 #include <memory>
+#include <string>
 
 #include "google/protobuf/descriptor.pb.h"
 #include <gtest/gtest.h>
@@ -64,6 +65,25 @@ TEST_F(JavaGeneratorTest, BasicError) {
       "foo.proto:4:7: Expected \"required\", \"optional\", or \"repeated\"");
 }
 
+
+TEST_F(JavaGeneratorTest, InvalidMutablePackageInAbsenceOfMultipleFiles) {
+  CreateTempFile("/foo.proto",
+                 R"schema(
+      edition = "2023";
+      package foo;
+      option java_multiple_files_mutable_package = "dummy";
+      message TestFileNameProto {
+        int32 field = 1;
+      }
+      )schema");
+
+  RunProtoc(
+      "protocol_compiler --proto_path=$tmpdir --java_out=$tmpdir foo.proto");
+
+  ExpectErrorSubstring(
+      "java_multiple_files_mutable_package is only supported "
+      "when java_multiple_files is enabled");
+}
 
 }  // namespace
 }  // namespace java
