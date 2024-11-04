@@ -734,6 +734,26 @@ TEST(CppGeneratedCode, ClearExtensionWithEmptyExtensionPtr) {
   EXPECT_EQ(false, ::hpb::HasExtension(recursive_child, theme));
 }
 
+TEST(CppGeneratedCode, SetExtensionInt32) {
+  TestModel model;
+  EXPECT_EQ(false, hpb::HasExtension(&model, int32_ext));
+  int32_t val = 55;
+  auto x = hpb::SetExtension(&model, int32_ext, val);
+  EXPECT_EQ(true, hpb::HasExtension(&model, int32_ext));
+  EXPECT_TRUE(x.ok());
+  EXPECT_EQ(*hpb::GetExtension(&model, int32_ext), val);
+}
+
+TEST(CppGeneratedCode, SetExtensionInt64) {
+  TestModel model;
+  EXPECT_EQ(false, hpb::HasExtension(&model, int64_ext));
+  int64_t val = std::numeric_limits<int32_t>::max() + int64_t{1};
+  auto x = hpb::SetExtension(&model, int64_ext, val);
+  EXPECT_EQ(true, hpb::HasExtension(&model, int64_ext));
+  EXPECT_TRUE(x.ok());
+  EXPECT_EQ(*hpb::GetExtension(&model, int64_ext), val);
+}
+
 TEST(CppGeneratedCode, SetExtension) {
   TestModel model;
   void* prior_message;
