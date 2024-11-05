@@ -365,17 +365,6 @@ static_assert(PROTOBUF_ABSL_MIN(20230125, 3),
 # define PROTOBUF_PREDICT_FALSE(x) (x)
 #endif
 
-#ifdef PROTOBUF_NODISCARD
-#error PROTOBUF_NODISCARD was previously defined
-#endif
-#if ABSL_HAVE_CPP_ATTRIBUTE(nodiscard)
-#define PROTOBUF_NODISCARD [[nodiscard]]
-#elif ABSL_HAVE_ATTRIBUTE(warn_unused_result) || defined(__GNUC__)
-#define PROTOBUF_NODISCARD __attribute__((warn_unused_result))
-#else
-#define PROTOBUF_NODISCARD
-#endif
-
 #ifdef PROTOBUF_RESTRICT
 #error PROTOBUF_RESTRICT was previously defined
 #endif
@@ -608,17 +597,6 @@ static_assert(PROTOBUF_ABSL_MIN(20230125, 3),
       const ::google::protobuf::internal::TcParseTableBase *table, uint64_t hasbits
 #define PROTOBUF_TC_PARAM_NO_DATA_PASS \
   msg, ptr, ctx, ::google::protobuf::internal::TcFieldData::DefaultInit(), table, hasbits
-
-#ifdef PROTOBUF_UNUSED
-#error PROTOBUF_UNUSED was previously defined
-#endif
-#if ABSL_HAVE_CPP_ATTRIBUTE(maybe_unused) || (PROTOBUF_MSC_VER_MIN(1911))
-#define PROTOBUF_UNUSED [[maybe_unused]]
-#elif ABSL_HAVE_ATTRIBUTE(unused) || defined(__GNUC__)
-#define PROTOBUF_UNUSED __attribute__((__unused__))
-#else
-#define PROTOBUF_UNUSED
-#endif
 
 // For the toolchains that support it, evaluates to `true` if the input is
 // determined to be a compile time constant after optimizations have happened
