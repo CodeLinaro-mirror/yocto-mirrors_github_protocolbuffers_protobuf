@@ -6,3 +6,7 @@
 #
 # TODO: insert links to corresponding bugs tracking the issue.
 # Should we use GitHub issues or the Google-internal bug tracker?
+Required.*.ProtobufInput.UnmatchedEndGroup                                                                         # Should have failed to parse, but didn't.
+Required.*.ProtobufInput.UnmatchedEndGroupUnknown                                                                  # Should have failed to parse, but didn't.
+Required.*.ProtobufInput.UnmatchedEndGroupWithData                                                                 # Should have failed to parse, but didn't.
+Required.*.ProtobufInput.UnmatchedEndGroupWrongType                                                                # Should have failed to parse, but didn't.
