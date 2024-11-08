@@ -33,6 +33,9 @@ extern "C" {
 // Creates a new message with the given mini_table on the given arena.
 UPB_API upb_Message* upb_Message_New(const upb_MiniTable* m, upb_Arena* arena);
 
+bool UPB_PRIVATE(_upb_Message_AddUnknown)(upb_Message* msg, const char* data,
+                                          size_t len, upb_Arena* arena);
+
 //
 // Unknown data may be stored non-contiguously. Each segment stores a block of
 // unknown fields. To iterate over segments:
