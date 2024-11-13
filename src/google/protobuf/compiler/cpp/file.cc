@@ -1325,6 +1325,9 @@ void FileGenerator::GenerateReflectionInitializationCode(io::Printer* p) {
   // Should be "bool eager = NeedsEagerDescriptorAssignment(file_, options_);"
   // however this might cause a tsan failure in superroot b/148382879,
   // so disable for now.
+  // The DescriptorTable needs to be extern "C" so that we can access it from
+  // Rust. We do not attempt to read the contents of the table in Rust, but
+  // just use the symbol to force-link the C++ generated code when necessary.
   bool eager = false;
   p->Emit(
       {
@@ -1340,6 +1343,7 @@ void FileGenerator::GenerateReflectionInitializationCode(io::Printer* p) {
       },
       R"cc(
         static ::absl::once_flag $desc_table$_once;
+        extern "C" {
         PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable $desc_table$ = {
             false,
             $eager$,
@@ -1356,6 +1360,7 @@ void FileGenerator::GenerateReflectionInitializationCode(io::Printer* p) {
             $file_level_enum_descriptors$,
             $file_level_service_descriptors$,
         };
+        }  // extern "C"
       )cc");
 
   // For descriptor.proto and cpp_features.proto we want to avoid doing any
@@ -1770,8 +1775,10 @@ void FileGenerator::GenerateGlobalStateFunctionDeclarations(io::Printer* p) {
 
   if (HasDescriptorMethods(file_, options_)) {
     p->Emit(R"cc(
+      extern "C" {
       $dllexport_decl $extern const ::$proto_ns$::internal::DescriptorTable
           $desc_table$;
+      }  // extern "C"
     )cc");
   }
 }

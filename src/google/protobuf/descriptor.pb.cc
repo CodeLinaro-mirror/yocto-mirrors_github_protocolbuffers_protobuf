@@ -2169,6 +2169,7 @@ const char descriptor_table_protodef_google_2fprotobuf_2fdescriptor_2eproto[] AB
     "B\252\002\032Google.Protobuf.Reflection"
 };
 static ::absl::once_flag descriptor_table_google_2fprotobuf_2fdescriptor_2eproto_once;
+extern "C" {
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_google_2fprotobuf_2fdescriptor_2eproto = {
     false,
     false,
@@ -2185,6 +2186,7 @@ PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_google_2fproto
     file_level_enum_descriptors_google_2fprotobuf_2fdescriptor_2eproto,
     file_level_service_descriptors_google_2fprotobuf_2fdescriptor_2eproto,
 };
+}  // extern "C"
 namespace google {
 namespace protobuf {
 namespace internal {
