@@ -7,6 +7,7 @@
 
 #include "upb/message/message.h"
 
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -42,6 +43,31 @@ bool UPB_PRIVATE(_upb_Message_AddUnknown)(upb_Message* msg, const char* data,
   upb_Message_Internal* in = UPB_PRIVATE(_upb_Message_GetInternal)(msg);
   memcpy(UPB_PTR_AT(in, in->unknown_end, char), data, len);
   in->unknown_end += len;
+  return true;
+}
+
+bool UPB_PRIVATE(_upb_Message_AddUnknownV)(upb_Message* msg, upb_Arena* arena,
+                                           int count, ...) {
+  UPB_ASSERT(!upb_Message_IsFrozen(msg));
+  va_list args;
+  va_start(args, count);
+  size_t total_len = 0;
+  for (int i = 0; i < count; i++) {
+    va_arg(args, const char*);
+    total_len += va_arg(args, size_t);
+  }
+  va_end(args);
+  if (!UPB_PRIVATE(_upb_Message_Realloc)(msg, total_len, arena)) return false;
+
+  upb_Message_Internal* in = UPB_PRIVATE(_upb_Message_GetInternal)(msg);
+  va_start(args, count);
+  for (int i = 0; i < count; i++) {
+    const char* arg_data = va_arg(args, const char*);
+    size_t arg_len = va_arg(args, size_t);
+    memcpy(UPB_PTR_AT(in, in->unknown_end, char), arg_data, arg_len);
+    in->unknown_end += arg_len;
+  }
+  va_end(args);
   return true;
 }
 

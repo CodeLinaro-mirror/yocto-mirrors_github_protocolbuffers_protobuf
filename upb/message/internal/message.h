@@ -89,6 +89,12 @@ bool UPB_PRIVATE(_upb_Message_AddUnknown)(struct upb_Message* msg,
                                           const char* data, size_t len,
                                           upb_Arena* arena);
 
+// Adds unknown data (serialized protobuf data) to the given message.
+// The data is copied into the message instance. Arguments are pairs of
+// const char* and size_t length.
+bool UPB_PRIVATE(_upb_Message_AddUnknownV)(struct upb_Message* msg,
+                                           upb_Arena* arena, int count, ...);
+
 bool UPB_PRIVATE(_upb_Message_Realloc)(struct upb_Message* msg, size_t need,
                                        upb_Arena* arena);
 
