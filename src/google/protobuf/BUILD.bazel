@@ -1267,6 +1267,7 @@ cc_library(
     strip_include_prefix = "/src",
     visibility = ["//:__subpackages__"],
     deps = [
+        ":arena_test_util",
         ":cc_lite_test_protos",
         ":cc_test_protos",
         ":lite_test_util",
@@ -1731,6 +1732,7 @@ cc_test(
     ],
     deps = [
         ":arena",
+        ":arena_test_util",
         ":cc_lite_test_protos",
         ":cc_test_protos",
         ":internal_visibility",
@@ -1764,6 +1766,7 @@ cc_test(
     ],
     deps = [
         ":arena",
+        ":arena_test_util",
         ":cc_test_protos",
         ":internal_visibility",
         ":port",
