@@ -402,7 +402,7 @@ bool _upb_Decoder_CheckEnum(upb_Decoder* d, const char* ptr, upb_Message* msg,
   const uint32_t tag =
       ((uint32_t)field->UPB_PRIVATE(number) << 3) | kUpb_WireType_Varint;
   upb_Message* unknown_msg =
-      field->UPB_PRIVATE(mode) & kUpb_LabelFlags_IsExtension ? d->unknown_msg
+      field->UPB_PRIVATE(mode) & kUpb_LabelFlags_IsExtension ? d->original_msg
                                                              : msg;
   _upb_Decoder_AddUnknownVarints(d, unknown_msg, tag, v);
   return false;
@@ -1176,7 +1176,7 @@ const char* _upb_Decoder_DecodeKnownField(upb_Decoder* d, const char* ptr,
     if (UPB_UNLIKELY(!ext)) {
       _upb_Decoder_ErrorJmp(d, kUpb_DecodeStatus_OutOfMemory);
     }
-    d->unknown_msg = msg;
+    d->original_msg = msg;
     msg = (upb_Message*)&ext->data;
     if (upb_MiniTableField_IsSubMessage(&ext->ext->UPB_PRIVATE(field))) {
       ext_sub.UPB_PRIVATE(submsg) =
@@ -1247,14 +1247,16 @@ static const char* _upb_Decoder_DecodeUnknownField(upb_Decoder* d,
     start = _upb_Decoder_ReverseSkipVarint(start, tag);
     assert(start == d->debug_tagstart);
 
+    const char* input_start =
+        upb_EpsCopyInputStream_GetInputPtr(&d->input, start);
+    size_t length;
     if (wire_type == kUpb_WireType_StartGroup) {
-      d->unknown = start;
-      d->unknown_msg = msg;
       ptr = _upb_Decoder_DecodeUnknownGroup(d, ptr, field_number);
-      start = d->unknown;
-      d->unknown = NULL;
+      length = upb_EpsCopyInputStream_GetInputPtr(&d->input, ptr) - input_start;
+    } else {
+      length = ptr - start;
     }
-    if (!UPB_PRIVATE(_upb_Message_AddUnknown)(msg, start, ptr - start,
+    if (!UPB_PRIVATE(_upb_Message_AddUnknown)(msg, input_start, length,
                                               &d->arena)) {
       _upb_Decoder_ErrorJmp(d, kUpb_DecodeStatus_OutOfMemory);
     }
@@ -1388,7 +1390,6 @@ upb_DecodeStatus upb_Decode(const char* buf, size_t size, upb_Message* msg,
                               options & kUpb_DecodeOption_AliasString);
 
   decoder.extreg = extreg;
-  decoder.unknown = NULL;
   decoder.depth = depth ? depth : kUpb_WireFormat_DefaultDepthLimit;
   decoder.end_group = DECODE_NOGROUP;
   decoder.options = (uint16_t)options;
