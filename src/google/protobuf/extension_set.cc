@@ -1664,20 +1664,32 @@ std::pair<ExtensionSet::Extension*, bool> ExtensionSet::Insert(int key) {
     auto maybe = map_.large->insert({key, Extension()});
     return {&maybe.first->second, maybe.second};
   }
-  KeyValue* end = flat_end();
-  KeyValue* it = flat_begin();
-  for (; it != end && it->first <= key; ++it) {
-    if (it->first == key) return {&it->second, false};
+  uint16_t i = flat_size_;
+  // Iterating from the back to benefit the case where the keys are inserted in
+  // increasing order.
+  while (i > 0) {
+    int map_key = map_.flat[i - 1].first;
+    if (map_key == key) {
+      return {&map_.flat[i - 1].second, false};
+    }
+    if (map_key < key) {
+      break;
+    }
+    --i;
   }
-  if (flat_size_ < flat_capacity_) {
-    std::copy_backward(it, end, end + 1);
-    ++flat_size_;
-    it->first = key;
-    it->second = Extension();
-    return {&it->second, true};
+  if (flat_size_ == flat_capacity_) {
+    GrowCapacity(flat_size_ + 1);
+    if (ABSL_PREDICT_FALSE(is_large())) {
+      return Insert(key);
+    }
   }
-  GrowCapacity(flat_size_ + 1);
-  return Insert(key);
+
+  std::copy_backward(flat_begin() + i, flat_begin() + flat_size_,
+                     flat_begin() + flat_size_ + 1);
+  ++flat_size_;
+  map_.flat[i].first = key;
+  map_.flat[i].second = Extension();
+  return {&map_.flat[i].second, true};
 }
 
 namespace {
