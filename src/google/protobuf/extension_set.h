@@ -820,12 +820,20 @@ class PROTOBUF_EXPORT ExtensionSet {
   // Grows the flat_capacity_.
   // If flat_capacity_ > kMaximumFlatCapacity, converts to LargeMap.
   void GrowCapacity(size_t minimum_new_capacity);
+
   static constexpr uint16_t kMaximumFlatCapacity = 256;
+
+  // Reserves capacity for the flat_capacity_ when the ExtensionSet is
+  // completely empty (flat_size_ == 0 && flat_capacity_ == 0).
+  // minimum_new_capacity must be <= kMaximumFlatCapacity.
+  void InternalReserveSmallCapacityFromEmpty(size_t minimum_new_capacity);
+
   bool is_large() const { return static_cast<int16_t>(flat_size_) < 0; }
 
   // Removes a key from the ExtensionSet.
   void Erase(int key);
 
+  // Returns the number of elements in the ExtensionSet including cleared.
   size_t Size() const {
     return ABSL_PREDICT_FALSE(is_large()) ? map_.large->size() : flat_size_;
   }
@@ -920,10 +928,24 @@ class PROTOBUF_EXPORT ExtensionSet {
     ForEachNoPrefetch(flat_begin(), flat_end(), std::move(func));
   }
 
-  // Merges existing Extension from other_extension
+  // Implementation of MergeFrom into the empty ExtensionSet from a small.
+  // This is used in all types of copy.
+  // PRECONDITIONs:
+  // 1. `this` is completely empty (flat_size_ == 0 && flat_capacity_ == 0).
+  // 2. `other` is small (!other.is_large()).
+  void InternalMergeFromSmallToEmpty(const MessageLite* extendee,
+                                     const ExtensionSet& other);
+  // Implementation of MergeFrom for general case.
+  void InternalMergeFromSlow(const MessageLite* extendee,
+                             const ExtensionSet& other);
+  // Merges new or existing Extension from other_extension.
   void InternalExtensionMergeFrom(const MessageLite* extendee, int number,
                                   const Extension& other_extension,
                                   Arena* other_arena);
+  // Merges newly created uninitialized Extension from other_extension.
+  void InternalExtensionMergeFromIntoUnitializedExtension(
+      Extension& dst_extension, const MessageLite* extendee, int number,
+      const Extension& other_extension, Arena* other_arena);
 
   inline static bool is_packable(WireFormatLite::WireType type) {
     switch (type) {

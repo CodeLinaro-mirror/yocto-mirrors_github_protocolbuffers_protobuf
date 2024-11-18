@@ -985,6 +985,48 @@ size_t SizeOfUnion(ItX it_dest, ItX end_dest, ItY it_source, ItY end_source) {
 void ExtensionSet::MergeFrom(const MessageLite* extendee,
                              const ExtensionSet& other) {
   Prefetch5LinesFrom1Line(&other);
+  if (ABSL_PREDICT_TRUE(flat_size_ == 0 && flat_capacity_ == 0 &&
+                        !other.is_large())) {
+    InternalMergeFromSmallToEmpty(extendee, other);
+    return;
+  }
+  InternalMergeFromSlow(extendee, other);
+}
+
+void ExtensionSet::InternalMergeFromSmallToEmpty(const MessageLite* extendee,
+                                                 const ExtensionSet& other) {
+  ABSL_DCHECK(!other.is_large());
+  auto begin = other.flat_begin();
+  auto end = other.flat_end();
+
+  size_t count = 0;
+  for (auto it = begin; it != end; ++it) {
+    const Extension& ext = it->second;
+    count += ext.is_cleared ? 0 : 1;
+  }
+  if (count == 0) {
+    return;
+  }
+
+  InternalReserveSmallCapacityFromEmpty(count);
+  flat_size_ = static_cast<uint16_t>(count);
+  auto dst_it = map_.flat;
+  other.ForEachPrefetchImpl(
+      begin, end,
+      [extendee, this, &dst_it, &other](int number, const Extension& ext) {
+        if (ext.is_cleared) {
+          return;
+        }
+        dst_it->first = number;
+        this->InternalExtensionMergeFromIntoUnitializedExtension(
+            dst_it->second, extendee, number, ext, other.arena_);
+        ++dst_it;
+      },
+      Prefetch{});
+}
+
+void ExtensionSet::InternalMergeFromSlow(const MessageLite* extendee,
+                                         const ExtensionSet& other) {
   if (ABSL_PREDICT_TRUE(!is_large())) {
     if (ABSL_PREDICT_TRUE(!other.is_large())) {
       GrowCapacity(SizeOfUnion(flat_begin(), flat_end(), other.flat_begin(),
@@ -1002,35 +1044,22 @@ void ExtensionSet::MergeFrom(const MessageLite* extendee,
       Prefetch{});
 }
 
-void ExtensionSet::InternalExtensionMergeFrom(const MessageLite* extendee,
-                                              int number,
-                                              const Extension& other_extension,
-                                              Arena* other_arena) {
-  if (other_extension.is_repeated) {
-    Extension* extension;
-    bool is_new =
-        MaybeNewExtension(number, other_extension.descriptor, &extension);
-    if (is_new) {
-      // Extension did not already exist in set.
-      extension->type = other_extension.type;
-      extension->is_packed = other_extension.is_packed;
-      extension->is_repeated = true;
-      extension->is_pointer = true;
-    } else {
-      ABSL_DCHECK_EQ(extension->type, other_extension.type);
-      ABSL_DCHECK_EQ(extension->is_packed, other_extension.is_packed);
-      ABSL_DCHECK(extension->is_repeated);
-    }
+void ExtensionSet::InternalExtensionMergeFromIntoUnitializedExtension(
+    Extension& dst_extension, const MessageLite* extendee, int number,
+    const Extension& other_extension, Arena* other_arena) {
+  // Copy and initialize all the fields.
+  // We fix up incorrect pointers later.
+  // Primitive values are copied here.
+  dst_extension = other_extension;
 
+  if (other_extension.is_repeated) {
     switch (cpp_type(other_extension.type)) {
-#define HANDLE_TYPE(UPPERCASE, LOWERCASE, REPEATED_TYPE)    \
-  case WireFormatLite::CPPTYPE_##UPPERCASE:                 \
-    if (is_new) {                                           \
-      extension->ptr.repeated_##LOWERCASE##_value =         \
-          Arena::Create<REPEATED_TYPE>(arena_);             \
-    }                                                       \
-    extension->ptr.repeated_##LOWERCASE##_value->MergeFrom( \
-        *other_extension.ptr.repeated_##LOWERCASE##_value); \
+#define HANDLE_TYPE(UPPERCASE, LOWERCASE, REPEATED_TYPE)       \
+  case WireFormatLite::CPPTYPE_##UPPERCASE:                    \
+    dst_extension.ptr.repeated_##LOWERCASE##_value =           \
+        Arena::Create<REPEATED_TYPE>(arena_);                  \
+    dst_extension.ptr.repeated_##LOWERCASE##_value->MergeFrom( \
+        *other_extension.ptr.repeated_##LOWERCASE##_value);    \
     break;
 
       HANDLE_TYPE(INT32, int32_t, RepeatedField<int32_t>);
@@ -1045,83 +1074,136 @@ void ExtensionSet::InternalExtensionMergeFrom(const MessageLite* extendee,
       HANDLE_TYPE(MESSAGE, message, RepeatedPtrField<MessageLite>);
 #undef HANDLE_TYPE
     }
-  } else {
-    if (!other_extension.is_cleared) {
-      switch (cpp_type(other_extension.type)) {
-#define HANDLE_TYPE(UPPERCASE, LOWERCASE, CAMELCASE)  \
-  case WireFormatLite::CPPTYPE_##UPPERCASE:           \
-    Set##CAMELCASE(number, other_extension.type,      \
-                   other_extension.LOWERCASE##_value, \
-                   other_extension.descriptor);       \
+    return;
+  }
+
+  // Non-repeated extension
+  switch (cpp_type(other_extension.type)) {
+    case WireFormatLite::CPPTYPE_INT32:
+      break;  // Do nothing.
+    case WireFormatLite::CPPTYPE_INT64:
+      break;  // Do nothing.
+    case WireFormatLite::CPPTYPE_UINT32:
+      break;  // Do nothing.
+    case WireFormatLite::CPPTYPE_UINT64:
+      break;  // Do nothing.
+    case WireFormatLite::CPPTYPE_FLOAT:
+      break;  // Do nothing.
+    case WireFormatLite::CPPTYPE_DOUBLE:
+      break;  // Do nothing.
+    case WireFormatLite::CPPTYPE_BOOL:
+      break;  // Do nothing.
+    case WireFormatLite::CPPTYPE_ENUM:
+      break;  // Do nothing.
+    case WireFormatLite::CPPTYPE_STRING:
+      dst_extension.ptr.string_value =
+          Arena::Create<std::string>(arena_, *other_extension.ptr.string_value);
+      break;
+    case WireFormatLite::CPPTYPE_MESSAGE: {
+      if (other_extension.is_lazy) {
+        dst_extension.ptr.lazymessage_value =
+            other_extension.ptr.lazymessage_value->New(arena_);
+        dst_extension.ptr.lazymessage_value->MergeFrom(
+            GetPrototypeForLazyMessage(extendee, number),
+            *other_extension.ptr.lazymessage_value, arena_, other_arena);
+      } else {
+        dst_extension.ptr.message_value =
+            other_extension.ptr.message_value->New(arena_);
+        dst_extension.ptr.message_value->CheckTypeAndMergeFrom(
+            *other_extension.ptr.message_value);
+      }
+      break;
+    }
+  }
+}
+
+void ExtensionSet::InternalExtensionMergeFrom(const MessageLite* extendee,
+                                              int number,
+                                              const Extension& other_extension,
+                                              Arena* other_arena) {
+  Extension* dst_extension;
+  bool is_new =
+      MaybeNewExtension(number, other_extension.descriptor, &dst_extension);
+  if (is_new) {
+    InternalExtensionMergeFromIntoUnitializedExtension(
+        *dst_extension, extendee, number, other_extension, other_arena);
+    return;
+  }
+  if (other_extension.is_repeated) {
+    ABSL_DCHECK_EQ(dst_extension->type, other_extension.type);
+    ABSL_DCHECK_EQ(dst_extension->is_packed, other_extension.is_packed);
+    ABSL_DCHECK(dst_extension->is_repeated);
+
+    switch (cpp_type(other_extension.type)) {
+#define HANDLE_TYPE(UPPERCASE, LOWERCASE)                       \
+  case WireFormatLite::CPPTYPE_##UPPERCASE:                     \
+    dst_extension->ptr.repeated_##LOWERCASE##_value->MergeFrom( \
+        *other_extension.ptr.repeated_##LOWERCASE##_value);     \
     break;
 
-        HANDLE_TYPE(INT32, int32_t, Int32);
-        HANDLE_TYPE(INT64, int64_t, Int64);
-        HANDLE_TYPE(UINT32, uint32_t, UInt32);
-        HANDLE_TYPE(UINT64, uint64_t, UInt64);
-        HANDLE_TYPE(FLOAT, float, Float);
-        HANDLE_TYPE(DOUBLE, double, Double);
-        HANDLE_TYPE(BOOL, bool, Bool);
-        HANDLE_TYPE(ENUM, enum, Enum);
+      HANDLE_TYPE(INT32, int32_t);
+      HANDLE_TYPE(INT64, int64_t);
+      HANDLE_TYPE(UINT32, uint32_t);
+      HANDLE_TYPE(UINT64, uint64_t);
+      HANDLE_TYPE(FLOAT, float);
+      HANDLE_TYPE(DOUBLE, double);
+      HANDLE_TYPE(BOOL, bool);
+      HANDLE_TYPE(ENUM, enum);
+      HANDLE_TYPE(STRING, string);
+      HANDLE_TYPE(MESSAGE, message);
 #undef HANDLE_TYPE
-        case WireFormatLite::CPPTYPE_STRING:
-          SetString(number, other_extension.type,
-                    *other_extension.ptr.string_value,
-                    other_extension.descriptor);
-          break;
-        case WireFormatLite::CPPTYPE_MESSAGE: {
-          Arena* const arena = arena_;
-          Extension* extension;
-          bool is_new =
-              MaybeNewExtension(number, other_extension.descriptor, &extension);
-          if (is_new) {
-            extension->type = other_extension.type;
-            extension->is_packed = other_extension.is_packed;
-            extension->is_repeated = false;
-            extension->is_pointer = true;
-            if (other_extension.is_lazy) {
-              extension->is_lazy = true;
-              extension->ptr.lazymessage_value =
-                  other_extension.ptr.lazymessage_value->New(arena);
-              extension->ptr.lazymessage_value->MergeFrom(
-                  GetPrototypeForLazyMessage(extendee, number),
-                  *other_extension.ptr.lazymessage_value, arena, other_arena);
-            } else {
-              extension->is_lazy = false;
-              extension->ptr.message_value =
-                  other_extension.ptr.message_value->New(arena);
-              extension->ptr.message_value->CheckTypeAndMergeFrom(
-                  *other_extension.ptr.message_value);
-            }
-          } else {
-            ABSL_DCHECK_EQ(extension->type, other_extension.type);
-            ABSL_DCHECK_EQ(extension->is_packed, other_extension.is_packed);
-            ABSL_DCHECK(!extension->is_repeated);
-            if (other_extension.is_lazy) {
-              if (extension->is_lazy) {
-                extension->ptr.lazymessage_value->MergeFrom(
-                    GetPrototypeForLazyMessage(extendee, number),
-                    *other_extension.ptr.lazymessage_value, arena, other_arena);
-              } else {
-                extension->ptr.message_value->CheckTypeAndMergeFrom(
-                    other_extension.ptr.lazymessage_value->GetMessage(
-                        *extension->ptr.message_value, other_arena));
-              }
-            } else {
-              if (extension->is_lazy) {
-                extension->ptr.lazymessage_value
-                    ->MutableMessage(*other_extension.ptr.message_value, arena)
-                    ->CheckTypeAndMergeFrom(*other_extension.ptr.message_value);
-              } else {
-                extension->ptr.message_value->CheckTypeAndMergeFrom(
-                    *other_extension.ptr.message_value);
-              }
-            }
-          }
-          extension->is_cleared = false;
-          break;
+    }
+    return;
+  }
+
+  if (other_extension.is_cleared) {
+    return;
+  }
+  dst_extension->is_cleared = false;
+  switch (cpp_type(other_extension.type)) {
+#define HANDLE_TYPE(UPPERCASE, LOWERCASE)                                 \
+  case WireFormatLite::CPPTYPE_##UPPERCASE:                               \
+    dst_extension->LOWERCASE##_value = other_extension.LOWERCASE##_value; \
+    break;
+
+    HANDLE_TYPE(INT32, int32_t);
+    HANDLE_TYPE(INT64, int64_t);
+    HANDLE_TYPE(UINT32, uint32_t);
+    HANDLE_TYPE(UINT64, uint64_t);
+    HANDLE_TYPE(FLOAT, float);
+    HANDLE_TYPE(DOUBLE, double);
+    HANDLE_TYPE(BOOL, bool);
+    HANDLE_TYPE(ENUM, enum);
+#undef HANDLE_TYPE
+    case WireFormatLite::CPPTYPE_STRING:
+      dst_extension->ptr.string_value->assign(
+          *other_extension.ptr.string_value);
+      break;
+    case WireFormatLite::CPPTYPE_MESSAGE: {
+      ABSL_DCHECK_EQ(dst_extension->type, other_extension.type);
+      ABSL_DCHECK_EQ(dst_extension->is_packed, other_extension.is_packed);
+      ABSL_DCHECK(!dst_extension->is_repeated);
+      if (other_extension.is_lazy) {
+        if (dst_extension->is_lazy) {
+          dst_extension->ptr.lazymessage_value->MergeFrom(
+              GetPrototypeForLazyMessage(extendee, number),
+              *other_extension.ptr.lazymessage_value, arena_, other_arena);
+        } else {
+          dst_extension->ptr.message_value->CheckTypeAndMergeFrom(
+              other_extension.ptr.lazymessage_value->GetMessage(
+                  *dst_extension->ptr.message_value, other_arena));
+        }
+      } else {
+        if (dst_extension->is_lazy) {
+          dst_extension->ptr.lazymessage_value
+              ->MutableMessage(*other_extension.ptr.message_value, arena_)
+              ->CheckTypeAndMergeFrom(*other_extension.ptr.message_value);
+        } else {
+          dst_extension->ptr.message_value->CheckTypeAndMergeFrom(
+              *other_extension.ptr.message_value);
         }
       }
+      break;
     }
   }
 }
@@ -1729,6 +1811,15 @@ void ExtensionSet::GrowCapacity(size_t minimum_new_capacity) {
   }
   flat_capacity_ = new_flat_capacity;
   map_ = new_map;
+}
+
+void ExtensionSet::InternalReserveSmallCapacityFromEmpty(
+    size_t minimum_new_capacity) {
+  ABSL_DCHECK(flat_capacity_ == 0);
+  ABSL_DCHECK(minimum_new_capacity <= kMaximumFlatCapacity);
+  ABSL_DCHECK(minimum_new_capacity > 0);
+  flat_capacity_ = minimum_new_capacity;
+  map_.flat = Arena::CreateArray<KeyValue>(arena_, minimum_new_capacity);
 }
 
 #if (__cplusplus < 201703) && \
