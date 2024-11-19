@@ -108,6 +108,8 @@ class DescriptorPoolTestBase(object):
         'google.protobuf.python.internal.another_field')
     assert descriptor_pool.Default().FindFileContainingSymbol(
         'protobuf_unittest.TestService')
+    self.assertEqual('Struct',
+                     descriptor_pool.Default().FindMessageTypeByName('google.protobuf.Struct').name)
 
     # Can find field.
     file_desc6 = self.pool.FindFileContainingSymbol(
