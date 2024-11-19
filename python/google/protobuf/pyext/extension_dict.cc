@@ -221,13 +221,17 @@ PyObject* _FindExtensionByName(ExtensionDict* self, PyObject* arg) {
     // Is is the name of a message set extension?
     const Descriptor* message_descriptor =
         pool->pool->FindMessageTypeByName(absl::string_view(name, name_size));
-    if (message_descriptor && message_descriptor->extension_count() > 0) {
-      const FieldDescriptor* extension = message_descriptor->extension(0);
-      if (extension->is_extension() &&
-          extension->containing_type()->options().message_set_wire_format() &&
-          extension->type() == FieldDescriptor::TYPE_MESSAGE &&
-          extension->label() == FieldDescriptor::LABEL_OPTIONAL) {
-        message_extension = extension;
+    if (message_descriptor) {
+      for (int i = 0; i < message_descriptor->extension_count(); i++) {
+        const FieldDescriptor* extension = message_descriptor->extension(i);
+        if (extension->is_extension() &&
+            extension->containing_type()->options().message_set_wire_format() &&
+            extension->type() == FieldDescriptor::TYPE_MESSAGE &&
+            extension->label() == FieldDescriptor::LABEL_OPTIONAL &&
+            extension->message_type() == message_descriptor) {
+          message_extension = extension;
+          break;
+        }
       }
     }
   }
