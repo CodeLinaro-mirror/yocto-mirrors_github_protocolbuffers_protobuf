@@ -17,9 +17,9 @@
 // Must be last.
 #include "upb/port/def.inc"
 
-bool upb_Message_NextExtension(const upb_Message* msg,
-                               const upb_MiniTableExtension** result,
-                               uintptr_t* iter) {
+bool upb_Message_NextExtensionReverse(const upb_Message* msg,
+                                      const upb_MiniTableExtension** result,
+                                      uintptr_t* iter) {
   size_t count;
   const upb_Extension* ext = UPB_PRIVATE(_upb_Message_Getexts)(msg, &count);
   size_t i = *iter;
@@ -34,12 +34,10 @@ bool upb_Message_NextExtension(const upb_Message* msg,
 
 const upb_MiniTableExtension* upb_Message_FindExtensionByNumber(
     const upb_Message* msg, uint32_t field_number) {
-  size_t count;
-  const upb_Extension* ext = UPB_PRIVATE(_upb_Message_Getexts)(msg, &count);
-
-  for (; count--; ext++) {
-    const upb_MiniTableExtension* e = ext->ext;
-    if (upb_MiniTableExtension_Number(e) == field_number) return e;
+  uintptr_t iter = kUpb_Message_ExtensionBegin;
+  const upb_MiniTableExtension* result;
+  while (upb_Message_NextExtensionReverse(msg, &result, &iter)) {
+    if (upb_MiniTableExtension_Number(result) == field_number) return result;
   }
   return NULL;
 }

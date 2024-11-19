@@ -14,8 +14,8 @@
 #include "upb/base/internal/log2.h"
 #include "upb/base/string_view.h"
 #include "upb/mem/alloc.h"
+#include "upb/message/internal/message.h"
 #include "upb/message/map.h"
-#include "upb/message/message.h"
 #include "upb/mini_table/extension.h"
 
 // Must be last.
@@ -144,15 +144,14 @@ static int _upb_mapsorter_cmpext(const void* _a, const void* _b) {
   return a_num < b_num ? -1 : 1;
 }
 
-bool _upb_mapsorter_pushexts(_upb_mapsorter* s, const upb_Extension* exts,
-                             size_t count, _upb_sortedmap* sorted) {
-  if (!_upb_mapsorter_resize(s, sorted, count)) return false;
+bool _upb_mapsorter_pushexts(_upb_mapsorter* s, const upb_Message_Internal* in,
+                             size_t ext_count, _upb_sortedmap* sorted) {
+  if (!_upb_mapsorter_resize(s, sorted, ext_count)) return false;
 
-  for (size_t i = 0; i < count; i++) {
-    s->entries[sorted->start + i] = &exts[i];
+  for (size_t i = 0; i < ext_count; i++) {
+    s->entries[sorted->start + i] = &(&in->ext_begin)[i];
   }
-
-  qsort(&s->entries[sorted->start], count, sizeof(*s->entries),
+  qsort(&s->entries[sorted->start], ext_count, sizeof(*s->entries),
         _upb_mapsorter_cmpext);
   return true;
 }
