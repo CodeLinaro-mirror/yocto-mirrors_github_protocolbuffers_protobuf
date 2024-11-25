@@ -657,6 +657,12 @@ class PROTOBUF_EXPORT ExtensionSet {
     virtual void MergeFrom(const MessageLite* prototype,
                            const LazyMessageExtension& other, Arena* arena,
                            Arena* other_arena) = 0;
+    // Implementation of MergeFrom that assumes the destination is newly
+    // created. That helps to avoid lookup of the prototype and a few additional
+    // branches in the implementation.
+    virtual void MergeFromIntoNewlyCreated(const LazyMessageExtension& other,
+                                           Arena* arena,
+                                           Arena* other_arena) = 0;
     virtual void MergeFromMessage(const MessageLite& msg, Arena* arena) = 0;
     virtual void Clear() = 0;
 

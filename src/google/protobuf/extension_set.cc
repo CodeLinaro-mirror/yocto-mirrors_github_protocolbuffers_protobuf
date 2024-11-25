@@ -1107,8 +1107,7 @@ void ExtensionSet::InternalExtensionMergeFromIntoUninitializedExtension(
       if (other_extension.is_lazy) {
         dst_extension.ptr.lazymessage_value =
             other_extension.ptr.lazymessage_value->New(arena_);
-        dst_extension.ptr.lazymessage_value->MergeFrom(
-            GetPrototypeForLazyMessage(extendee, number),
+        dst_extension.ptr.lazymessage_value->MergeFromIntoNewlyCreated(
             *other_extension.ptr.lazymessage_value, arena_, other_arena);
       } else {
         dst_extension.ptr.message_value =
