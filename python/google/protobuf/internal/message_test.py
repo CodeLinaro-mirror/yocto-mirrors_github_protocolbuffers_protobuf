@@ -1268,6 +1268,15 @@ class MessageTest(unittest.TestCase):
     self.assertEqual(bool, type(m.repeated_bool[0]))
     self.assertEqual(True, m.repeated_bool[0])
 
+  def testAllAttributeFromDirAccessible(self, message_module):
+    m = message_module.TestAllTypes()
+    attributes = dir(m)
+    for attribute in attributes:
+      try:
+        getattr(m, attribute)
+      except AttributeError:
+        self.fail(f'Attribute {attribute} is not accessible.')
+
   def testEquality(self, message_module):
     m = message_module.TestAllTypes()
     m2 = message_module.TestAllTypes()
