@@ -14,6 +14,10 @@ http_archive(
 load("@protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
+
+load("@protobuf//:protobuf_extra_deps.bzl", "protobuf_extra_deps")
+
+protobuf_extra_deps();
 ```
 """
 
