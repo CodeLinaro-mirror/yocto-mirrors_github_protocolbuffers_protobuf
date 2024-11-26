@@ -182,8 +182,8 @@ class MessageFactoryTest(unittest.TestCase):
     if api_implementation.Type() == 'upb':
       with self.assertRaisesRegex(
           TypeError,
-          # TODO - b/380939902: Figure out why this fails with an OOM message.
-          "Couldn't build proto file into descriptor pool: out of memory",
+          "Couldn't build proto file into descriptor pool: "
+          'duplicate extension entry',
       ):
         pool.Add(f)
     else:
