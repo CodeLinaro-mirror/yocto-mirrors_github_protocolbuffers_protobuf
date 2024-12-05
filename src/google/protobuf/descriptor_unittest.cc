@@ -11678,6 +11678,24 @@ TEST_F(DescriptorPoolFeaturesTest, OverrideDefaults) {
               )pb"));
 }
 
+TEST_F(DescriptorPoolFeaturesTest, HasFeatureSetDefaultsCppDefault) {
+  EXPECT_FALSE(pool_.HasFeatureSetDefaults(pb::test));
+  EXPECT_FALSE(pool_.HasFeatureSetDefaults(pb::TestMessage::test_message));
+  EXPECT_TRUE(pool_.HasFeatureSetDefaults(pb::cpp));  // The default.
+}
+
+TEST_F(DescriptorPoolFeaturesTest, HasFeatureSetDefaults) {
+  auto test_default_spec = FeatureResolver::CompileDefaults(
+      FeatureSet::descriptor(), {GetExtensionReflection(pb::test)},
+      EDITION_PROTO2, EDITION_99999_TEST_ONLY);
+  ASSERT_OK(test_default_spec);
+  ASSERT_OK(pool_.SetFeatureSetDefaults(std::move(test_default_spec).value()));
+
+  EXPECT_TRUE(pool_.HasFeatureSetDefaults(pb::test));
+  EXPECT_FALSE(pool_.HasFeatureSetDefaults(pb::TestMessage::test_message));
+  EXPECT_TRUE(pool_.HasFeatureSetDefaults(pb::cpp));  // The default.
+}
+
 
 
 

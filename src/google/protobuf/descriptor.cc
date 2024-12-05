@@ -4789,6 +4789,25 @@ absl::Status DescriptorPool::SetFeatureSetDefaults(FeatureSetDefaults spec) {
   return absl::OkStatus();
 }
 
+bool DescriptorPool::HasFeatureSetDefaultsInternal(int extension_number) const {
+  auto all_defaults = GetCppFeatureSetDefaults().defaults();
+  if (feature_set_defaults_spec_ != nullptr) {
+    all_defaults.MergeFrom(feature_set_defaults_spec_->defaults());
+  }
+  for (const auto& edition_default : all_defaults) {
+    std::vector<int> extensions;
+    auto features = edition_default.fixed_features();
+    features.MergeFrom(edition_default.overridable_features());
+    features.GetReflection()->ListExtensions(features, &extensions);
+    for (int extension : extensions) {
+      if (extension == extension_number) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 DescriptorBuilder::DescriptorBuilder(
     const DescriptorPool* pool, DescriptorPool::Tables* tables,
     DescriptorPool::DeferredValidation& deferred_validation,
