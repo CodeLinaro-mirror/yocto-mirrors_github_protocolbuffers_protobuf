@@ -108,7 +108,7 @@ void DeclareSubmodulesForNonPrimarySrcs(
                         mod $mod_name$;
 
                         #[allow(unused_imports)]
-                        pub use crate::$mod_name$::*;
+                        pub use $mod_name$::*;
                       )rs");
   }
 }

@@ -106,7 +106,11 @@ template <typename Desc>
 std::string GetFullyQualifiedPath(Context& ctx, const Desc& desc) {
   auto rel_path = GetCrateRelativeQualifiedPath(ctx, desc);
   if (IsInCurrentlyGeneratingCrate(ctx, desc)) {
-    return absl::StrCat("crate::", rel_path);
+    std::string prefix;
+    for (size_t i = 0; i < ctx.GetModuleDepth(); ++i) {
+      prefix += "super::";
+    }
+    return absl::StrCat(prefix, rel_path);
   }
   return absl::StrCat(GetCrateName(ctx, *desc.file()), "::", rel_path);
 }

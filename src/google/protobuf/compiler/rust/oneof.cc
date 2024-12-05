@@ -233,8 +233,7 @@ void GenerateOneofAccessors(Context& ctx, const OneofDescriptor& oneof,
        {"view_lifetime", ViewLifetime(accessor_case)},
        {"self", ViewReceiver(accessor_case)},
        {"oneof_enum_module",
-        absl::StrCat("crate::", RustModuleForContainingType(
-                                    ctx, oneof.containing_type()))},
+        RustModuleForContainingType(ctx, oneof.containing_type())},
        {"view_enum_name", OneofViewEnumRsName(oneof)},
        {"case_enum_name", OneofCaseEnumRsName(oneof)},
        {"view_cases",
@@ -302,8 +301,7 @@ void GenerateOneofExternC(Context& ctx, const OneofDescriptor& oneof) {
   ctx.Emit(
       {
           {"oneof_enum_module",
-           absl::StrCat("crate::", RustModuleForContainingType(
-                                       ctx, oneof.containing_type()))},
+           RustModuleForContainingType(ctx, oneof.containing_type())},
           {"case_enum_rs_name", OneofCaseEnumRsName(oneof)},
           {"case_thunk", ThunkName(ctx, oneof, "case")},
       },
