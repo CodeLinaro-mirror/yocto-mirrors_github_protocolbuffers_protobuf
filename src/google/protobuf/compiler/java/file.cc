@@ -111,35 +111,28 @@ void CollectExtensions(const FileDescriptorProto& file_proto,
                        const DescriptorPool& alternate_pool,
                        FieldDescriptorSet* extensions,
                        const std::string& file_data) {
-  if (!CollectExtensions(file_proto, extensions)) {
-    // There are unknown fields in the file_proto, which are probably
-    // extensions. We need to parse the data into a dynamic message based on the
-    // builder-pool to find out all extensions.
-    const Descriptor* file_proto_desc = alternate_pool.FindMessageTypeByName(
-        file_proto.GetDescriptor()->full_name());
-    ABSL_CHECK(file_proto_desc)
-        << "Find unknown fields in FileDescriptorProto when building "
-        << file_proto.name()
-        << ". It's likely that those fields are custom options, however, "
-           "descriptor.proto is not in the transitive dependencies. "
-           "This normally should not happen. Please report a bug.";
-    DynamicMessageFactory factory;
-    std::unique_ptr<Message> dynamic_file_proto(
-        factory.GetPrototype(file_proto_desc)->New());
-    ABSL_CHECK(dynamic_file_proto.get() != nullptr);
-    ABSL_CHECK(dynamic_file_proto->ParseFromString(file_data));
+  // There are unknown fields in the file_proto, which are probably
+  // extensions. We need to parse the data into a dynamic message based on the
+  // builder-pool to find out all extensions.
+  const Descriptor* file_proto_desc = alternate_pool.FindMessageTypeByName(
+      file_proto.GetDescriptor()->full_name());
+  if (!file_proto_desc) return;
+  DynamicMessageFactory factory;
+  std::unique_ptr<Message> dynamic_file_proto(
+      factory.GetPrototype(file_proto_desc)->New());
+  ABSL_CHECK(dynamic_file_proto.get() != nullptr);
+  ABSL_CHECK(dynamic_file_proto->ParseFromString(file_data));
 
-    // Collect the extensions again from the dynamic message. There should be no
-    // more unknown fields this time, i.e. all the custom options should be
-    // parsed as extensions now.
-    extensions->clear();
-    ABSL_CHECK(CollectExtensions(*dynamic_file_proto, extensions))
-        << "Find unknown fields in FileDescriptorProto when building "
-        << file_proto.name()
-        << ". It's likely that those fields are custom options, however, "
-           "those options cannot be recognized in the builder pool. "
-           "This normally should not happen. Please report a bug.";
-  }
+  // Collect the extensions again from the dynamic message. There should be no
+  // more unknown fields this time, i.e. all the custom options should be
+  // parsed as extensions now.
+  extensions->clear();
+  ABSL_CHECK(CollectExtensions(*dynamic_file_proto, extensions))
+      << "Find unknown fields in FileDescriptorProto when building "
+      << file_proto.name()
+      << ". It's likely that those fields are custom options, however, "
+         "those options cannot be recognized in the builder pool. "
+         "This normally should not happen. Please report a bug.";
 }
 
 // Our static initialization methods can become very, very large.
