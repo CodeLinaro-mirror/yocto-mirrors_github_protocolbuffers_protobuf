@@ -2468,6 +2468,17 @@ class TokenizerTest(parameterized.TestCase):
     self.assertEqual(1, tokenizer.ConsumeInteger())
     self.assertTrue(tokenizer.AtEnd())
 
+  @parameterized.parameters('00', '09', '01.123', '-00', '-09', '-01.234')
+  def testConsumeOctalFloats(self, text):
+    """Test rejection of for octal-formatted floats."""
+    tokenizer = text_format.Tokenizer([text])
+
+    self.assertRaisesRegex(
+        text_format.ParseError,
+        'Invalid octal float: %s' % text,
+        tokenizer.ConsumeFloat,
+    )
+
   def testConsumeByteString(self):
     text = '"string1\''
     tokenizer = text_format.Tokenizer(text.splitlines())
@@ -2589,19 +2600,19 @@ class TokenizerTest(parameterized.TestCase):
 
     msg = unittest_pb2.TestAllTypes(
         repeatedgroup=[unittest_pb2.TestAllTypes.RepeatedGroup(a=1)])
-    if api_implementation.Type() == 'upb':
-      self.assertEqual('repeatedgroup {\n  a: 1\n}\n', str(msg))
-    else:
-      self.assertEqual('RepeatedGroup {\n  a: 1\n}\n', str(msg))
+      if api_implementation.Type() == 'upb':
+        self.assertEqual('repeatedgroup {\n  a: 1\n}\n', str(msg))
+      else:
+        self.assertEqual('RepeatedGroup {\n  a: 1\n}\n', str(msg))
 
   def testPrintGroupLikeDelimited(self):
     msg = unittest_delimited_pb2.TestDelimited(
         grouplike=unittest_delimited_pb2.TestDelimited.GroupLike(a=1)
     )
-    if api_implementation.Type() == 'upb':
-      self.assertEqual(str(msg), 'grouplike {\n  a: 1\n}\n')
-    else:
-      self.assertEqual(str(msg), 'GroupLike {\n  a: 1\n}\n')
+      if api_implementation.Type() == 'upb':
+        self.assertEqual(str(msg), 'grouplike {\n  a: 1\n}\n')
+      else:
+        self.assertEqual(str(msg), 'GroupLike {\n  a: 1\n}\n')
 
   def testPrintGroupLikeDelimitedExtension(self):
     msg = unittest_delimited_pb2.TestDelimited()
