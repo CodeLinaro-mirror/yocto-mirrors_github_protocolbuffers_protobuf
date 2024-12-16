@@ -9,6 +9,15 @@ pub struct CodeGen {
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+const PROTOC_ERROR_MESSAGE: &str = "
+Please make sure you have protoc and protoc-gen-upb_minitable available in your PATH. You can \
+build these binaries from source as follows: \
+git clone https://github.com/protocolbuffers/protobuf.git; \
+cd protobuf; \
+git checkout v4.30.0-beta; \
+cmake . -Dprotobuf_FORCE_FETCH_DEPENDENCIES=ON; \
+cmake --build . --parallel 12";
+
 // Given the output of "protoc --version", returns a shortened version string
 // suitable for comparing against the protobuf crate version.
 //
@@ -108,10 +117,9 @@ impl CodeGen {
         }
 
         let mut version_cmd = std::process::Command::new("protoc");
-        let output = version_cmd
-            .arg("--version")
-            .output()
-            .map_err(|e| format!("failed to run protoc --version: {}", e))?;
+        let output = version_cmd.arg("--version").output().map_err(|e| {
+            format!("failed to run protoc --version: {} {}", e, PROTOC_ERROR_MESSAGE)
+        })?;
 
         let protoc_version = protoc_version(&String::from_utf8(output.stdout).unwrap());
         let expected_protoc_version = expected_protoc_version(VERSION);
