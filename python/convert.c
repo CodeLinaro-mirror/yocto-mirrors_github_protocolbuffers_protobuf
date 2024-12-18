@@ -222,11 +222,11 @@ bool PyUpb_PyToUpb(PyObject* obj, const upb_FieldDef* f, upb_MessageValue* val,
     case kUpb_CType_UInt64:
       return PyUpb_GetUint64(obj, &val->uint64_val);
     case kUpb_CType_Float:
-      if (PyUpb_IsNumpyNdarray(obj, f)) return false;
+      if (!PyFloat_Check(obj) && PyUpb_IsNumpyNdarray(obj, f)) return false;
       val->float_val = PyFloat_AsDouble(obj);
       return !PyErr_Occurred();
     case kUpb_CType_Double:
-      if (PyUpb_IsNumpyNdarray(obj, f)) return false;
+      if (!PyFloat_Check(obj) && PyUpb_IsNumpyNdarray(obj, f)) return false;
       val->double_val = PyFloat_AsDouble(obj);
       return !PyErr_Occurred();
     case kUpb_CType_Bool:
