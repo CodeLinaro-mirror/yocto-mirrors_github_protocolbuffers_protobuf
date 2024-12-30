@@ -280,6 +280,7 @@ TEST_F(CodeGeneratorTest, BuildFeatureSetDefaults) {
                     utf8_validation: NONE
                     message_encoding: LENGTH_PREFIXED
                     json_format: LEGACY_BEST_EFFORT
+                    enforce_naming_style: LEGACY_STYLE
                   }
                 }
                 defaults {
@@ -292,6 +293,7 @@ TEST_F(CodeGeneratorTest, BuildFeatureSetDefaults) {
                     utf8_validation: VERIFY
                     message_encoding: LENGTH_PREFIXED
                     json_format: ALLOW
+                    enforce_naming_style: LEGACY_STYLE
                   }
                 }
                 defaults {
@@ -303,6 +305,19 @@ TEST_F(CodeGeneratorTest, BuildFeatureSetDefaults) {
                     utf8_validation: VERIFY
                     message_encoding: LENGTH_PREFIXED
                     json_format: ALLOW
+                  }
+                  fixed_features { enforce_naming_style: LEGACY_STYLE }
+                }
+                defaults {
+                  edition: EDITION_2024
+                  overridable_features {
+                    field_presence: EXPLICIT
+                    enum_type: OPEN
+                    repeated_field_encoding: PACKED
+                    utf8_validation: VERIFY
+                    message_encoding: LENGTH_PREFIXED
+                    json_format: ALLOW
+                    enforce_naming_style: STYLE2024
                   }
                   fixed_features {}
                 }
