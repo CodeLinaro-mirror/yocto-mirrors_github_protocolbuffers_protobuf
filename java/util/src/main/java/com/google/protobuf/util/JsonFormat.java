@@ -862,7 +862,8 @@ public class JsonFormat {
 
     /** Prints google.protobuf.Any */
     private void printAny(MessageOrBuilder message) throws IOException {
-      if (Any.getDefaultInstance().equals(message)) {
+      if (message.getDescriptorForType().getFullName().equals("com.google.protobuf.Any")
+          && message.getDefaultInstanceForType().equals(message)) {
         generator.print("{}");
         return;
       }
