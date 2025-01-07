@@ -151,6 +151,8 @@ struct DescriptorTable;
 template <bool is_oneof>
 struct DynamicFieldInfoHelper;
 class HasBitsTestPeer;
+template <typename MessageT>
+struct MapDynamicFieldInfo;
 class MapFieldBase;
 class MessageUtil;
 class ReflectionVisit;
@@ -1084,6 +1086,8 @@ class PROTOBUF_EXPORT Reflection final {
   friend class FastReflectionBase;
   friend class FastReflectionMessageMutator;
   friend class internal::HasBitsTestPeer;
+  template <typename MessageT>
+  friend struct internal::MapDynamicFieldInfo;
   friend class internal::ReflectionVisit;
   friend bool internal::IsDescendant(const Message& root,
                                      const Message& message);
@@ -1299,6 +1303,10 @@ class PROTOBUF_EXPORT Reflection final {
                            const FieldDescriptor* field) const;
   void SetHasBit(Message* message, const FieldDescriptor* field) const;
   void ClearHasBit(Message* message, const FieldDescriptor* field) const;
+  // Simple wrapper around SetHasBit that is used for repeated fields.
+  // TODO: Remove this method once measurement is complete.
+  void SetHasBitForRepeated(Message* message,
+                            const FieldDescriptor* field) const;
   // Naively swaps the hasbit without checking for field existence.
   // For explicit presence fields, the hasbit is swapped normally.
   // For implicit presence fields, the hasbit is swapped without checking for
@@ -1572,6 +1580,10 @@ template <>
 inline RepeatedPtrField<std::string>*
 Reflection::MutableRepeatedPtrFieldInternal<std::string>(
     Message* message, const FieldDescriptor* field) const {
+  if (internal::EnableExperimentalHintHasBitsForRepeatedFields() &&
+      !field->is_extension()) {
+    SetHasBitForRepeated(message, field);
+  }
   return static_cast<RepeatedPtrField<std::string>*>(
       MutableRawRepeatedString(message, field, true));
 }
@@ -1589,6 +1601,10 @@ inline const RepeatedPtrField<Message>& Reflection::GetRepeatedPtrFieldInternal(
 template <>
 inline RepeatedPtrField<Message>* Reflection::MutableRepeatedPtrFieldInternal(
     Message* message, const FieldDescriptor* field) const {
+  if (internal::EnableExperimentalHintHasBitsForRepeatedFields() &&
+      !field->is_extension()) {
+    SetHasBitForRepeated(message, field);
+  }
   return static_cast<RepeatedPtrField<Message>*>(MutableRawRepeatedField(
       message, field, FieldDescriptor::CPPTYPE_MESSAGE, -1, nullptr));
 }
@@ -1604,6 +1620,10 @@ inline const RepeatedPtrField<PB>& Reflection::GetRepeatedPtrFieldInternal(
 template <typename PB>
 inline RepeatedPtrField<PB>* Reflection::MutableRepeatedPtrFieldInternal(
     Message* message, const FieldDescriptor* field) const {
+  if (internal::EnableExperimentalHintHasBitsForRepeatedFields() &&
+      !field->is_extension()) {
+    SetHasBitForRepeated(message, field);
+  }
   return static_cast<RepeatedPtrField<PB>*>(
       MutableRawRepeatedField(message, field, FieldDescriptor::CPPTYPE_MESSAGE,
                               -1, PB::default_instance().GetDescriptor()));
@@ -1811,6 +1831,10 @@ template <typename T>
 MutableRepeatedFieldRef<T> Reflection::GetMutableRepeatedFieldRef(
     Message* message, const FieldDescriptor* field) const {
   ABSL_DCHECK_EQ(message->GetReflection(), this);
+  if (internal::EnableExperimentalHintHasBitsForRepeatedFields() &&
+      !field->is_extension()) {
+    SetHasBitForRepeated(message, field);
+  }
   return MutableRepeatedFieldRef<T>(message, field);
 }
 

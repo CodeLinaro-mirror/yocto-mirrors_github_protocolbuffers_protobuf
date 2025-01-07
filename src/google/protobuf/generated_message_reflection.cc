@@ -2664,6 +2664,10 @@ Message* Reflection::MutableRepeatedMessage(Message* message,
         MutableExtensionSet(message)->MutableRepeatedMessage(field->number(),
                                                              index));
   } else {
+    if constexpr (internal::EnableExperimentalHintHasBitsForRepeatedFields()) {
+      SetHasBitForRepeated(message, field);
+    }
+
     if (IsMapFieldInApi(field)) {
       return MutableRaw<MapFieldBase>(message, field)
           ->MutableRepeatedField()
@@ -2686,6 +2690,10 @@ Message* Reflection::AddMessage(Message* message, const FieldDescriptor* field,
         MutableExtensionSet(message)->AddMessage(field, factory));
   } else {
     Message* result = nullptr;
+
+    if constexpr (internal::EnableExperimentalHintHasBitsForRepeatedFields()) {
+      SetHasBitForRepeated(message, field);
+    }
 
     // We can't use AddField<Message>() because RepeatedPtrFieldBase doesn't
     // know how to allocate one.
@@ -2732,6 +2740,9 @@ void Reflection::AddAllocatedMessage(Message* message,
       repeated = MutableRaw<RepeatedPtrFieldBase>(message, field);
     }
     repeated->AddAllocated<GenericTypeHandler<Message> >(new_entry);
+    if constexpr (internal::EnableExperimentalHintHasBitsForRepeatedFields()) {
+      SetHasBitForRepeated(message, field);
+    }
   }
 }
 
@@ -2752,6 +2763,9 @@ void Reflection::UnsafeArenaAddAllocatedMessage(Message* message,
       repeated = MutableRaw<RepeatedPtrFieldBase>(message, field);
     }
     repeated->UnsafeArenaAddAllocated<GenericTypeHandler<Message>>(new_entry);
+    if constexpr (internal::EnableExperimentalHintHasBitsForRepeatedFields()) {
+      SetHasBitForRepeated(message, field);
+    }
   }
 }
 
@@ -2889,6 +2903,9 @@ bool Reflection::InsertOrLookupMapValue(Message* message,
   USAGE_CHECK(IsMapFieldInApi(field), InsertOrLookupMapValue,
               "Field is not a map field.");
   val->SetType(field->message_type()->map_value()->cpp_type());
+  if constexpr (internal::EnableExperimentalHintHasBitsForRepeatedFields()) {
+    SetHasBitForRepeated(message, field);
+  }
   return MutableRaw<MapFieldBase>(message, field)
       ->InsertOrLookupMapValue(key, val);
 }
@@ -3255,6 +3272,11 @@ void Reflection::ClearHasBit(Message* message,
       ~(static_cast<uint32_t>(1) << (index % 32));
 }
 
+void Reflection::SetHasBitForRepeated(Message* message,
+                                      const FieldDescriptor* field) const {
+  SetHasBit(message, field);
+}
+
 void Reflection::NaiveSwapHasBit(Message* message1, Message* message2,
                                  const FieldDescriptor* field) const {
   ABSL_DCHECK(!field->options().weak());
@@ -3360,6 +3382,10 @@ void Reflection::ClearOneof(Message* message,
   template <>                                                              \
   RepeatedField<TYPE>* Reflection::MutableRepeatedFieldInternal<TYPE>(     \
       Message * message, const FieldDescriptor* field) const {             \
+    if (internal::EnableExperimentalHintHasBitsForRepeatedFields() &&      \
+        !field->is_extension()) {                                          \
+      SetHasBitForRepeated(message, field);                                \
+    }                                                                      \
     return static_cast<RepeatedField<TYPE>*>(                              \
         MutableRawRepeatedField(message, field, CPPTYPE, CTYPE, nullptr)); \
   }
@@ -3454,6 +3480,9 @@ template <typename Type>
 void Reflection::AddField(Message* message, const FieldDescriptor* field,
                           const Type& value) const {
   MutableRaw<RepeatedField<Type> >(message, field)->Add(value);
+  if constexpr (internal::EnableExperimentalHintHasBitsForRepeatedFields()) {
+    SetHasBitForRepeated(message, field);
+  }
 }
 
 template <typename Type>
@@ -3461,6 +3490,9 @@ Type* Reflection::AddField(Message* message,
                            const FieldDescriptor* field) const {
   RepeatedPtrField<Type>* repeated =
       MutableRaw<RepeatedPtrField<Type> >(message, field);
+  if constexpr (internal::EnableExperimentalHintHasBitsForRepeatedFields()) {
+    SetHasBitForRepeated(message, field);
+  }
   return repeated->Add();
 }
 
@@ -3514,6 +3546,9 @@ void* Reflection::RepeatedFieldData(Message* message,
 MapFieldBase* Reflection::MutableMapData(Message* message,
                                          const FieldDescriptor* field) const {
   USAGE_CHECK(IsMapFieldInApi(field), GetMapData, "Field is not a map field.");
+  if constexpr (internal::EnableExperimentalHintHasBitsForRepeatedFields()) {
+    SetHasBitForRepeated(message, field);
+  }
   auto* map = MutableRaw<MapFieldBase>(message, field);
   map->MutableAccess();
   return map;
