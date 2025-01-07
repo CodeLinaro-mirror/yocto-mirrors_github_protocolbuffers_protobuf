@@ -125,6 +125,26 @@ public class FieldPresenceTest {
     assertThat(proto.toBuilder().hasOptionalInt32()).isTrue();
   }
 
+  @Test
+  public void testExplicitPresenceOpenEnum() throws Exception {
+    assertThat(TestProto3Optional.getDefaultInstance().hasOptionalNestedEnum()).isFalse();
+
+    TestProto3Optional.Builder builder =
+        TestProto3Optional.newBuilder().setOptionalNestedEnumValue(100);
+    assertThat(builder.hasOptionalNestedEnum()).isTrue();
+    assertThat(builder.build().hasOptionalNestedEnum()).isTrue();
+
+    TestProto3Optional.Builder otherBuilder =
+        TestProto3Optional.newBuilder().setOptionalNestedEnum(TestProto3Optional.NestedEnum.FOO);
+    otherBuilder.mergeFrom(builder.build());
+    assertThat(otherBuilder.hasOptionalNestedEnum()).isTrue();
+    assertThat(otherBuilder.getOptionalNestedEnumValue()).isEqualTo(100);
+
+    TestProto3Optional proto = TestProto3Optional.parseFrom(builder.build().toByteArray());
+    assertThat(proto.hasOptionalNestedEnum()).isTrue();
+    assertThat(proto.toBuilder().hasOptionalNestedEnum()).isTrue();
+  }
+
   private static void assertProto3OptionalReflection(String name) throws Exception {
     FieldDescriptor fieldDescriptor = TestProto3Optional.getDescriptor().findFieldByName(name);
     OneofDescriptor oneofDescriptor = fieldDescriptor.getContainingOneof();
