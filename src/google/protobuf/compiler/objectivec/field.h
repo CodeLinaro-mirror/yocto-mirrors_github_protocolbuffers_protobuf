@@ -8,13 +8,16 @@
 #ifndef GOOGLE_PROTOBUF_COMPILER_OBJECTIVEC_FIELD_H__
 #define GOOGLE_PROTOBUF_COMPILER_OBJECTIVEC_FIELD_H__
 
+#include <cstddef>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/container/btree_set.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
+#include "absl/log/absl_log.h"
 #include "absl/strings/match.h"
 #include "absl/strings/string_view.h"
 #include "google/protobuf/compiler/objectivec/options.h"
@@ -25,6 +28,44 @@ namespace google {
 namespace protobuf {
 namespace compiler {
 namespace objectivec {
+
+// A map of `io::Printer::Sub`s, where entries can be overwritten.
+//
+// This exists because `io::Printer::WithVars` only accepts a flat list of
+// substitutions, and will break if there are any duplicated entries. At the
+// same time, a lot of code in this generator depends on modifying, overwriting,
+// and looking up variables in the list of substitutions.
+class SubstitutionMap {
+ public:
+  auto Install(io::Printer* printer) const { return printer->WithVars(subs_); }
+
+  std::string Value(absl::string_view key) const {
+    if (auto it = subs_map_.find(key); it != subs_map_.end()) {
+      return std::string(subs_.at(it->second).value());
+    }
+    ABSL_LOG(FATAL) << " Unknown variable: " << key;
+  }
+
+  // Sets or replaces a variable in the map.
+  // All arguments are forwarded to `io::Printer::Sub`.
+  template <typename... Args>
+  void Set(std::string key, Args&&... args);
+
+ private:
+  std::vector<io::Printer::Sub> subs_;
+  absl::flat_hash_map<std::string, size_t> subs_map_;
+};
+
+template <typename... Args>
+void SubstitutionMap::Set(std::string key, Args&&... args) {
+  if (auto [it, inserted] = subs_map_.try_emplace(key, subs_.size());
+      !inserted) {
+    subs_[it->second] =
+        io::Printer::Sub(std::move(key), std::forward<Args>(args)...);
+  } else {
+    subs_.emplace_back(std::move(key), std::forward<Args>(args)...);
+  }
+}
 
 class FieldGenerator {
  public:
@@ -70,8 +111,8 @@ class FieldGenerator {
   virtual void SetExtraRuntimeHasBitsBase(int index_base);
   void SetOneofIndexBase(int index_base);
 
-  std::string variable(const char* key) const {
-    return variables_.find(key)->second;
+  std::string variable(absl::string_view key) const {
+    return variables_.Value(key);
   }
 
   bool needs_textformat_name_support() const {
@@ -89,7 +130,7 @@ class FieldGenerator {
 
   const FieldDescriptor* descriptor_;
   const GenerationOptions& generation_options_;
-  absl::flat_hash_map<absl::string_view, std::string> variables_;
+  SubstitutionMap variables_;
 };
 
 class SingleFieldGenerator : public FieldGenerator {
