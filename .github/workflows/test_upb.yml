@@ -91,6 +91,7 @@ jobs:
         with:
           cache: pip
           cache-dependency-path: 'python/requirements.txt'
+          python-version: 3.9
       - name: Run tests
         uses: protocolbuffers/protobuf-ci/bazel@v4
         with:
