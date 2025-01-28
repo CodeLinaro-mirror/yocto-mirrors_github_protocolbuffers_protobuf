@@ -159,18 +159,6 @@ struct TransparentSupport<std::string> {
   }
 };
 
-enum class MapNodeSizeInfoT : uint32_t;
-inline uint16_t SizeFromInfo(MapNodeSizeInfoT node_size_info) {
-  return static_cast<uint16_t>(static_cast<uint32_t>(node_size_info) >> 16);
-}
-inline constexpr uint16_t ValueOffsetFromInfo(MapNodeSizeInfoT node_size_info) {
-  return static_cast<uint16_t>(static_cast<uint32_t>(node_size_info) >> 0);
-}
-constexpr MapNodeSizeInfoT MakeNodeInfo(uint16_t size, uint16_t value_offset) {
-  return static_cast<MapNodeSizeInfoT>((static_cast<uint32_t>(size) << 16) |
-                                       value_offset);
-}
-
 struct NodeBase {
   // Align the node to allow KeyNode to predict the location of the key.
   // This way sizeof(NodeBase) contains any possible padding it was going to
@@ -179,10 +167,6 @@ struct NodeBase {
 
   void* GetVoidKey() { return this + 1; }
   const void* GetVoidKey() const { return this + 1; }
-
-  void* GetVoidValue(MapNodeSizeInfoT size_info) {
-    return reinterpret_cast<char*>(this) + ValueOffsetFromInfo(size_info);
-  }
 };
 
 constexpr size_t kGlobalEmptyTableSize = 1;
@@ -1411,10 +1395,6 @@ class Map : private internal::KeyMapBase<internal::KeyForBase<Key>> {
   struct Node : Base::KeyNode {
     using key_type = Key;
     using mapped_type = T;
-    static constexpr internal::MapNodeSizeInfoT size_info() {
-      return internal::MakeNodeInfo(sizeof(Node),
-                                    PROTOBUF_FIELD_OFFSET(Node, kv.second));
-    }
     value_type kv;
   };
 

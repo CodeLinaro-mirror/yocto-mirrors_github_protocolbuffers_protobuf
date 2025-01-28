@@ -811,14 +811,13 @@ class PROTOBUF_EXPORT TcParser final {
     // Verify the assumption made in MpMap, guaranteed by Map<>.
     assert(PROTOBUF_FIELD_OFFSET(Node, kv.first) == sizeof(NodeBase));
     return {
-        MakeMapTypeCard(static_cast<WireFormatLite::FieldType>(key_type)),
-        MakeMapTypeCard(static_cast<WireFormatLite::FieldType>(value_type)),
+        MakeMapTypeCard(1, static_cast<WireFormatLite::FieldType>(key_type)),
+        MakeMapTypeCard(2, static_cast<WireFormatLite::FieldType>(value_type)),
         true,
         !std::is_base_of<MapFieldBaseForParse, MapField>::value,
         fail_on_utf8_failure,
         log_debug_utf8_failure,
         validated_enum_value,
-        Node::size_info(),
     };
   }
 
@@ -1015,7 +1014,7 @@ class PROTOBUF_EXPORT TcParser final {
                                       const TcParseTableBase::FieldAux* aux,
                                       const TcParseTableBase* table,
                                       const TcParseTableBase::FieldEntry& entry,
-                                      Arena* arena);
+                                      UntypedMapBase& map);
 
   // Mini field lookup:
   static const TcParseTableBase::FieldEntry* FindFieldEntry(
