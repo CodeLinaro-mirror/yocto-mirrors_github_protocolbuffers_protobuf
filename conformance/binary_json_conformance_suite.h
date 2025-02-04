@@ -52,6 +52,8 @@ class BinaryAndJsonConformanceSuite : public ConformanceTestSuite {
 
   void RunDelimitedFieldTests();
 
+  void RunMessageSetTests();
+
   template <typename MessageType>
   friend class BinaryAndJsonConformanceSuiteImpl;
 

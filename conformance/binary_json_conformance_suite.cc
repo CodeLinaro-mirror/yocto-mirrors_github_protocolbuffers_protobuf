@@ -363,6 +363,7 @@ void BinaryAndJsonConformanceSuite::RunSuiteImpl() {
       this, /*run_proto3_tests=*/true);
   BinaryAndJsonConformanceSuiteImpl<TestAllTypesProto2>(
       this, /*run_proto3_tests=*/false);
+  RunMessageSetTests();
   if (maximum_edition_ >= Edition::EDITION_2023) {
     BinaryAndJsonConformanceSuiteImpl<TestAllTypesProto3Editions>(
         this, /*run_proto3_tests=*/true);
@@ -424,6 +425,43 @@ void BinaryAndJsonConformanceSuite::RunDelimitedFieldTests() {
       absl::StrCat("ValidDelimitedExtension.NotGroupLike"), REQUIRED,
       group(122, field(1, WireFormatLite::WIRETYPE_VARINT, varint(99))),
       R"pb([protobuf_test_messages.editions.delimited_ext] { c: 99 })pb");
+}
+
+void BinaryAndJsonConformanceSuite::RunMessageSetTests() {
+  RunValidBinaryProtobufTest<TestAllTypesProto2>(
+      absl::StrCat("ValidMessageSetEncoding"), REQUIRED,
+      len(500,
+          group(1, absl::StrCat(field(2, WireFormatLite::WIRETYPE_VARINT,
+                                      varint(4135312)),
+                                len(3, field(9, WireFormatLite::WIRETYPE_VARINT,
+                                             varint(99))), ))),
+      R"pb(message_set_correct: {
+             [protobuf_test_messages.google.protobuf.TestAllTypesProto2
+                  .MessageSetCorrectExtension2]: { i: 99 }
+           })pb");
+  RunValidBinaryProtobufTest<TestAllTypesProto2>(
+      absl::StrCat("ValidMessageSetEncoding.OutOfOrderGroupsEntries"), REQUIRED,
+      len(500,
+          group(1, absl::StrCat(len(3, field(9, WireFormatLite::WIRETYPE_VARINT,
+                                             varint(99))),
+                                field(2, WireFormatLite::WIRETYPE_VARINT,
+                                      varint(4135312)), ))),
+      R"pb(message_set_correct: {
+             [protobuf_test_messages.google.protobuf.TestAllTypesProto2
+                  .MessageSetCorrectExtension2]: { i: 99 }
+           })pb");
+
+  // If an encoder is unaware of the message_set_wire_format option it will be
+  // encoded like any other extension submessage. Decoders should be able to
+  // tolerate this format as well.
+  RunValidBinaryProtobufTest<TestAllTypesProto2>(
+      absl::StrCat("ValidMessageSetEncoding.SubmessageEncoding"), REQUIRED,
+      len(500,
+          len(4135312, field(9, WireFormatLite::WIRETYPE_VARINT, varint(99)))),
+      R"pb(message_set_correct: {
+             [protobuf_test_messages.google.protobuf.TestAllTypesProto2
+                  .MessageSetCorrectExtension2]: { i: 99 }
+           })pb");
 }
 
 template <typename MessageType>
