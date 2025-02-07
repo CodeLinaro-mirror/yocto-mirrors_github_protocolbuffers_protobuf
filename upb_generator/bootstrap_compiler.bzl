@@ -21,6 +21,7 @@ _extra_proto_path = "-I$$(dirname $(location @com_google_protobuf//:descriptor_p
 
 # This visibility is used automatically for anything used by the bootstrapping process.
 _bootstrap_visibility = [
+    "//third_party/upb/github:__pkg__",
     "//upb_generator:__subpackages__",
     "//upb/reflection:__pkg__",
     "//upb:__pkg__",  # For the amalgamations.
@@ -101,22 +102,24 @@ def _stage0_proto_staleness_test(name, src_files, src_rules, strip_prefix):
     native.genrule(
         name = name + "_generate_bootstrap",
         srcs = src_rules,
-        outs = ["bootstrap_generated_sources/" + f for f in _generated_hdrs_and_srcs(src_files, "stage0", "upb")],
+        outs = ["bootstrap_generated_sources/" + f.replace("third_party", "3rd_party") for f in _generated_hdrs_and_srcs(src_files, "stage0", "upb")],
         tools = [_protoc, _upbc("upb", 0)],
         cmd =
             "$(location " + _protoc + ") " +
-            "-I$(GENDIR)/" + strip_prefix + " " + _extra_proto_path +
+            "-I. -I$(GENDIR)/" + strip_prefix + " " + _extra_proto_path +
             "--plugin=protoc-gen-upb=$(location " + _upbc("upb", 0) + ") " +
             "--upb_out=bootstrap_stage=0:$(@D)/bootstrap_generated_sources/stage0 " +
-            " ".join(src_files),
+            " ".join(src_files) +
+            "; rm -rf $(@D)/bootstrap_generated_sources/stage0/3rd_party" +
+            "; if [ -e $(@D)/bootstrap_generated_sources/stage0/third_party ]; then mv $(@D)/bootstrap_generated_sources/stage0/third_party $(@D)/bootstrap_generated_sources/stage0/3rd_party; fi",
     )
 
     staleness_test(
         name = name + "_stage0_staleness_test",
-        outs = _generated_hdrs_and_srcs(src_files, "stage0", "upb"),
+        outs = [f.replace("third_party", "3rd_party") for f in _generated_hdrs_and_srcs(src_files, "stage0", "upb")],
         generated_pattern = "bootstrap_generated_sources/%s",
         target_files = native.glob(["stage0/**"]),
-        # To avoid skew problems for descriptor.proto/pluging.proto between
+        # To avoid skew problems for descriptor.proto/plugin.proto between
         # GitHub repos.  It's not critical that the checked-in protos are up to
         # date for every change, they just needs to be complete enough to have
         # everything needed by the code generator itself.
@@ -209,12 +212,15 @@ def bootstrap_upb_proto_library(
         **kwargs: Other arguments that will be passed through to cc_library(), genrule(), and
           upb_proto_library().
     """
-    _stage0_proto_staleness_test(name, oss_src_files, oss_src_rules, oss_strip_prefix)
+    src_files = google3_src_files if _is_google3 else oss_src_files
+    src_rules = google3_src_rules if _is_google3 else oss_src_rules
+
+    _stage0_proto_staleness_test(name, src_files, src_rules, "" if _is_google3 else oss_strip_prefix)
 
     # stage0 uses checked-in protos, and has no MiniTable.
     native.cc_library(
         name = name + "_stage0",
-        srcs = _generated_hdrs_and_srcs(oss_src_files, "stage0", "upb"),
+        srcs = _generated_hdrs_and_srcs(src_files, "stage0", "upb"),
         hdrs = [bootstrap_hdr],
         visibility = _bootstrap_visibility,
         defines = ["UPB_BOOTSTRAP_STAGE=0"],
@@ -224,9 +230,6 @@ def bootstrap_upb_proto_library(
         ] + [dep + "_stage0" for dep in deps],
         **kwargs
     )
-
-    src_files = google3_src_files if _is_google3 else oss_src_files
-    src_rules = google3_src_rules if _is_google3 else oss_src_rules
 
     # Generate stage1 protos (C API and MiniTables) using stage0 compiler.
     _generate_stage1_proto(name, src_files, src_rules, "upb", kwargs)
