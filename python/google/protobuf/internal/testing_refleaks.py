@@ -92,6 +92,7 @@ class ReferenceLeakCheckerMixin(object):
       result.addError(self, sys.exc_info())
 
   def _getRefcounts(self):
+    sys._clear_type_cache()  # pylint: disable=protected-access
     copyreg.dispatch_table.clear()
     copyreg.dispatch_table.update(self._saved_pickle_registry)
     # It is sometimes necessary to gc.collect() multiple times, to ensure
