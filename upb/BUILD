@@ -86,7 +86,7 @@ cc_library(
         "//upb/message:internal",
     ] + select({
         ":fasttable_enabled_setting": [
-            "//upb/wire:decode_fast",
+            "//upb/wire/decode_fast:field_parsers",
         ],
         "//conditions:default": [],
     }),

@@ -25,6 +25,7 @@ _bootstrap_visibility = [
     "//third_party/upb/github:__pkg__",
     "//upb_generator:__subpackages__",
     "//upb/reflection:__pkg__",
+    "//upb/wire/decode_fast:__pkg__",
     "//upb:__pkg__",  # For the amalgamations.
     "//python/dist:__pkg__",  # For the Python source package.
     "//:__pkg__",  # For protoc

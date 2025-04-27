@@ -41,6 +41,8 @@ UPB_API_INLINE bool upb_MiniTableField_IsPacked(const upb_MiniTableField* f);
 
 UPB_API_INLINE bool upb_MiniTableField_IsScalar(const upb_MiniTableField* f);
 
+UPB_API_INLINE bool upb_MiniTableField_IsRequired(const upb_MiniTableField* f);
+
 UPB_API_INLINE bool upb_MiniTableField_IsSubMessage(
     const upb_MiniTableField* f);
 
