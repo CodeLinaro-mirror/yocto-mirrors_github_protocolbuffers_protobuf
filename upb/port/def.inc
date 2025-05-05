@@ -42,6 +42,33 @@
 #define UPB_GNUC_MIN(x, y) 0
 #endif
 
+// Macros for checking for compiler attributes, defined here to avoid the
+// problem described in
+// https://gcc.gnu.org/onlinedocs/cpp/_005f_005fhas_005fattribute.html.
+#ifdef __has_attribute
+#define UPB_HAS_ATTRIBUTE(x) __has_attribute(x)
+#else
+#define UPB_HAS_ATTRIBUTE(x) 0
+#endif
+
+#ifdef __has_builtin
+#define UPB_HAS_BUILTIN(x) __has_builtin(x)
+#else
+#define UPB_HAS_BUILTIN(x) 0
+#endif
+
+#ifdef __has_extension
+#define UPB_HAS_EXTENSION(x) __has_extension(x)
+#else
+#define UPB_HAS_EXTENSION(x) 0
+#endif
+
+#ifdef __has_feature
+#define UPB_HAS_FEATURE(x) __has_feature(x)
+#else
+#define UPB_HAS_FEATURE(x) 0
+#endif
+
 #include <assert.h>
 #include <setjmp.h>
 #include <stdbool.h>
@@ -114,7 +141,6 @@ Error, UINTPTR_MAX is undefined
 #define UPBC_API
 #endif
 
-#define UPB_MALLOC_ALIGN 8
 #define UPB_ALIGN_UP(size, align) (((size) + (align) - 1) / (align) * (align))
 #define UPB_ALIGN_DOWN(size, align) ((size) / (align) * (align))
 #define UPB_ALIGN_MALLOC(size) UPB_ALIGN_UP(size, UPB_MALLOC_ALIGN)
@@ -148,13 +174,9 @@ Error, UINTPTR_MAX is undefined
 #define UPB_UNLIKELY(x) (x)
 #endif
 
-#ifdef __has_builtin
-#if __has_builtin(__builtin_expect_with_probability)
+#if UPB_HAS_BUILTIN(__builtin_expect_with_probability)
 #define UPB_UNPREDICTABLE(x) \
   __builtin_expect_with_probability((bool)(x), 1, 0.5)
-#else
-#define UPB_UNPREDICTABLE(x) (x)
-#endif
 #else
 #define UPB_UNPREDICTABLE(x) (x)
 #endif
@@ -181,7 +203,7 @@ Error, UINTPTR_MAX is undefined
 #define UPB_MAX(x, y) ((x) > (y) ? (x) : (y))
 #define UPB_MIN(x, y) ((x) < (y) ? (x) : (y))
 
-#define UPB_UNUSED(var) (void)var
+#define UPB_UNUSED(var) (void)(var)
 
 // UPB_ASSUME(): in release mode, we tell the compiler to assume this is true.
 #ifdef NDEBUG
@@ -251,14 +273,10 @@ Error, UINTPTR_MAX is undefined
 #define UPB_LONGJMP(buf, val) longjmp(buf, val)
 #endif
 
-#if ((__STDC_VERSION__ >= 201112L) && !defined(__STDC_NO_ATOMICS__))
-#define UPB_USE_C11_ATOMICS
-#elif defined(__has_extension)
-#if __has_extension(c_atomic)
-#define UPB_USE_C11_ATOMICS
-#endif
-#elif defined(__GNUC__)
-// GCC supported atomics as an extension before it supported __has_extension
+#if ((__STDC_VERSION__ >= 201112L) && !defined(__STDC_NO_ATOMICS__)) || \
+    UPB_HAS_EXTENSION(c_atomic) ||                                      \
+    defined(__GNUC__)  // GCC supported atomics as an extension before it
+                       // supported __has_extension
 #define UPB_USE_C11_ATOMICS
 #elif defined(_MSC_VER)
 #define UPB_USE_MSC_ATOMICS
@@ -285,19 +303,11 @@ Error, UINTPTR_MAX is undefined
 
 /* Configure whether fasttable is switched on or not. *************************/
 
-#ifdef __has_attribute
-#define UPB_HAS_ATTRIBUTE(x) __has_attribute(x)
-#else
-#define UPB_HAS_ATTRIBUTE(x) 0
-#endif
-
 #if UPB_HAS_ATTRIBUTE(musttail)
 #define UPB_MUSTTAIL __attribute__((musttail))
 #else
 #define UPB_MUSTTAIL
 #endif
-
-#undef UPB_HAS_ATTRIBUTE
 
 /* This check is not fully robust: it does not require that we have "musttail"
  * support available. We need tail calls to avoid consuming arbitrary amounts
@@ -347,84 +357,6 @@ Error, UINTPTR_MAX is undefined
 #endif
 
 #undef UPB_FASTTABLE_SUPPORTED
-
-/* ASAN poisoning (for arena).
- * If using UPB from an interpreted language like Ruby, a build of the
- * interpreter compiled with ASAN enabled must be used in order to get sane and
- * expected behavior.
- */
-
-/* Due to preprocessor limitations, the conditional logic for setting
- * UPB_CLANG_ASAN below cannot be consolidated into a portable one-liner.
- * See https://gcc.gnu.org/onlinedocs/cpp/_005f_005fhas_005fattribute.html.
- */
-#if defined(__has_feature)
-#if __has_feature(address_sanitizer)
-#define UPB_CLANG_ASAN 1
-#else
-#define UPB_CLANG_ASAN 0
-#endif
-#if __has_feature(thread_sanitizer)
-#define UPB_CLANG_TSAN 1
-#else
-#define UPB_CLANG_TSAN 0
-#endif
-#else
-#define UPB_CLANG_ASAN 0
-#define UPB_CLANG_TSAN 0
-#endif
-
-#if defined(__SANITIZE_ADDRESS__) || UPB_CLANG_ASAN
-#define UPB_ASAN 1
-#define UPB_ASAN_GUARD_SIZE 32
-#ifdef __cplusplus
-    extern "C" {
-#endif
-  void __asan_poison_memory_region(void const volatile *addr, size_t size);
-  void __asan_unpoison_memory_region(void const volatile *addr, size_t size);
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
-#define UPB_POISON_MEMORY_REGION(addr, size) \
-  __asan_poison_memory_region((addr), (size))
-#define UPB_UNPOISON_MEMORY_REGION(addr, size) \
-  __asan_unpoison_memory_region((addr), (size))
-#else
-#define UPB_ASAN 0
-#define UPB_ASAN_GUARD_SIZE 0
-#define UPB_POISON_MEMORY_REGION(addr, size) ((void)(addr), (void)(size))
-#define UPB_UNPOISON_MEMORY_REGION(addr, size) ((void)(addr), (void)(size))
-#endif
-
-#if defined(__SANITIZE_THREAD__) || UPB_CLANG_TSAN
-#define UPB_TSAN_PUBLISHED_MEMBER uintptr_t upb_tsan_safely_published;
-#define UPB_TSAN_INIT_PUBLISHED(ptr) (ptr)->upb_tsan_safely_published = 0x5AFE
-#define UPB_TSAN_CHECK_PUBLISHED(ptr) \
-  UPB_ASSERT((ptr)->upb_tsan_safely_published == 0x5AFE)
-#define UPB_TSAN_PUBLISH 1
-#define UPB_TSAN_CHECK_READ(member) \
-  __asm__ volatile("" ::"r"(*(char *)&(member)))
-#define UPB_TSAN_CHECK_WRITE(member)                                   \
-  do {                                                                 \
-    char *write_upb_tsan_detect_race_ptr = (char *)&(member);          \
-    char write_upb_tsan_detect_race = *write_upb_tsan_detect_race_ptr; \
-    __asm__ volatile("" : "+r"(write_upb_tsan_detect_race));           \
-    *write_upb_tsan_detect_race_ptr = write_upb_tsan_detect_race;      \
-  } while (false)
-#else
-#define UPB_TSAN_PUBLISHED_MEMBER
-#define UPB_TSAN_INIT_PUBLISHED(ptr)
-#define UPB_TSAN_CHECK_PUBLISHED(ptr) \
-  do {                                \
-  } while (false && (ptr))
-#define UPB_TSAN_PUBLISH 0
-#define UPB_TSAN_CHECK_READ(member) \
-  do {                              \
-  } while (false && (member))
-#define UPB_TSAN_CHECK_WRITE(member) \
-  do {                               \
-  } while (false && (member))
-#endif
 
 /* Disable proto2 arena behavior (TEMPORARY) **********************************/
 
