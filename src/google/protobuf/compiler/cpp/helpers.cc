@@ -1339,6 +1339,12 @@ bool IsV2EnabledForMessage(const Descriptor* descriptor,
 }
 
 #ifdef PROTOBUF_INTERNAL_V2_EXPERIMENT
+bool ShouldGenerateV2Code(const Descriptor* descriptor,
+                          const Options& options) {
+  return !options.opensource_runtime && !options.bootstrap &&
+         !HasSimpleBaseClass(descriptor, options);
+}
+
 bool IsEligibleForV2Batching(const FieldDescriptor* field) {
   // Non-message fields whose numbers fit into 2B should be considered for
   // batching although the actual batching depends on the current batching, the
@@ -1346,6 +1352,13 @@ bool IsEligibleForV2Batching(const FieldDescriptor* field) {
   return field->cpp_type() != FieldDescriptor::CPPTYPE_MESSAGE &&
          !field->is_map() &&
          field->number() < std::numeric_limits<uint16_t>::max();
+}
+
+bool HasFieldEligibleForV2Batching(const Descriptor* descriptor) {
+  for (const auto& field : FieldRange(descriptor)) {
+    if (IsEligibleForV2Batching(field)) return true;
+  }
+  return false;
 }
 #endif  // PROTOBUF_INTERNAL_V2_EXPERIMENT
 
