@@ -124,6 +124,9 @@ using google::protobuf::io::win32::write;
 static const char* kDefaultDirectDependenciesViolationMsg =
     "File is imported but not declared in --direct_dependencies: %s";
 
+static const char* kDefaultOptionDependenciesViolationMsg =
+    "File is option imported but not declared in --option_dependencies: %s";
+
 // Returns true if the text begins with a Windows-style absolute path, starting
 // with a drive letter.  Example:  "C:\foo".
 static bool StartsWithWindowsAbsolutePath(absl::string_view text) {
@@ -958,7 +961,9 @@ const char* const CommandLineInterface::kPathSeparator = ":";
 
 CommandLineInterface::CommandLineInterface()
     : direct_dependencies_violation_msg_(
-          kDefaultDirectDependenciesViolationMsg) {}
+          kDefaultDirectDependenciesViolationMsg),
+      option_dependencies_violation_msg_(
+          kDefaultOptionDependenciesViolationMsg) {}
 
 CommandLineInterface::~CommandLineInterface() = default;
 
@@ -1645,6 +1650,26 @@ bool CommandLineInterface::ParseInputFiles(
         break;
       }
     }
+
+    // Enforce --option_dependencies.
+    if (option_dependencies_explicitly_set_) {
+      bool indirect_option_imports = false;
+      for (int i = 0; i < parsed_file->option_dependency_count(); ++i) {
+        if (option_dependencies_.find(parsed_file->option_dependency_name(i)) ==
+            option_dependencies_.end()) {
+          indirect_option_imports = true;
+          std::cerr << parsed_file->name() << ": "
+                    << absl::StrReplaceAll(
+                           option_dependencies_violation_msg_,
+                           {{"%s", parsed_file->option_dependency_name(i)}})
+                    << std::endl;
+        }
+        if (indirect_option_imports) {
+          result = false;
+          break;
+        }
+      }
+    }
   }
   descriptor_pool->ClearDirectInputFiles();
   return result;
@@ -1658,6 +1683,8 @@ void CommandLineInterface::Clear() {
   input_files_.clear();
   direct_dependencies_.clear();
   direct_dependencies_violation_msg_ = kDefaultDirectDependenciesViolationMsg;
+  option_dependencies_.clear();
+  option_dependencies_violation_msg_ = kDefaultOptionDependenciesViolationMsg;
   output_directives_.clear();
   codec_type_.clear();
   descriptor_set_in_names_.clear();
@@ -2139,7 +2166,23 @@ CommandLineInterface::InterpretArgument(const std::string& name,
 
   } else if (name == "--direct_dependencies_violation_msg") {
     direct_dependencies_violation_msg_ = value;
+  } else if (name == "--option_dependencies") {
+    if (option_dependencies_explicitly_set_) {
+      std::cerr << name
+                << " may only be passed once. To specify multiple "
+                   "option dependencies, pass them all as a single "
+                   "parameter separated by ':'."
+                << std::endl;
+      return PARSE_ARGUMENT_FAIL;
+    }
 
+    option_dependencies_explicitly_set_ = true;
+    std::vector<std::string> direct =
+        absl::StrSplit(value, ':', absl::SkipEmpty());
+    ABSL_DCHECK(option_dependencies_.empty());
+    option_dependencies_.insert(direct.begin(), direct.end());
+  } else if (name == "--option_dependencies_violation_msg") {
+    option_dependencies_violation_msg_ = value;
   } else if (name == "--descriptor_set_in") {
     if (!descriptor_set_in_names_.empty()) {
       std::cerr << name
