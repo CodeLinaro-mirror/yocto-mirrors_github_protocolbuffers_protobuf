@@ -1,4 +1,5 @@
 include(${protobuf_SOURCE_DIR}/src/file_lists.cmake)
+include(${protobuf_SOURCE_DIR}/cmake/protobuf-configure-target.cmake)
 
 set(bootstrap_cmake_dir ${protobuf_SOURCE_DIR}/upb_generator/cmake)
 set(bootstrap_sources
@@ -14,6 +15,7 @@ foreach(generator upb upbdefs)
     ${bootstrap_sources}
     ${protobuf_version_rc_file}
   )
+  protobuf_configure_target(protoc-gen-${generator})
   target_include_directories(protoc-gen-${generator} PRIVATE ${bootstrap_cmake_dir})
   target_link_libraries(protoc-gen-${generator}
     utf8_validity
