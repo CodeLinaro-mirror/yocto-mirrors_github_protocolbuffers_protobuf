@@ -180,7 +180,7 @@ class UntypedMessage final {
       return 0;
     }
 
-    return std::visit(SizeVisitor{}, it->second);
+    return std::visit(SizeVisitor{}, *it->second);
   }
 
   // Returns the contents of a field by number.
@@ -196,9 +196,9 @@ class UntypedMessage final {
       return {};
     }
 
-    if (auto* val = std::get_if<T>(&it->second)) {
+    if (auto* val = std::get_if<T>(it->second.get())) {
       return absl::Span<const T>(val, 1);
-    } else if (auto* vec = std::get_if<std::vector<T>>(&it->second)) {
+    } else if (auto* vec = std::get_if<std::vector<T>>(it->second.get())) {
       return *vec;
     } else {
       ABSL_CHECK(false) << "wrong type for UntypedMessage::Get(" << field_number
@@ -230,7 +230,7 @@ class UntypedMessage final {
   absl::Status InsertField(const ResolverPool::Field& field, T&& value);
 
   const ResolverPool::Message* desc_;
-  absl::flat_hash_map<int32_t, Value> fields_;
+  absl::flat_hash_map<int32_t, std::unique_ptr<Value>> fields_;
 };
 }  // namespace json_internal
 }  // namespace protobuf
