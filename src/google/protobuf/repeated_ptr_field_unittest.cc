@@ -508,6 +508,35 @@ TEST(RepeatedPtrFieldTest, ReserveDoesntLoseAllocated) {
 }
 
 
+TEST(RepeatedPtrFieldTest, AddRvalueToCleared) {
+  // Check that an added rvalue correctly overwrites a cleared SOO element.
+  {
+    RepeatedPtrField<std::string> field;
+    field.Add()->assign("foo");
+    ABSL_CHECK_EQ(field.size(), 1);
+    field.RemoveLast();
+    ABSL_CHECK_EQ(field.size(), 0);  // Have a cleared SOO element.
+    field.Add("bar");
+    ASSERT_EQ(field.size(), 1);
+    EXPECT_EQ(field.Get(0), "bar");
+  }
+  // Check that an added rvalue correctly overwrites a cleared non-SOO element
+  // in the Rep.
+  {
+    RepeatedPtrField<std::string> field;
+    field.Add()->assign("foo");
+    field.Add()->assign("bar");
+    field.Add()->assign("buz");
+    ABSL_CHECK_EQ(field.size(), 3);
+    field.RemoveLast();
+    ABSL_CHECK_EQ(field.size(), 2);  // Have a cleared element.
+    EXPECT_EQ(field.Get(field.size() - 1), "bar");
+    field.Add("qux");
+    ASSERT_EQ(field.size(), 3);
+    EXPECT_EQ(field.Get(field.size() - 1), "qux");
+  }
+}
+
 // Test all code paths in AddAllocated().
 TEST(RepeatedPtrFieldTest, AddAllocated) {
   RepeatedPtrField<std::string> field;

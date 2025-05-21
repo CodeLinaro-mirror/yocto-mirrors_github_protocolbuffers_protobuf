@@ -31,6 +31,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "testing/production_stub/public/gunit_prod.h"
 #include "absl/base/attributes.h"
 #include "absl/base/optimization.h"
 #include "absl/base/prefetch.h"
