@@ -8595,6 +8595,7 @@ void DescriptorBuilder::ValidateOptions(const FieldDescriptor* field,
 
   ValidateFieldFeatures(field, proto);
 
+
   if (field->file()->edition() >= Edition::EDITION_2024 &&
       field->has_legacy_proto_ctype()) {
     AddError(field->full_name(), proto, DescriptorPool::ErrorCollector::TYPE,
