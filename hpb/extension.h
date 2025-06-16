@@ -15,6 +15,7 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
+#include "hpb/arena.h"
 #include "hpb/backend/upb/interop.h"
 #include "hpb/internal/message_lock.h"
 #include "hpb/internal/template_help.h"
@@ -224,8 +225,9 @@ upb_ExtensionRegistry* GetUpbExtensions(
 
 class ExtensionRegistry {
  public:
-  explicit ExtensionRegistry(const upb::Arena& arena)
-      : registry_(upb_ExtensionRegistry_New(arena.ptr())) {}
+  explicit ExtensionRegistry(const hpb::Arena& arena)
+      : registry_(
+            upb_ExtensionRegistry_New(hpb::interop::upb::UnwrapArena(arena))) {}
 
   template <typename ExtensionIdentifier>
   void AddExtension(const ExtensionIdentifier& id) {
