@@ -76,7 +76,11 @@ bool CollectExtensions(const Message& message, FieldDescriptorSet* extensions) {
   const Reflection* reflection = message.GetReflection();
 
   // There are unknown fields that could be extensions, thus this call fails.
-  if (reflection->GetUnknownFields(message).field_count() > 0) return false;
+  if (reflection->GetUnknownFields(message).field_count() > 0) {
+    ABSL_LOG(INFO) << "unknown fields: "
+                   << reflection->GetUnknownFields(message).field(0).number();
+    return false;
+  }
 
   std::vector<const FieldDescriptor*> fields;
   reflection->ListFields(message, &fields);
@@ -115,7 +119,8 @@ void CollectExtensions(const FileDescriptor& file,
       file_proto.GetDescriptor()->full_name());
 
   // descriptor.proto is not found in the builder pool, meaning there are no
-  // custom options.
+  // custom options or reachable custom options.
+  // TODO: What if they are linked into the generated pool? We might still need.
   if (file_proto_desc == nullptr) return;
 
   DynamicMessageFactory factory;
@@ -126,12 +131,7 @@ void CollectExtensions(const FileDescriptor& file,
 
   // Collect the extensions again from the dynamic message.
   extensions->clear();
-  ABSL_CHECK(CollectExtensions(*dynamic_file_proto, extensions))
-      << "Found unknown fields in FileDescriptorProto when building "
-      << file_proto.name()
-      << ". It's likely that those fields are custom options, however, "
-         "those options cannot be recognized in the builder pool. "
-         "This normally should not happen. Please report a bug.";
+  CollectExtensions(*dynamic_file_proto, extensions);
 }
 
 // Our static initialization methods can become very, very large.
