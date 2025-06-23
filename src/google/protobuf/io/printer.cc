@@ -331,11 +331,12 @@ bool Printer::Validate(bool cond, Printer::PrintOptions opts,
 
 // This function is outlined to isolate the use of
 // ABSL_CHECK into the .cc file.
-void Printer::Outdent() {
+void Printer::Outdent(const SourceLocation loc) {
   PrintOptions opts;
   opts.checks_are_debug_only = true;
   if (!Validate(indent_ >= options_.spaces_per_indent, opts,
-                "Outdent() without matching Indent()")) {
+                absl::StrCat("Outdent() without matching Indent(): ",
+                             loc.file_name(), ":", loc.line()))) {
     return;
   }
   indent_ -= options_.spaces_per_indent;
