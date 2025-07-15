@@ -346,6 +346,10 @@ class PROTOBUF_EXPORT EpsCopyInputStream {
     return res;
   }
 
+  const char* InitFrom(const BoundedZCIS& bounded_zcis) {
+    return InitFrom(bounded_zcis.zcis, bounded_zcis.limit);
+  }
+
  protected:
   enum { kSlopBytes = 16, kPatchBufferSize = 32 };
   static_assert(kPatchBufferSize >= kSlopBytes * 2,
