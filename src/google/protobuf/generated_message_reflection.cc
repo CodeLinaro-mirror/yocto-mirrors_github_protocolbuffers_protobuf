@@ -2664,6 +2664,8 @@ Message* Reflection::MutableRepeatedMessage(Message* message,
         MutableExtensionSet(message)->MutableRepeatedMessage(field->number(),
                                                              index));
   } else {
+    SetHasBitForRepeated(message, field);
+
     if (IsMapFieldInApi(field)) {
       return MutableRaw<MapFieldBase>(message, field)
           ->MutableRepeatedField()
@@ -2686,6 +2688,8 @@ Message* Reflection::AddMessage(Message* message, const FieldDescriptor* field,
         MutableExtensionSet(message)->AddMessage(field, factory));
   } else {
     Message* result = nullptr;
+
+    SetHasBitForRepeated(message, field);
 
     // We can't use AddField<Message>() because RepeatedPtrFieldBase doesn't
     // know how to allocate one.
@@ -2731,7 +2735,8 @@ void Reflection::AddAllocatedMessage(Message* message,
     } else {
       repeated = MutableRaw<RepeatedPtrFieldBase>(message, field);
     }
-    repeated->AddAllocated<GenericTypeHandler<Message> >(new_entry);
+    repeated->AddAllocated<GenericTypeHandler<Message>>(new_entry);
+    SetHasBitForRepeated(message, field);
   }
 }
 
@@ -2752,6 +2757,7 @@ void Reflection::UnsafeArenaAddAllocatedMessage(Message* message,
       repeated = MutableRaw<RepeatedPtrFieldBase>(message, field);
     }
     repeated->UnsafeArenaAddAllocated<GenericTypeHandler<Message>>(new_entry);
+    SetHasBitForRepeated(message, field);
   }
 }
 
@@ -2889,6 +2895,7 @@ bool Reflection::InsertOrLookupMapValue(Message* message,
   USAGE_CHECK(IsMapFieldInApi(field), InsertOrLookupMapValue,
               "Field is not a map field.");
   val->SetType(field->message_type()->map_value()->cpp_type());
+  SetHasBitForRepeated(message, field);
   return MutableRaw<MapFieldBase>(message, field)
       ->InsertOrLookupMapValue(key, val);
 }
@@ -3258,7 +3265,8 @@ void Reflection::ClearHasBit(Message* message,
 void Reflection::NaiveSwapHasBit(Message* message1, Message* message2,
                                  const FieldDescriptor* field) const {
   ABSL_DCHECK(!field->options().weak());
-  if (!schema_.HasHasbits()) {
+  if (!schema_.HasHasbits() ||
+      schema_.HasBitIndex(field) == static_cast<uint32_t>(kNoHasbit)) {
     return;
   }
   const Reflection* r1 = message1->GetReflection();
@@ -3360,6 +3368,9 @@ void Reflection::ClearOneof(Message* message,
   template <>                                                              \
   RepeatedField<TYPE>* Reflection::MutableRepeatedFieldInternal<TYPE>(     \
       Message * message, const FieldDescriptor* field) const {             \
+    if (!field->is_extension()) {                                          \
+      SetHasBitForRepeated(message, field);                                \
+    }                                                                      \
     return static_cast<RepeatedField<TYPE>*>(                              \
         MutableRawRepeatedField(message, field, CPPTYPE, CTYPE, nullptr)); \
   }
@@ -3453,14 +3464,16 @@ Type* Reflection::MutableRepeatedField(Message* message,
 template <typename Type>
 void Reflection::AddField(Message* message, const FieldDescriptor* field,
                           const Type& value) const {
-  MutableRaw<RepeatedField<Type> >(message, field)->Add(value);
+  MutableRaw<RepeatedField<Type>>(message, field)->Add(value);
+  SetHasBitForRepeated(message, field);
 }
 
 template <typename Type>
 Type* Reflection::AddField(Message* message,
                            const FieldDescriptor* field) const {
   RepeatedPtrField<Type>* repeated =
-      MutableRaw<RepeatedPtrField<Type> >(message, field);
+      MutableRaw<RepeatedPtrField<Type>>(message, field);
+  SetHasBitForRepeated(message, field);
   return repeated->Add();
 }
 
@@ -3514,6 +3527,7 @@ void* Reflection::RepeatedFieldData(Message* message,
 MapFieldBase* Reflection::MutableMapData(Message* message,
                                          const FieldDescriptor* field) const {
   USAGE_CHECK(IsMapFieldInApi(field), GetMapData, "Field is not a map field.");
+  SetHasBitForRepeated(message, field);
   auto* map = MutableRaw<MapFieldBase>(message, field);
   map->MutableAccess();
   return map;
@@ -3608,7 +3622,9 @@ void Reflection::PopulateTcParseEntries(
       entries->has_idx = schema_.oneof_case_offset_ + 4 * oneof->index();
     } else if (schema_.HasHasbits()) {
       entries->has_idx =
-          static_cast<int>(8 * schema_.HasBitsOffset() + entry.hasbit_idx);
+          entry.hasbit_idx >= 0
+              ? static_cast<int>(8 * schema_.HasBitsOffset() + entry.hasbit_idx)
+              : kNoHasbit;
     } else {
       entries->has_idx = 0;
     }
