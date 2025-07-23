@@ -301,6 +301,19 @@ PyObject* SetAllowOversizeProtos(PyObject* m, PyObject* arg);
     return err;                                  \
   }
 
+// TODO: raise error in 2026 Q1 release
+// FormatTypeError(arg, "int");
+#define PROTOBUF_CHECK_INT_WITH_BOOL(arg, field_des)                           \
+  static int bool_warning_count = 100;                                         \
+  if (bool_warning_count > 0 && (!strcmp(Py_TYPE(arg)->tp_name, "bool"))) {    \
+    --bool_warning_count;                                                      \
+    std::string error_msg =                                                    \
+        absl::StrCat(field_des->full_name(),                                   \
+                     ": Expected an int, got a boolean. This "                 \
+                     "will be rejected in 7.34.0, please fix it before that"); \
+    PyErr_WarnEx(PyExc_DeprecationWarning, error_msg.c_str(), 3);              \
+  }
+
 #define FULL_MODULE_NAME "google.protobuf.pyext._message"
 
 void FormatTypeError(PyObject* arg, const char* expected_types);
