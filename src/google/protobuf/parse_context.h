@@ -39,6 +39,7 @@
 #include "google/protobuf/repeated_field.h"
 #include "google/protobuf/repeated_ptr_field.h"
 #include "google/protobuf/wire_format_lite.h"
+#include "utf8_validity.h"
 
 
 // Must be included last.
@@ -312,7 +313,6 @@ class PROTOBUF_EXPORT EpsCopyInputStream {
     return res.second;
   }
 
-
   const char* InitFrom(absl::string_view flat) {
     overall_limit_ = 0;
     if (flat.size() > kSlopBytes) {
@@ -423,7 +423,7 @@ class PROTOBUF_EXPORT EpsCopyInputStream {
   // kSlopBytes of the current buffer. depth is the current depth of nested
   // groups (or negative if the use case does not need careful tracking).
   template <bool kExperimentalV2>
-  inline const char* NextBuffer(int overrun, int depth);
+  const char* NextBuffer(int overrun, int depth);
   const char* SkipFallback(const char* ptr, int size);
   const char* AppendStringFallback(const char* ptr, int size, std::string* str);
   const char* VerifyUTF8Fallback(const char* ptr, size_t size);
@@ -652,6 +652,7 @@ class PROTOBUF_EXPORT ParseContext : public EpsCopyInputStream {
   int group_depth_ = std::numeric_limits<int16_t>::min();
   Data data_;
 };
+
 
 template <int>
 struct EndianHelper;
