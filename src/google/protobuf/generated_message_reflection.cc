@@ -3966,6 +3966,20 @@ bool IsDescendant(const Message& root, const Message& message) {
 
     // Optional messages.
     if (!field->is_repeated()) {
+      // Skip unparsed lazy fields, since we can't possibly have a reference to
+      // an unparsed field.
+      if (reflection->IsLazyField(field)) {
+        if (field->is_extension()) {
+          const auto& extension_set = reflection->GetExtensionSet(root);
+          if (extension_set.HasLazy(field->number()) &&
+              extension_set.LazyHasUnparsed(field->number())) {
+            continue;
+          }
+        } else if (reflection->GetLazyField(root, field)->HasUnparsed()) {
+          continue;
+        }
+      }
+
       const Message& sub_message = reflection->GetMessage(root, field);
       if (&sub_message == &message || IsDescendant(sub_message, message)) {
         return true;
@@ -3973,30 +3987,37 @@ bool IsDescendant(const Message& root, const Message& message) {
       continue;
     }
 
-    // Repeated messages.
-    if (!IsMapFieldInApi(field)) {
-      int count = reflection->FieldSize(root, field);
-      for (int i = 0; i < count; i++) {
-        const Message& sub_message =
-            reflection->GetRepeatedMessage(root, field, i);
-        if (&sub_message == &message || IsDescendant(sub_message, message)) {
-          return true;
+    if (IsMapFieldInApi(field)) {
+      // Map field: if accessed as repeated fields, messages are *copied* and
+      // matching pointer won't work. Must directly access map.
+      constexpr int kValIdx = 1;
+      const FieldDescriptor* val_field = field->message_type()->field(kValIdx);
+      // Skip map fields whose value type is not message.
+      if (val_field->cpp_type() != FieldDescriptor::CPPTYPE_MESSAGE) continue;
+
+      const auto& map = reflection->GetRaw<MapFieldBase>(root, field);
+      if (map.IsMapValid()) {
+        const auto end = reflection->ConstMapEnd(&root, field);
+        for (auto iter = reflection->ConstMapBegin(&root, field); iter != end;
+             ++iter) {
+          const Message& sub_message = iter.GetValueRef().GetMessageValue();
+          if (&sub_message == &message || IsDescendant(sub_message, message)) {
+            return true;
+          }
         }
+
+        continue;
       }
-      continue;
+
+      // If the map is in state STATE_MODIFIED_REPEATED, then accessing it as a
+      // repeated message field will not require syncing.
     }
 
-    // Map field: if accessed as repeated fields, messages are *copied* and
-    // matching pointer won't work. Must directly access map.
-    constexpr int kValIdx = 1;
-    const FieldDescriptor* val_field = field->message_type()->field(kValIdx);
-    // Skip map fields whose value type is not message.
-    if (val_field->cpp_type() != FieldDescriptor::CPPTYPE_MESSAGE) continue;
-
-    const auto end = reflection->ConstMapEnd(&root, field);
-    for (auto iter = reflection->ConstMapBegin(&root, field); iter != end;
-         ++iter) {
-      const Message& sub_message = iter.GetValueRef().GetMessageValue();
+    // Repeated messages.
+    int count = reflection->FieldSize(root, field);
+    for (int i = 0; i < count; i++) {
+      const Message& sub_message =
+          reflection->GetRepeatedMessage(root, field, i);
       if (&sub_message == &message || IsDescendant(sub_message, message)) {
         return true;
       }
