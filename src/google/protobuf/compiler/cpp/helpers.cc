@@ -1367,6 +1367,9 @@ bool ShouldGenerateV2Code(const Descriptor* descriptor,
 }
 
 bool IsEligibleForV2Batching(const FieldDescriptor* field) {
+#ifdef PROTOBUF_DISABLE_BATCH
+  return false;
+#else
   // Non-message fields whose numbers fit into 2B should be considered for
   // batching although the actual batching depends on the current batching, the
   // payload size, etc. Oneof fields are not eligible for batching because they
@@ -1374,6 +1377,7 @@ bool IsEligibleForV2Batching(const FieldDescriptor* field) {
   return field->cpp_type() != FieldDescriptor::CPPTYPE_MESSAGE &&
          field->real_containing_oneof() == nullptr && !field->is_map() &&
          field->number() < std::numeric_limits<uint16_t>::max();
+#endif
 }
 
 bool HasFieldEligibleForV2Batching(const Descriptor* descriptor) {
