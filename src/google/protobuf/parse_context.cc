@@ -23,6 +23,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
+#include "google/protobuf/lazy_field.h"
 #include "google/protobuf/message_lite.h"
 #include "google/protobuf/micro_string.h"
 #include "google/protobuf/port.h"
