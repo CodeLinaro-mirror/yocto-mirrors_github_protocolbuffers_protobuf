@@ -71,12 +71,15 @@ using FieldDescriptorSet =
 // Returns true if all the extensions can be recognized. The extensions will be
 // appended in to the extensions parameter.
 // Returns false when there are unknown fields, in which case the data in the
-// extensions output parameter is not reliable and should be discarded.
+// extensions output parameter may contain unknown extensions.
 bool CollectExtensions(const Message& message, FieldDescriptorSet* extensions) {
   const Reflection* reflection = message.GetReflection();
 
   // There are unknown fields that could be extensions, thus this call fails.
-  if (reflection->GetUnknownFields(message).field_count() > 0) return false;
+  bool all_known = true;
+  if (reflection->GetUnknownFields(message).field_count() > 0) {
+    all_known = false;
+  }
 
   std::vector<const FieldDescriptor*> fields;
   reflection->ListFields(message, &fields);
@@ -92,16 +95,19 @@ bool CollectExtensions(const Message& message, FieldDescriptorSet* extensions) {
         for (int j = 0; j < size; j++) {
           const Message& sub_message =
               reflection->GetRepeatedMessage(message, fields[i], j);
-          if (!CollectExtensions(sub_message, extensions)) return false;
+          if (!CollectExtensions(sub_message, extensions)) {
+            all_known = false;
+          }
         }
       } else {
         const Message& sub_message = reflection->GetMessage(message, fields[i]);
-        if (!CollectExtensions(sub_message, extensions)) return false;
+        if (!CollectExtensions(sub_message, extensions)) {
+          all_known = false;
+        }
       }
     }
   }
-
-  return true;
+  return all_known;
 }
 
 // Finds all extensions for custom options in the given file descriptor with the
@@ -115,7 +121,7 @@ void CollectExtensions(const FileDescriptor& file,
       file_proto.GetDescriptor()->full_name());
 
   // descriptor.proto is not found in the builder pool, meaning there are no
-  // custom options.
+  // custom options or they are option imported and not reachable.
   if (file_proto_desc == nullptr) return;
 
   DynamicMessageFactory factory;
@@ -124,14 +130,10 @@ void CollectExtensions(const FileDescriptor& file,
   ABSL_CHECK(dynamic_file_proto.get() != nullptr);
   ABSL_CHECK(dynamic_file_proto->ParseFromString(file_data));
 
-  // Collect the extensions again from the dynamic message.
+  // Collect the extensions from the dynamic message.
   extensions->clear();
-  ABSL_CHECK(CollectExtensions(*dynamic_file_proto, extensions))
-      << "Found unknown fields in FileDescriptorProto when building "
-      << file_proto.name()
-      << ". It's likely that those fields are custom options, however, "
-         "those options cannot be recognized in the builder pool. "
-         "This normally should not happen. Please report a bug.";
+  // Unknown extensions are ok and expected in the case of option imports.
+  CollectExtensions(*dynamic_file_proto, extensions);
 }
 
 // Our static initialization methods can become very, very large.
