@@ -24,6 +24,7 @@
 // Must be included last.
 #include "google/protobuf/port_def.inc"
 
+
 namespace google {
 namespace protobuf {
 
@@ -33,22 +34,7 @@ void LogIndexOutOfBounds(int index, int size) {
   ABSL_DLOG(FATAL) << "Index " << index << " out of bounds " << size;
 }
 
-[[noreturn]] void LogIndexOutOfBoundsAndAbort(int index, int size) {
-  ABSL_LOG(FATAL) << "index: " << index << ", size: " << size;
-}
-}  // namespace internal
-
-template <>
-PROTOBUF_EXPORT_TEMPLATE_DEFINE size_t
-RepeatedField<absl::Cord>::SpaceUsedExcludingSelfLong() const {
-  size_t result = size() * sizeof(absl::Cord);
-  for (int i = 0; i < size(); i++) {
-    // Estimate only.
-    result += Get(i).size();
-  }
-  return result;
-}
-
+void LogIndexOutOfBoundsAndAbort(int index, int size) {
 
 }  // namespace protobuf
 }  // namespace google
