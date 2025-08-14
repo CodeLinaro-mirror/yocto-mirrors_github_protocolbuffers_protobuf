@@ -592,8 +592,8 @@ void FileGenerator::GenerateSourceDefaultInstance(int idx, io::Printer* p) {
             };
           };
 
-          PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT$ dllexport_decl$
-              PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const $type$ $name$;
+          PROTOBUF_ATTRIBUTE_NO_DESTROY const PROTOBUF_CONSTINIT
+              $dllexport_decl$ PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $type$ $name$;
         )cc");
   }
 
@@ -620,8 +620,8 @@ void FileGenerator::GenerateSourceDefaultInstance(int idx, io::Printer* p) {
             };
           };
 
-          PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT$ dllexport_decl$
-              PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $type$ $name$;
+          PROTOBUF_ATTRIBUTE_NO_DESTROY const PROTOBUF_CONSTINIT
+              $dllexport_decl$ PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $type$ $name$;
         )cc");
   } else if (UsingImplicitWeakDescriptor(file_, options_)) {
     p->Emit(
@@ -646,8 +646,8 @@ void FileGenerator::GenerateSourceDefaultInstance(int idx, io::Printer* p) {
                 file_default_instances + $index$, sizeof($type$)};
           };
 
-          PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT$ dllexport_decl$
-              PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $type$ $name$
+          PROTOBUF_ATTRIBUTE_NO_DESTROY const PROTOBUF_CONSTINIT
+              $dllexport_decl$ PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $type$ $name$
               __attribute__((section("$section$")));
         )cc");
   } else {
@@ -666,8 +666,8 @@ void FileGenerator::GenerateSourceDefaultInstance(int idx, io::Printer* p) {
             };
           };
 
-          PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT$ dllexport_decl$
-              PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $type$ $name$;
+          PROTOBUF_ATTRIBUTE_NO_DESTROY const PROTOBUF_CONSTINIT
+              $dllexport_decl$ PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 $type$ $name$;
         )cc");
   }
 
@@ -781,7 +781,7 @@ void FileGenerator::GenerateInternalForwardDeclarations(
         p->Emit({{"type", DefaultInstanceType(instance, options_)},
                  {"name", DefaultInstanceName(instance, options_)}},
                 R"cc(
-                  extern __attribute__((weak)) $type$ $name$;
+                  extern const __attribute__((weak)) $type$ $name$;
                 )cc");
       }
     }
@@ -1451,7 +1451,7 @@ class FileGenerator::ForwardDeclarations {
           R"cc(
             class $class$;
             struct $default_type$;
-            $dllexport_decl $extern $default_type$ $default_name$;
+            $dllexport_decl $extern const $default_type$ $default_name$;
             $dllexport_decl $extern const $pbi$::$classdata_type$ $class$_class_data_;
           )cc");
     }
