@@ -33,12 +33,15 @@ extern "C" {
 /// Encoding options.
 pub mod text_encode_options {
     /// When set, prints everything on a single line.
+    #[allow(dead_code)]
     pub const SINGLE_LINE: i32 = 1;
 
     /// When set, unknown fields are not printed.
+    #[allow(dead_code)]
     pub const SKIP_UNKNOWN: i32 = 2;
 
     /// When set, maps are *not* sorted (this avoids allocating tmp mem).
+    #[allow(dead_code)]
     pub const NO_SORT_MAPS: i32 = 4;
 }
 

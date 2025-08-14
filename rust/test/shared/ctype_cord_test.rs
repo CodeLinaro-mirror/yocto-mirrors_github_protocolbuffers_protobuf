@@ -7,7 +7,7 @@
 
 use googletest::prelude::*;
 
-use unittest_rust_proto::{TestAllTypes, TestCord};
+use unittest_rust_proto::TestAllTypes;
 
 #[gtest]
 fn test_bytes_cord() {
