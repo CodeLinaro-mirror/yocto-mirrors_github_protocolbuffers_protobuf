@@ -910,13 +910,14 @@ void ExtensionSet::InternalExtensionMergeFromIntoUninitializedExtension(
   }
 }
 
+
 void ExtensionSet::InternalExtensionMergeFrom(const MessageLite* extendee,
                                               int number,
                                               const Extension& other_extension,
                                               Arena* other_arena) {
   Extension* dst_extension;
   bool is_new =
-      MaybeNewExtension(number, other_extension.descriptor, &dst_extension);
+      MaybeNewExtension(number, other_extension.desc_or_proto, &dst_extension);
   if (is_new) {
     InternalExtensionMergeFromIntoUninitializedExtension(
         *dst_extension, extendee, number, other_extension, other_arena);
@@ -978,9 +979,12 @@ void ExtensionSet::InternalExtensionMergeFrom(const MessageLite* extendee,
       ABSL_DCHECK(!dst_extension->is_repeated);
       if (other_extension.is_lazy) {
         if (dst_extension->is_lazy) {
+          const MessageLite* prototype =
+              other_extension.desc_or_proto.GetPrototype();
+          ABSL_DCHECK_NE(prototype, nullptr);
           dst_extension->ptr.lazymessage_value->MergeFrom(
-              GetPrototypeForLazyMessage(extendee, number),
-              *other_extension.ptr.lazymessage_value, arena_, other_arena);
+              prototype, *other_extension.ptr.lazymessage_value, arena_,
+              other_arena);
         } else {
           dst_extension->ptr.message_value->CheckTypeAndMergeFrom(
               other_extension.ptr.lazymessage_value->GetMessage(
@@ -1213,7 +1217,20 @@ bool ExtensionSet::MaybeNewExtension(int number,
                                      Extension** result) {
   bool extension_is_new = false;
   std::tie(*result, extension_is_new) = Insert(number);
-  (*result)->descriptor = descriptor;
+  if (extension_is_new) {
+    (*result)->desc_or_proto.Set(descriptor);
+  }
+  return extension_is_new;
+}
+
+bool ExtensionSet::MaybeNewExtension(
+    int number, Extension::DescriptorOrPrototype desc_or_proto,
+    Extension** result) {
+  bool extension_is_new = false;
+  std::tie(*result, extension_is_new) = Insert(number);
+  if (extension_is_new) {
+    (*result)->desc_or_proto = desc_or_proto;
+  }
   return extension_is_new;
 }
 
@@ -1510,8 +1527,7 @@ bool ExtensionSet::Extension::IsInitialized(const ExtensionSet* ext_set,
 
   if (!is_lazy) return ptr.message_value->IsInitialized();
 
-  const MessageLite* prototype =
-      ext_set->GetPrototypeForLazyMessage(extendee, number);
+  const MessageLite* prototype = desc_or_proto.GetPrototype();
   ABSL_DCHECK_NE(prototype, nullptr)
       << "extendee: " << extendee->GetTypeName() << "; number: " << number;
   return ptr.lazymessage_value->IsInitialized(prototype, arena);
@@ -1811,8 +1827,8 @@ uint8_t* ExtensionSet::Extension::InternalSerializeFieldWithCachedSizesToArray(
         break;
       case WireFormatLite::TYPE_MESSAGE:
         if (is_lazy) {
-          const auto* prototype =
-              extension_set->GetPrototypeForLazyMessage(extendee, number);
+          const auto* prototype = desc_or_proto.GetPrototype();
+          ABSL_DCHECK_NE(prototype, nullptr);
           target = ptr.lazymessage_value->WriteMessageToArray(prototype, number,
                                                               target, stream);
         } else {
@@ -1861,8 +1877,8 @@ ExtensionSet::Extension::InternalSerializeMessageSetItemWithCachedSizesToArray(
       WireFormatLite::kMessageSetTypeIdNumber, number, target);
   // Write message.
   if (is_lazy) {
-    const auto* prototype =
-        extension_set->GetPrototypeForLazyMessage(extendee, number);
+    const auto* prototype = desc_or_proto.GetPrototype();
+    ABSL_DCHECK_NE(prototype, nullptr);
     target = ptr.lazymessage_value->WriteMessageToArray(
         prototype, WireFormatLite::kMessageSetMessageNumber, target, stream);
   } else {
