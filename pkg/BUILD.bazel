@@ -299,7 +299,18 @@ cc_dist_library(
     testonly = 1,
     dist_deps = [":protobuf"],
     tags = ["manual"],
-    deps = ["//conformance:conformance_cpp"],
+    deps = [
+        "//conformance:conformance_cpp",
+        "//src/google/protobuf:any_cc_proto",
+        "//src/google/protobuf:api_cc_proto",
+        "//src/google/protobuf:duration_cc_proto",
+        "//src/google/protobuf:empty_cc_proto",
+        "//src/google/protobuf:field_mask_cc_proto",
+        "//src/google/protobuf:struct_cc_proto",
+        "//src/google/protobuf:timestamp_cc_proto",
+        "//src/google/protobuf:type_cc_proto",
+        "//src/google/protobuf:wrappers_cc_proto",
+    ],
 )
 
 cc_dist_library(

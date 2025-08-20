@@ -20,6 +20,7 @@ package(
     default_visibility = [
         "//:__pkg__",  # "public" targets are alias rules in //.
         "//json:__subpackages__",
+        "//pkg:__subpackages__",
         "//src/google/protobuf:__subpackages__",
     ],
 )
