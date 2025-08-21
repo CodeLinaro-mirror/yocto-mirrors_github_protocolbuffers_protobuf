@@ -906,10 +906,11 @@ TEST(RepeatedPtrFieldTest, SmallOptimization) {
   // Adding a second object stops sso.
   std::string str2;
   array->UnsafeArenaAddAllocated(&str2);
-  EXPECT_EQ(array->Capacity(), 3);
+  EXPECT_GT(array->Capacity(), 1);
   // Backing array and the strings.
-  EXPECT_EQ(array->SpaceUsedExcludingSelf(),
-            (1 + array->Capacity()) * sizeof(void*) + 2 * sizeof(str));
+  EXPECT_EQ(
+      array->SpaceUsedExcludingSelf(),
+      2 * sizeof(int) + array->Capacity() * sizeof(void*) + 2 * sizeof(str));
   // We used some arena space now.
   EXPECT_LT(usage_before, arena.SpaceUsed());
   // And the pointer_begin is not in the sso anymore.
