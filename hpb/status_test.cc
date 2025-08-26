@@ -36,6 +36,7 @@ TEST(StatusTest, GuaranteedTraits) {
   EXPECT_TRUE(std::is_trivially_copy_constructible<type>::value);
   EXPECT_TRUE(std::is_trivially_copy_assignable<type>::value);
   EXPECT_TRUE(std::is_trivially_destructible<type>::value);
+  EXPECT_TRUE(std::is_move_constructible<type>::value);
 }
 
 TEST(StatusTest, StatusOr) {
