@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "google/protobuf/descriptor.pb.h"
+#include "absl/numeric/bits.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
@@ -51,6 +52,8 @@ void WriteInternalForwardDeclarationsInHeader(
     const protobuf::Descriptor* message, Context& ctx);
 void WriteDefaultInstanceHeader(const protobuf::Descriptor* message,
                                 Context& ctx);
+void WriteDefaultInstanceDefinitionHeader(const protobuf::Descriptor* message,
+                                          Context& ctx);
 void WriteUsingEnumsInHeader(
     const protobuf::Descriptor* message,
     const std::vector<const protobuf::EnumDescriptor*>& file_enums,
@@ -73,23 +76,32 @@ void WriteMessageClassDeclarations(
 
   // Forward declaration of Proto Class for GCC handling of free friend method.
   ctx.Emit(
-      {Sub("class_name", ClassName(descriptor)),
-       Sub("model_access",
-           [&] { WriteModelAccessDeclaration(descriptor, ctx); })
-           .WithSuffix(";"),
-       Sub("fwd_decl",
-           [&] { WriteInternalForwardDeclarationsInHeader(descriptor, ctx); })
-           .WithSuffix(";"),
-       Sub("public_decl",
-           [&] {
-             WriteModelPublicDeclaration(descriptor, file_exts, file_enums,
-                                         ctx);
-           })
-           .WithSuffix(";"),
-       Sub("cproxy_decl", [&] { WriteModelCProxyDeclaration(descriptor, ctx); })
-           .WithSuffix(";"),
-       Sub("proxy_decl", [&] { WriteModelProxyDeclaration(descriptor, ctx); })
-           .WithSuffix(";")},
+      {
+          Sub("class_name", ClassName(descriptor)),
+          Sub("model_access",
+              [&] { WriteModelAccessDeclaration(descriptor, ctx); })
+              .WithSuffix(";"),
+          Sub("fwd_decl",
+              [&] {
+                WriteInternalForwardDeclarationsInHeader(descriptor, ctx);
+              })
+              .WithSuffix(";"),
+          Sub("public_decl",
+              [&] {
+                WriteModelPublicDeclaration(descriptor, file_exts, file_enums,
+                                            ctx);
+              })
+              .WithSuffix(";"),
+          Sub("cproxy_decl",
+              [&] { WriteModelCProxyDeclaration(descriptor, ctx); })
+              .WithSuffix(";"),
+          Sub("proxy_decl",
+              [&] { WriteModelProxyDeclaration(descriptor, ctx); })
+              .WithSuffix(";"),
+          Sub("default_instance",
+              [&] { WriteDefaultInstanceDefinitionHeader(descriptor, ctx); })
+              .WithSuffix(";"),
+      },
       R"cc(
         class $class_name$;
         namespace internal {
@@ -103,6 +115,7 @@ void WriteMessageClassDeclarations(
         $cproxy_decl$;
         $proxy_decl$;
         }  // namespace internal
+        $default_instance$;
       )cc");
 }
 
@@ -386,8 +399,25 @@ void WriteModelCProxyDeclaration(const protobuf::Descriptor* descriptor,
 
 void WriteDefaultInstanceHeader(const protobuf::Descriptor* message,
                                 Context& ctx) {
-  ctx.EmitLegacy("  static ::hpb::Ptr<const $0> default_instance();\n",
-                 ClassName(message));
+  ctx.EmitLegacy(
+      R"cc(
+        static ::hpb::Ptr<const $0> default_instance();
+      )cc",
+      ClassName(message));
+}
+
+void WriteDefaultInstanceDefinitionHeader(const protobuf::Descriptor* message,
+                                          Context& ctx) {
+  ctx.EmitLegacy(
+      R"cc(
+        inline ::hpb::Ptr<const $0> $0::default_instance() {
+          return ::hpb::interop::upb::MakeCHandle<$0>(
+              ::hpb::internal::backend::upb::DefaultInstance<$1>::msg(),
+              ::hpb::internal::backend::upb::DefaultInstance<$1>::arena());
+        }
+      )cc",
+      ClassName(message),
+      absl::bit_ceil(static_cast<size_t>(ctx.GetLayoutSize(message))));
 }
 
 void WriteMessageImplementation(
@@ -445,46 +475,10 @@ void WriteMessageImplementation(
   }
 
   WriteAccessorsInSource(descriptor, ctx);
-
-  if (!message_is_map_entry) {
-    ctx.EmitLegacy(
-        R"cc(
-          struct $0DefaultTypeInternal {
-            $1* msg;
-            upb_Arena* arena;
-          };
-          static $0DefaultTypeInternal _$0DefaultTypeBuilder() {
-            upb_Arena* arena = upb_Arena_New();
-            return $0DefaultTypeInternal{$1_new(arena), arena};
-          }
-          $0DefaultTypeInternal _$0_default_instance_ = _$0DefaultTypeBuilder();
-        )cc",
-        ClassName(descriptor),
-        upb::generator::CApiMessageType(descriptor->full_name()));
-
-    ctx.EmitLegacy(
-        R"cc(
-          ::hpb::Ptr<const $0> $0::default_instance() {
-            return ::hpb::interop::upb::MakeCHandle<$0>(
-                (upb_Message *)_$0_default_instance_.msg,
-                _$0_default_instance_.arena);
-          }
-        )cc",
-        ClassName(descriptor));
-  }
 }
 
 void WriteInternalForwardDeclarationsInHeader(
-    const protobuf::Descriptor* message, Context& ctx) {
-  // Write declaration for internal re-usable default_instance without
-  // leaking implementation.
-  ctx.EmitLegacy(
-      R"cc(
-        struct $0DefaultTypeInternal;
-        extern $0DefaultTypeInternal _$0_default_instance_;
-      )cc",
-      ClassName(message));
-}
+    const protobuf::Descriptor* message, Context& ctx) {}
 
 void WriteExtensionIdentifiersInClassHeader(
     const protobuf::Descriptor* message,

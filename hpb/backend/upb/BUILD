@@ -23,6 +23,8 @@ cc_library(
         "//hpb/internal",
         "//hpb/internal:message_lock",
         "//hpb/internal:template_help",
+        "//upb/mem",
+        "//upb/message",
         "//upb/wire",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:string_view",

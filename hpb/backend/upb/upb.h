@@ -8,6 +8,8 @@
 #ifndef GOOGLE_PROTOBUF_HPB_BACKEND_UPB_UPB_H__
 #define GOOGLE_PROTOBUF_HPB_BACKEND_UPB_UPB_H__
 
+#include <cstddef>
+
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "hpb/arena.h"
@@ -18,9 +20,22 @@
 #include "hpb/internal/template_help.h"
 #include "hpb/ptr.h"
 #include "hpb/status.h"
+#include "upb/mem/arena.h"
+#include "upb/message/message.h"
 #include "upb/wire/decode.h"
 
 namespace hpb::internal::backend::upb {
+
+template <size_t N>
+class DefaultInstance {
+ public:
+  static const upb_Message* msg() { return (upb_Message*)&buffer_; }
+  static upb_Arena* arena() { return arena_; }
+
+ private:
+  static constexpr char buffer_[N] = {0};
+  static inline upb_Arena* arena_ = upb_Arena_New();
+};
 
 template <typename T>
 typename T::Proxy CreateMessage(hpb::Arena& arena) {
