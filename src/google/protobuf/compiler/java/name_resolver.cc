@@ -22,6 +22,7 @@
 #include "google/protobuf/compiler/java/helpers.h"
 #include "google/protobuf/compiler/java/names.h"
 #include "google/protobuf/descriptor.h"
+#include "google/protobuf/port.h"
 
 
 // Must be last.
@@ -228,7 +229,7 @@ bool ClassNameResolver::HasConflictingClassName(const FileDescriptor* file,
 
 std::string ClassNameResolver::GetDescriptorClassName(
     const FileDescriptor* file) {
-  if (options_.opensource_runtime) {
+  if (google::protobuf::internal::IsOss()) {
     return GetFileImmutableClassName(file);
   } else {
     return absl::StrCat(GetFileImmutableClassName(file), "InternalDescriptors");
@@ -417,7 +418,7 @@ std::string ClassNameResolver::GetFileJavaPackage(const FileDescriptor* file,
   if (file->options().has_java_package()) {
     result = file->options().java_package();
   } else {
-    result = options_.opensource_runtime ? "" : "com.google.protos";
+    result = google::protobuf::internal::IsOss() ? "" : "com.google.protos";
     if (!file->package().empty()) {
       if (!result.empty()) result += '.';
       absl::StrAppend(&result, file->package());

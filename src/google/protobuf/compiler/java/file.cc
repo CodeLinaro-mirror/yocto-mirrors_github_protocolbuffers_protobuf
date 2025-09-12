@@ -42,6 +42,7 @@
 #include "google/protobuf/dynamic_message.h"
 #include "google/protobuf/io/printer.h"
 #include "google/protobuf/io/zero_copy_stream.h"
+#include "google/protobuf/port.h"
 
 
 // Must be last.
@@ -319,7 +320,7 @@ void FileGenerator::Generate(io::Printer* printer) {
       "GENCODE\n"
       "// source: $filename$\n",
       "filename", file_->name());
-  if (options_.opensource_runtime) {
+  if (google::protobuf::internal::IsOss()) {
     printer->Print("// Protobuf Java Version: $protobuf_java_version$\n",
                    "protobuf_java_version", PROTOBUF_JAVA_VERSION_STRING);
   }
@@ -335,7 +336,7 @@ void FileGenerator::Generate(io::Printer* printer) {
       options_.annotate_code ? absl::StrCat(classname_, ".java.pb.meta") : "",
       options_);
 
-  if (!options_.opensource_runtime) {
+  if (!google::protobuf::internal::IsOss()) {
     printer->Print("@com.google.protobuf.Internal.ProtoNonnullApi\n");
   }
   printer->Print(
@@ -353,7 +354,7 @@ void FileGenerator::Generate(io::Printer* printer) {
   if (!context_->EnforceLite()) {
     printer->Print("static {\n");
     printer->Indent();
-    PrintGencodeVersionValidator(printer, options_.opensource_runtime,
+    PrintGencodeVersionValidator(printer, google::protobuf::internal::IsOss(),
                                  classname_);
     printer->Outdent();
     printer->Print("}\n");
@@ -475,10 +476,10 @@ void FileGenerator::GenerateDescriptorInitializationCodeForImmutable(
       "    descriptor;\n"
       "static {\n",
       // TODO: Mark this as final.
-      "final", options_.opensource_runtime ? "" : "final");
+      "final", google::protobuf::internal::IsOss() ? "" : "final");
   printer->Indent();
 
-  if (options_.opensource_runtime) {
+  if (google::protobuf::internal::IsOss()) {
     SharedCodeGenerator shared_code_generator(file_, options_);
     shared_code_generator.GenerateDescriptors(printer);
   } else {
@@ -610,7 +611,7 @@ static void GenerateSibling(
       "GENCODE\n"
       "// source: $filename$\n",
       "filename", descriptor->file()->name());
-  if (opensource_runtime) {
+  if (google::protobuf::internal::IsOss()) {
     printer.Print("// Protobuf Java Version: $protobuf_java_version$\n",
                   "protobuf_java_version", PROTOBUF_JAVA_VERSION_STRING);
   }
@@ -643,7 +644,7 @@ void FileGenerator::GenerateSiblings(
     GenerateSibling<EnumGenerator>(
         package_dir, java_package_, file_->enum_type(i), context, file_list,
         options_.annotate_code, annotation_list, "", generator.get(),
-        options_.opensource_runtime, &EnumGenerator::Generate);
+        google::protobuf::internal::IsOss(), &EnumGenerator::Generate);
   }
   for (int i = 0; i < file_->message_type_count(); i++) {
     if (NestedInFileClass(*file_->message_type(i), immutable_api_)) continue;
@@ -651,13 +652,13 @@ void FileGenerator::GenerateSiblings(
       GenerateSibling<MessageGenerator>(
           package_dir, java_package_, file_->message_type(i), context,
           file_list, options_.annotate_code, annotation_list, "OrBuilder",
-          message_generators_[i].get(), options_.opensource_runtime,
+          message_generators_[i].get(), google::protobuf::internal::IsOss(),
           &MessageGenerator::GenerateInterface);
     }
     GenerateSibling<MessageGenerator>(
         package_dir, java_package_, file_->message_type(i), context, file_list,
         options_.annotate_code, annotation_list, "",
-        message_generators_[i].get(), options_.opensource_runtime,
+        message_generators_[i].get(), google::protobuf::internal::IsOss(),
         &MessageGenerator::Generate);
   }
   if (HasGenericServices(file_, context_->EnforceLite())) {
@@ -668,7 +669,7 @@ void FileGenerator::GenerateSiblings(
       GenerateSibling<ServiceGenerator>(
           package_dir, java_package_, file_->service(i), context, file_list,
           options_.annotate_code, annotation_list, "", generator.get(),
-          options_.opensource_runtime, &ServiceGenerator::Generate);
+          google::protobuf::internal::IsOss(), &ServiceGenerator::Generate);
     }
   }
 }

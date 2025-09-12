@@ -70,6 +70,7 @@
 #include "absl/strings/substitute.h"
 #include "absl/types/span.h"
 #include "google/protobuf/compiler/code_generator.h"
+#include "google/protobuf/compiler/code_generator_lite.h"
 #include "google/protobuf/compiler/importer.h"
 #include "google/protobuf/compiler/plugin.pb.h"
 #include "google/protobuf/compiler/retention.h"

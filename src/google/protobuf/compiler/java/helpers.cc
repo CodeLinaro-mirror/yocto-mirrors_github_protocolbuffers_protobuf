@@ -36,6 +36,7 @@
 #include "google/protobuf/descriptor.pb.h"
 #include "google/protobuf/io/printer.h"
 #include "google/protobuf/io/strtod.h"
+#include "google/protobuf/port.h"
 #include "google/protobuf/wire_format.h"
 
 // Must be last.

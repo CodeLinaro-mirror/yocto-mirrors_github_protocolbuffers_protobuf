@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "google/protobuf/compiler/code_generator.h"
+#include "google/protobuf/port.h"
 
 
 #include <memory>
@@ -52,8 +53,6 @@ bool JavaGenerator::Generate(const FileDescriptor* file,
   std::vector<std::pair<std::string, std::string> > options;
   ParseGeneratorParameter(parameter, &options);
   Options file_options;
-
-  file_options.opensource_runtime = opensource_runtime_;
 
   for (auto& option : options) {
     if (option.first == "output_list_file") {
