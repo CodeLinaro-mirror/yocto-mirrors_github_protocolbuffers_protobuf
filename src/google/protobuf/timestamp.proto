@@ -136,9 +136,10 @@ message Timestamp {
   // 9999-12-31T23:59:59Z inclusive.
   int64 seconds = 1;
 
-  // Non-negative fractions of a second at nanosecond resolution. Negative
-  // second values with fractions must still have non-negative nanos values
-  // that count forward in time. Must be from 0 to 999,999,999
-  // inclusive.
+  // Non-negative fractions of a second at nanosecond resolution. This field is
+  // counted *in addition to* the seconds field to add sub-second precision, not
+  // as an alternative to seconds. Negative second values with fractions must
+  // still have non-negative nanos values that count forward in time. Must be
+  // from 0 to 999,999,999 inclusive.
   int32 nanos = 2;
 }
