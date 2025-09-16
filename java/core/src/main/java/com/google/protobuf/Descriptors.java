@@ -2380,6 +2380,14 @@ public final class Descriptors {
       return Collections.unmodifiableList(Arrays.asList(values));
     }
 
+    public int getValueCount() {
+      return values.length;
+    }
+
+    public EnumValueDescriptor getValue(int index) {
+      return values[index];
+    }
+
     /** Determines if the given field number is reserved. */
     public boolean isReservedNumber(final int number) {
       for (final EnumDescriptorProto.EnumReservedRange range : proto.getReservedRangeList()) {
