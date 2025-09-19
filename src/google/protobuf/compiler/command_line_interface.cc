@@ -2708,7 +2708,7 @@ bool CommandLineInterface::EnforceProtocEditionsSupport(
     if (edition > ProtocMaximumEdition()) {
       std::cerr << absl::Substitute(
           "$0: is a file using edition $1, which is later than the protoc "
-          "maximum supported edition $2.",
+          "maximum supported edition $2.\n",
           fd->name(), edition, ProtocMaximumEdition());
       return false;
     }
