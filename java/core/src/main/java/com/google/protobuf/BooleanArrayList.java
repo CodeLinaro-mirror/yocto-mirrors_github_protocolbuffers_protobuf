@@ -42,7 +42,12 @@ final class BooleanArrayList extends AbstractProtobufList<Boolean>
 
   /** Constructs a new mutable {@code BooleanArrayList} with default capacity. */
   BooleanArrayList() {
-    this(EMPTY_ARRAY, 0, true);
+    this(0);
+  }
+
+  /** Constructs a new mutable {@code BooleanArrayList} with {@code initialCapacity} capacity. */
+  BooleanArrayList(int initialCapacity) {
+    this(initialCapacity == 0 ? EMPTY_ARRAY : new boolean[initialCapacity], 0, true);
   }
 
   /**
@@ -53,6 +58,17 @@ final class BooleanArrayList extends AbstractProtobufList<Boolean>
     super(isMutable);
     this.array = other;
     this.size = size;
+  }
+
+  /**
+   * Constructs a new mutable {@code BooleanArrayList} containing the same elements as {@code
+   * other}.
+   */
+  BooleanArrayList(BooleanArrayList other, boolean isMutable) {
+    this(
+        other.size == 0 ? EMPTY_ARRAY : Arrays.copyOf(other.array, other.size),
+        other.size,
+        isMutable);
   }
 
   @Override

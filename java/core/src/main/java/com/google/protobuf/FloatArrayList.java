@@ -42,7 +42,12 @@ final class FloatArrayList extends AbstractProtobufList<Float>
 
   /** Constructs a new mutable {@code FloatArrayList} with default capacity. */
   FloatArrayList() {
-    this(EMPTY_ARRAY, 0, true);
+    this(0);
+  }
+
+  /** Constructs a new mutable {@code FloatArrayList} with {@code initialCapacity} capacity. */
+  FloatArrayList(int initialCapacity) {
+    this(initialCapacity == 0 ? EMPTY_ARRAY : new float[initialCapacity], 0, true);
   }
 
   /**
@@ -52,6 +57,16 @@ final class FloatArrayList extends AbstractProtobufList<Float>
     super(isMutable);
     this.array = other;
     this.size = size;
+  }
+
+  /**
+   * Constructs a new mutable {@code FloatArrayList} containing the same elements as {@code other}.
+   */
+  FloatArrayList(FloatArrayList other, boolean isMutable) {
+    this(
+        other.size == 0 ? EMPTY_ARRAY : Arrays.copyOf(other.array, other.size),
+        other.size,
+        isMutable);
   }
 
   @Override

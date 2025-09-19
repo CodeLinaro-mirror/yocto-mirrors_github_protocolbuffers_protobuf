@@ -42,7 +42,12 @@ final class DoubleArrayList extends AbstractProtobufList<Double>
 
   /** Constructs a new mutable {@code DoubleArrayList} with default capacity. */
   DoubleArrayList() {
-    this(EMPTY_ARRAY, 0, true);
+    this(0);
+  }
+
+  /** Constructs a new mutable {@code DoubleArrayList} with {@code initialCapacity} capacity. */
+  DoubleArrayList(int initialCapacity) {
+    this(initialCapacity == 0 ? EMPTY_ARRAY : new double[initialCapacity], 0, true);
   }
 
   /**
@@ -52,6 +57,16 @@ final class DoubleArrayList extends AbstractProtobufList<Double>
     super(isMutable);
     this.array = other;
     this.size = size;
+  }
+
+  /**
+   * Constructs a new mutable {@code DoubleArrayList} containing the same elements as {@code other}.
+   */
+  DoubleArrayList(DoubleArrayList other, boolean isMutable) {
+    this(
+        other.size == 0 ? EMPTY_ARRAY : Arrays.copyOf(other.array, other.size),
+        other.size,
+        isMutable);
   }
 
   @Override
