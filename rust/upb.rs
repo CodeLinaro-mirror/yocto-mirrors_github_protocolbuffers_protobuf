@@ -1236,3 +1236,24 @@ where
         }
     }
 }
+
+pub fn message_set_sub_message<
+    P: Message + AssociatedMiniTable,
+    T: Message + UpbGetMessagePtrMut + UpbGetArena,
+>(
+    parent: MessagePtr<P>,
+    parent_arena: &Arena,
+    index: u32,
+    val: impl IntoProxied<T>,
+) {
+    // The message and arena are dropped after the setter. The
+    // memory remains allocated as we fuse the arena with the
+    // parent message's arena.
+    let mut child = val.into_proxied(Private);
+    parent_arena.fuse(child.get_arena(Private));
+
+    let child_ptr = child.get_ptr_mut(Private);
+    unsafe {
+        parent.set_base_field_message_at_index(index, child_ptr);
+    }
+}
