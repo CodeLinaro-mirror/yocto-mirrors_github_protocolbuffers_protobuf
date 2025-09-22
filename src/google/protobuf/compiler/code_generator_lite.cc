@@ -15,6 +15,7 @@
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
 #include "absl/strings/strip.h"
+#include "google/protobuf/internal_feature_helper.h"
 
 
 namespace google {
