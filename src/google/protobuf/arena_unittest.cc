@@ -537,6 +537,9 @@ class DispatcherTestProto : public Message {
   explicit DispatcherTestProto(Arena*) : Message(nullptr, nullptr) {
     ABSL_LOG(FATAL);
   }
+  DispatcherTestProto(const DispatcherTestProto&) : Message(nullptr, nullptr) {
+    ABSL_LOG(FATAL);
+  }
   DispatcherTestProto(Arena*, const DispatcherTestProto&)
       : Message(nullptr, nullptr) {
     ABSL_LOG(FATAL);
