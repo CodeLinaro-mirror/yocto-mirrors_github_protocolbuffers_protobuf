@@ -176,6 +176,19 @@ TEST(RepeatedField, Large) {
   EXPECT_GE(field.SpaceUsedExcludingSelf(), expected_usage);
 }
 
+TEST(RepeatedField, AddRangeThatOverflowsFailsWithATermination) {
+  RepeatedField<bool> field;
+
+  std::vector<bool> input;
+  // Overflows into "negative" ints.
+  input.resize(size_t{std::numeric_limits<int32_t>::max()} + 1);
+  EXPECT_DEATH(field.Add(input.begin(), input.end()), "Input too large");
+
+  // Overflows the ints completely.
+  input.resize(size_t{std::numeric_limits<uint32_t>::max()} + 1);
+  EXPECT_DEATH(field.Add(input.begin(), input.end()), "Input too large");
+}
+
 template <typename Rep>
 void CheckAllocationSizes() {
   using T = typename Rep::value_type;
