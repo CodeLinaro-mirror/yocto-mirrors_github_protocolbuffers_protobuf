@@ -46,6 +46,9 @@ public final class RuntimeVersion {
   @SuppressWarnings("NonFinalStaticField")
   static int minorWarningLoggedCount = 0;
 
+  @SuppressWarnings("NonFinalStaticField")
+  static boolean prereleaseRuntimeOldGencodeWarningLogged = false;
+
   private static final String VERSION_STRING = versionString(MAJOR, MINOR, PATCH, SUFFIX);
   private static final Logger logger = Logger.getLogger(RuntimeVersion.class.getName());
 
@@ -115,6 +118,11 @@ public final class RuntimeVersion {
               DOMAIN));
     }
 
+    // Exact match is always good.
+    if (major == MAJOR && minor == MINOR && patch == PATCH && suffix.equals(SUFFIX)) {
+      return;
+    }
+
     String gencodeVersionString = null;
 
     // Check that runtime major version is the same as the gencode major version.
@@ -158,8 +166,15 @@ public final class RuntimeVersion {
               VERSION_STRING));
     }
 
-    // Check that runtime version suffix is the same as the gencode version suffix.
-    if (!suffix.equals(SUFFIX)) {
+    // If neither gencode or runtime has a suffix we're done.
+    if (suffix.isEmpty() && SUFFIX.isEmpty()) {
+      return;
+    }
+
+    // If gencode has any suffix, we only support exact matching runtime including suffix. Exact
+    // match including suffix was already checked above so if we get this far and the gencode has a
+    // suffix it is a disallowed combination.
+    if (!suffix.isEmpty()) {
       if (gencodeVersionString == null) {
         gencodeVersionString = versionString(major, minor, patch, suffix);
       }
@@ -167,10 +182,47 @@ public final class RuntimeVersion {
           String.format(
               Locale.US,
               "Detected mismatched Protobuf Gencode/Runtime version suffixes when loading %s:"
-                  + " gencode %s, runtime %s. Version suffixes must be the same.",
+                  + " gencode %s, runtime %s. Prerelease gencode must be used with the same"
+                  + " runtime.",
               location,
               gencodeVersionString,
               VERSION_STRING));
+    }
+
+    // Here we know the runtime version is suffixed and the gencode version is not. If the
+    // major.minor.patch is exact match, its an illegal combination (eg 4.32.0-rc1 runtime with
+    // 4.32.0 gencode). If major.minor.patch is not an exact match, then the gencode is a lower
+    // version (e.g 4.32.0-rc1 runtime with 4.31.0 gencode) which is allowed but we log a warning to
+    // make sure people realize they on a prelease version.
+    if (major == MAJOR && minor == MINOR && patch == PATCH) {
+      if (gencodeVersionString == null) {
+        gencodeVersionString = versionString(major, minor, patch, suffix);
+      }
+      throw new ProtobufRuntimeVersionException(
+          String.format(
+              Locale.US,
+              "Detected mismatched Protobuf Gencode/Runtime version suffixes when loading %s:"
+                  + " gencode %s, runtime %s. Prelease runtimes must only be used with exact match"
+                  + " gencode (including suffix) or non-prerelease gencode versions of a"
+                  + " lower version.",
+              location,
+              gencodeVersionString,
+              VERSION_STRING));
+    } else if (!prereleaseRuntimeOldGencodeWarningLogged) {
+      if (gencodeVersionString == null) {
+        gencodeVersionString = versionString(major, minor, patch, suffix);
+      }
+      logger.warning(
+          String.format(
+              Locale.US,
+              " Protobuf runtime version %s is prerelease and the gencode version %s is not at %s."
+                  + " You can ignore this message if you are deliberately testing a prerelease"
+                  + " runtime with older gencode. Otherwise you should switch to a non-prerelease "
+                  + " Protobuf version.",
+              VERSION_STRING,
+              gencodeVersionString,
+              location));
+      prereleaseRuntimeOldGencodeWarningLogged = true;
     }
   }
 

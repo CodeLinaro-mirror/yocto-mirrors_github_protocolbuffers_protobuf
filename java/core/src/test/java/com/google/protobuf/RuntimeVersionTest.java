@@ -77,18 +77,6 @@ public final class RuntimeVersionTest {
   }
 
   @Test
-  public void versionValidation_newerRuntimeVersionAllowed() {
-    int gencodeMinor = RuntimeVersion.MINOR - 1;
-    RuntimeVersion.validateProtobufGencodeVersion(
-        RuntimeVersion.DOMAIN,
-        RuntimeVersion.MAJOR,
-        gencodeMinor,
-        RuntimeVersion.PATCH,
-        RuntimeVersion.SUFFIX,
-        "dummy");
-  }
-
-  @Test
   public void versionValidation_olderRuntimeVersionDisallowed() {
     int gencodeMinor = RuntimeVersion.MINOR + 1;
     RuntimeVersion.ProtobufRuntimeVersionException thrown =
@@ -147,6 +135,79 @@ public final class RuntimeVersionTest {
   }
 
   @Test
+  public void versionValidation_suffixedRuntime_sameSuffixLowerMinorDisallowed() {
+    // We can only execute this test if the test runtime does have a suffix (which is nearly always
+    // for our OSS continuous tests).
+    if (RuntimeVersion.SUFFIX.isEmpty()) {
+      return;
+    }
+    RuntimeVersion.ProtobufRuntimeVersionException thrown =
+        assertThrows(
+            RuntimeVersion.ProtobufRuntimeVersionException.class,
+            () ->
+                RuntimeVersion.validateProtobufGencodeVersion(
+                    RuntimeVersion.DOMAIN,
+                    RuntimeVersion.MAJOR,
+                    RuntimeVersion.MINOR - 1,
+                    RuntimeVersion.PATCH,
+                    RuntimeVersion.SUFFIX,
+                    "testing.Foo"));
+    assertThat(thrown)
+        .hasMessageThat()
+        .contains(
+            "Detected mismatched Protobuf Gencode/Runtime version suffixes when loading"
+                + " testing.Foo");
+  }
+
+  @Test
+  public void versionValidation_suffixedRuntime_sameNumbersNoSuffixDisallowed() {
+    // We can only execute this test if the test runtime does have a suffix (which is nearly always
+    // for our OSS continuous tests).
+    if (RuntimeVersion.SUFFIX.isEmpty()) {
+      return;
+    }
+    RuntimeVersion.ProtobufRuntimeVersionException thrown =
+        assertThrows(
+            RuntimeVersion.ProtobufRuntimeVersionException.class,
+            () ->
+                RuntimeVersion.validateProtobufGencodeVersion(
+                    RuntimeVersion.DOMAIN,
+                    RuntimeVersion.MAJOR,
+                    RuntimeVersion.MINOR,
+                    RuntimeVersion.PATCH,
+                    "",
+                    "testing.Foo"));
+    assertThat(thrown)
+        .hasMessageThat()
+        .contains(
+            "Detected mismatched Protobuf Gencode/Runtime version suffixes when loading"
+                + " testing.Foo");
+  }
+
+  @Test
+  public void versionValidation_suffixedRuntime_allowedLowerVersionWarns() {
+    // We can only execute this test if the runtime does have a suffix (which is nearly always for
+    // our OSS continuous tests).
+    if (RuntimeVersion.SUFFIX.isEmpty()) {
+      return;
+    }
+
+    TestUtil.TestLogHandler logHandler = new TestUtil.TestLogHandler();
+    Logger logger = Logger.getLogger(RuntimeVersion.class.getName());
+    logger.addHandler(logHandler);
+    RuntimeVersion.validateProtobufGencodeVersion(
+        RuntimeVersion.DOMAIN,
+        RuntimeVersion.MAJOR,
+        RuntimeVersion.MINOR - 1,
+        RuntimeVersion.PATCH,
+        "",
+        "testing.Foo");
+    assertThat(logHandler.getStoredLogRecords()).hasSize(1);
+    assertThat(logHandler.getStoredLogRecords().get(0).getMessage())
+        .contains("you should switch to a non-prerelease");
+  }
+
+  @Test
   public void versionValidation_gencodeOneMajorVersionOlderWarning() {
     TestUtil.TestLogHandler logHandler = new TestUtil.TestLogHandler();
     Logger logger = Logger.getLogger(RuntimeVersion.class.getName());
@@ -156,7 +217,7 @@ public final class RuntimeVersionTest {
         RuntimeVersion.MAJOR - 1,
         RuntimeVersion.MINOR,
         RuntimeVersion.PATCH,
-        RuntimeVersion.SUFFIX,
+        "",
         "dummy");
     assertThat(logHandler.getStoredLogRecords()).hasSize(1);
     assertThat(logHandler.getStoredLogRecords().get(0).getMessage())
