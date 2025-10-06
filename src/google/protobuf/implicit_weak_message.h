@@ -136,6 +136,7 @@ class ImplicitWeakTypeHandler {
   static void Merge(const MessageLite& from, MessageLite* to) {
     to->CheckTypeAndMergeFrom(from);
   }
+  static constexpr bool has_default_instance() { return false; }
 };
 
 }  // namespace internal
