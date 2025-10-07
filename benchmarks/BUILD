@@ -75,6 +75,7 @@ cc_test(
         "//upb/base",
         "//upb/json",
         "//upb/mem",
+        "//upb/message",
         "//upb/reflection",
         "//upb/wire",
         "@abseil-cpp//absl/container:flat_hash_set",
