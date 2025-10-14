@@ -764,6 +764,53 @@ static int MaybeReleaseOverlappingOneofField(CMessage* cmessage,
   return 0;
 }
 
+int MaybeReleaseOneofBeforeMerge(CMessage* self, const Message& other) {
+  if (!self->composite_fields) {
+    return 0;
+  }
+
+  Message* message = self->message;
+  const Reflection* reflection = message->GetReflection();
+  PyMessageFactory* factory = GetFactoryForMessage(self);
+  std::vector<const FieldDescriptor*> fields_to_release;
+  std::vector<const FieldDescriptor*> nested_message_fields;
+  for (const auto& item : *self->composite_fields) {
+    const FieldDescriptor* descriptor = item.first;
+    if (descriptor->cpp_type() == FieldDescriptor::CPPTYPE_MESSAGE &&
+        !descriptor->is_repeated() &&
+        reflection->HasField(*message, descriptor)) {
+      if (reflection->HasField(other, descriptor)) {
+        nested_message_fields.push_back(descriptor);
+        ABSL_DLOG(ERROR) << descriptor->name();
+      } else {
+        const OneofDescriptor* oneof = descriptor->containing_oneof();
+        if (oneof) {
+          for (int i = 0; i < oneof->field_count(); ++i) {
+            const FieldDescriptor* field = oneof->field(i);
+            if (reflection->HasField(other, field)) {
+              fields_to_release.push_back(descriptor);
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+  for (const FieldDescriptor* field : nested_message_fields) {
+    ABSL_DLOG(ERROR) << field->name();
+    MaybeReleaseOneofBeforeMerge(
+        reinterpret_cast<CMessage*>(
+            self->composite_fields->find(field)->second),
+        reflection->GetMessage(other, field, factory->message_factory));
+  }
+  for (const FieldDescriptor* field : fields_to_release) {
+    ABSL_DLOG(ERROR) << field->name();
+    if (InternalReleaseFieldByDescriptor(self, field) < 0) {
+      return -1;
+    }
+  }
+  return 0;
+}
 // After a Merge, visit every sub-message that was read-only, and
 // eventually update their pointer if the Merge operation modified them.
 int FixupMessageAfterMerge(CMessage* self) {
@@ -1845,6 +1892,10 @@ PyObject* MergeFrom(CMessage* self, PyObject* arg) {
     return nullptr;
   }
   AssureWritable(self);
+
+  if (MaybeReleaseOneofBeforeMerge(self, *other_message->message) < 0) {
+    return nullptr;
+  };
 
   self->message->MergeFrom(*other_message->message);
   // Child message might be lazily created before MergeFrom. Make sure they
