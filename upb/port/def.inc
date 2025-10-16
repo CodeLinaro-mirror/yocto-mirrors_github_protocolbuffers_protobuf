@@ -398,6 +398,12 @@ Error, UINTPTR_MAX is undefined
 #define UPB_PRESERVE_NONE
 #endif
 
+#if UPB_HAS_ATTRIBUTE(preserve_most)
+#define UPB_PRESERVE_MOST __attribute__((preserve_most))
+#else
+#define UPB_PRESERVE_MOST
+#endif
+
 #if defined(__aarch64__) && (defined(__GNUC__) || defined(__clang__))
 #define UPB_ARM64_ASM 1
 #else
