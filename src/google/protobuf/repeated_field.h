@@ -107,10 +107,12 @@ class RepeatedIterator;
 struct RepeatedFieldBase {};
 
 #ifdef PROTOBUF_INTERNAL_REMOVE_ARENA_PTRS_REPEATED_FIELD
+// Align to 8 as sanitizers are picky on the alignment of containers to start at
+// 8 byte offsets even when compiling for 32 bit platforms.
 template <size_t kMinSize>
-class HeapRep {
+class alignas(8) HeapRep {
  public:
-  explicit HeapRep(uint32_t capacity) : capacity_(capacity) {
+  explicit HeapRep(uint32_t capacity) : capacity_(capacity), unused_(0) {
     StaticallyVerifySize();
   }
   // Avoid 'implicitly deleted dtor' warnings on certain compilers.
@@ -128,12 +130,10 @@ class HeapRep {
                   "consume no space.");
   }
 
-  // Align to 8 as sanitizers are picky on the alignment of containers to start
-  // at 8 byte offsets even when compiling for 32 bit platforms.
   union {
-    alignas(8) struct {
+    struct {
       uint32_t capacity_;
-      [[maybe_unused]] const uint32_t unused_ = 0;
+      [[maybe_unused]] const uint32_t unused_;
     };
 
     // We pad the header to be at least `sizeof(Element)` so that we have
