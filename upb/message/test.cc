@@ -56,6 +56,10 @@
 #include "upb/wire/types.h"
 #include "upb/wire/writer.h"
 
+#ifdef UPB_FUZZ_DUMP_MINITABLE
+#include "upb/mini_table/debug_string.h"
+#endif
+
 // Must be last
 #include "upb/port/def.inc"
 
