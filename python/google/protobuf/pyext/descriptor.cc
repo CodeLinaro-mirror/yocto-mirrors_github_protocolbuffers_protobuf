@@ -9,13 +9,16 @@
 
 #include "google/protobuf/pyext/descriptor.h"
 
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <string>
+
+#include "absl/base/const_init.h"
+#include "absl/synchronization/mutex.h"
+
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
-#include <frameobject.h>
-
-#include <cstdint>
-#include <string>
-#include <unordered_map>
 
 #include "google/protobuf/descriptor.pb.h"
 #include "absl/container/flat_hash_map.h"
@@ -76,11 +79,12 @@ namespace python {
 // released.
 // This is enough to support the "is" operator on live objects.
 // All descriptors are stored here.
-std::unordered_map<const void*, PyObject*>* interned_descriptors;
+absl::flat_hash_map<const void*, PyObject*>* interned_descriptors;
+absl::Mutex interned_descriptors_lock(absl::kConstInit);
 
 PyObject* PyString_FromCppString(absl::string_view str) {
   return PyUnicode_FromStringAndSize(str.data(),
-                                     static_cast<size_t>(str.size()));
+                                     static_cast<Py_ssize_t>(str.size()));
 }
 
 // Check that the calling Python code is the global scope of a _pb2.py module.
@@ -398,9 +402,9 @@ PyObject* NewInternedDescriptor(PyTypeObject* type,
     return nullptr;
   }
 
+  absl::MutexLock mu(interned_descriptors_lock);
   // See if the object is in the map of interned descriptors
-  std::unordered_map<const void*, PyObject*>::iterator it =
-      interned_descriptors->find(descriptor);
+  auto it = interned_descriptors->find(descriptor);
   if (it != interned_descriptors->end()) {
     ABSL_DCHECK(Py_TYPE(it->second) == type);
     Py_INCREF(it->second);
@@ -437,6 +441,7 @@ PyObject* NewInternedDescriptor(PyTypeObject* type,
 }
 
 static void Dealloc(PyObject* pself) {
+  absl::MutexLock mu(interned_descriptors_lock);
   PyBaseDescriptor* self = reinterpret_cast<PyBaseDescriptor*>(pself);
   // Remove from interned dictionary
   interned_descriptors->erase(self->descriptor);
@@ -2129,7 +2134,7 @@ bool InitDescriptor() {
   if (!InitDescriptorMappingTypes()) return false;
 
   // Initialize globals defined in this file.
-  interned_descriptors = new std::unordered_map<const void*, PyObject*>;
+  interned_descriptors = new absl::flat_hash_map<const void*, PyObject*>;
 
   return true;
 }
