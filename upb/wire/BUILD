@@ -212,6 +212,7 @@ cc_test(
     deps = [
         ":eps_copy_input_stream",
         "//upb/mem",
+        "//upb/port",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
     ],
