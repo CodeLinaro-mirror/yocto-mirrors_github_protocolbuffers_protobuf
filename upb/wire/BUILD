@@ -201,6 +201,7 @@ cc_library(
     copts = UPB_DEFAULT_COPTS,
     visibility = ["//visibility:public"],
     deps = [
+        "//upb/base",
         "//upb/mem",
         "//upb/port",
     ],
@@ -211,6 +212,7 @@ cc_test(
     srcs = ["eps_copy_input_stream_test.cc"],
     deps = [
         ":eps_copy_input_stream",
+        "//upb/base",
         "//upb/mem",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
