@@ -41,6 +41,23 @@ with open(
 
   print('PASSED: All jobs are in the list of blocking jobs.')
 
+
+def check_ctest(name, job, file, obj):
+  """Checks that the ctest command is not in a mode that allows missing tests to pass."""
+  for key in obj:
+    if (
+        isinstance(obj[key], str)
+        and 'ctest' in obj[key]
+        and 'ctest --no-tests=error' not in obj[key]
+    ):
+      raise ValueError(
+          'Step %s in job %s from file %s runs ctest in a mode that'
+          ' allows missing tests to pass' % (name, job, file)
+      )
+    elif isinstance(obj[key], dict):
+      check_ctest(name, job, file, obj[key])
+
+
 # Ensure every job with a continuous prefix conditions every step on whether we
 # are in a continuous run.
 for file in yaml_files:
@@ -72,4 +89,6 @@ for file in yaml_files:
               ' condition but the job does not contain the continuous-prefix'
               % (name, job, file)
           )
+        check_ctest(name, job, file, step)
+
 print('PASSED: All steps in all jobs check the continuous-run condition.')
