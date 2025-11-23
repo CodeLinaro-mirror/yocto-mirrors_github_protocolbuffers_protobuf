@@ -197,7 +197,10 @@ cc_test(
 
 cc_library(
     name = "eps_copy_input_stream",
-    srcs = ["eps_copy_input_stream.c"],
+    srcs = [
+        "eps_copy_input_stream.c",
+        "internal/eps_copy_input_stream.h",
+    ],
     hdrs = ["eps_copy_input_stream.h"],
     copts = UPB_DEFAULT_COPTS,
     visibility = ["//visibility:public"],
