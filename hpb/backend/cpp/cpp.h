@@ -12,6 +12,7 @@
 #include "absl/strings/string_view.h"
 #include "hpb/arena.h"
 #include "hpb/extension.h"
+#include "hpb/internal/internal.h"
 #include "hpb/internal/template_help.h"
 #include "hpb/ptr.h"
 
