@@ -611,7 +611,7 @@ class ABSL_ATTRIBUTE_WARN_UNUSED PROTOBUF_DECLSPEC_EMPTY_BASES
   // Gets the Arena on which this RepeatedField stores its elements.
   // Note: this can be inaccurate for split default fields so we make this
   // function non-const.
-  PROTOBUF_FUTURE_ADD_NODISCARD inline Arena* GetArena() {
+  PROTOBUF_FUTURE_ADD_NODISCARD inline Arena* GetArena() const {
 #ifdef PROTOBUF_INTERNAL_REMOVE_ARENA_PTRS_REPEATED_FIELD
     return soo_rep_.arena();
 #else
