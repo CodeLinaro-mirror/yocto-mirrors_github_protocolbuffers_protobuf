@@ -123,14 +123,13 @@ typedef struct {
   uint64_t val;
 } _upb_DecodeLongVarintReturn;
 
+// This is identical to _upb_Decoder_DecodeTag() except that the maximum value
+// is INT32_MAX instead of UINT32_MAX.
 UPB_FORCEINLINE
 const char* upb_Decoder_DecodeSize(upb_Decoder* d, const char* ptr,
                                    uint32_t* size) {
   int sz;
   ptr = upb_WireReader_ReadSize(ptr, &sz, EPS(d));
-  if (!upb_EpsCopyInputStream_CheckSize(&d->input, ptr, sz)) {
-    upb_ErrorHandler_ThrowError(&d->err, kUpb_DecodeStatus_Malformed);
-  }
   *size = sz;
   return ptr;
 }
@@ -186,8 +185,9 @@ static upb_Message* _upb_Decoder_NewSubMessage(upb_Decoder* d,
 }
 
 static const char* _upb_Decoder_ReadString2(upb_Decoder* d, const char* ptr,
-                                            int size, upb_StringView* str) {
-  if (!_upb_Decoder_ReadString(d, &ptr, size, str)) {
+                                            int size, upb_StringView* str,
+                                            bool validate_utf8) {
+  if (!_upb_Decoder_ReadString(d, &ptr, size, str, validate_utf8)) {
     upb_ErrorHandler_ThrowError(&d->err, kUpb_DecodeStatus_OutOfMemory);
   }
   return ptr;
@@ -411,15 +411,23 @@ static const char* _upb_Decoder_DecodeToArray(upb_Decoder* d, const char* ptr,
       arr->UPB_PRIVATE(size)++;
       memcpy(mem, val, 1 << op);
       return ptr;
-    case kUpb_DecodeOp_String:
-      _upb_Decoder_VerifyUtf8(d, ptr, val->size);
-      /* Fallthrough. */
+    case kUpb_DecodeOp_String: {
+      /* Append string. */
+      upb_StringView* str = (upb_StringView*)upb_Array_MutableDataPtr(arr) +
+                            arr->UPB_PRIVATE(size);
+      ptr = _upb_Decoder_ReadString2(d, ptr, val->size, str,
+                                     /*validate_utf8=*/true);
+      arr->UPB_PRIVATE(size)++;
+      return ptr;
+    }
     case kUpb_DecodeOp_Bytes: {
       /* Append bytes. */
       upb_StringView* str = (upb_StringView*)upb_Array_MutableDataPtr(arr) +
                             arr->UPB_PRIVATE(size);
+      ptr = _upb_Decoder_ReadString2(d, ptr, val->size, str,
+                                     /*validate_utf8=*/false);
       arr->UPB_PRIVATE(size)++;
-      return _upb_Decoder_ReadString2(d, ptr, val->size, str);
+      return ptr;
     }
     case kUpb_DecodeOp_SubMessage: {
       /* Append submessage / group. */
@@ -591,10 +599,11 @@ static const char* _upb_Decoder_DecodeToSubMessage(
       break;
     }
     case kUpb_DecodeOp_String:
-      _upb_Decoder_VerifyUtf8(d, ptr, val->size);
-      /* Fallthrough. */
+      return _upb_Decoder_ReadString2(d, ptr, val->size, mem,
+                                      /*validate_utf8=*/true);
     case kUpb_DecodeOp_Bytes:
-      return _upb_Decoder_ReadString2(d, ptr, val->size, mem);
+      return _upb_Decoder_ReadString2(d, ptr, val->size, mem,
+                                      /*validate_utf8=*/false);
     case kUpb_DecodeOp_Scalar8Byte:
       memcpy(mem, val, 8);
       break;
