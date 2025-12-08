@@ -800,11 +800,11 @@ class alignas(8) GlobalEmptyStringConstexpr {
   // Nothing to init, or destroy.
   std::string* Init() const { return nullptr; }
 
-  // Disable the optimization for MSVC.
+  // Disable the optimization for MSVC and Xtensa.
   // There are some builds where the default constructed string can't be used as
   // `constinit` even though the constructor is `constexpr` and can be used
   // during constant evaluation.
-#if !defined(_MSC_VER)
+#if !defined(_MSC_VER) && !defined(__XTENSA__)
   template <typename T = std::string, bool = (T(), true)>
   static constexpr std::true_type HasConstexprDefaultConstructor(int) {
     return {};
