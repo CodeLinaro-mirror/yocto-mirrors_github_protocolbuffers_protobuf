@@ -245,6 +245,7 @@ final class FieldMaskTree {
     if (source.getDescriptorForType() != destination.getDescriptorForType()) {
       throw new IllegalArgumentException(
           String.format(
+              Locale.ROOT,
               "source (%s) and destination (%s) descriptor must be equal",
               source.getDescriptorForType().getFullName(),
               destination.getDescriptorForType().getFullName()));

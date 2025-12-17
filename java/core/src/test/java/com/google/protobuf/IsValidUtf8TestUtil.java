@@ -291,7 +291,7 @@ final class IsValidUtf8TestUtil {
       if (i > 0) {
         s.append(" ");
       }
-      s.append(String.format("%02x", b[i] & 0xFF));
+      s.append(String.format(Locale.ROOT, "%02x", b[i] & 0xFF));
     }
     s.append("\"");
     return s.toString();
