@@ -125,13 +125,6 @@ jobs:
           credentials: ${{ secrets.GAR_SERVICE_ACCOUNT }}
           architecture: linux-i386
 
-      - name: Setup composer
-        if: ${{ !matrix.continuous-only || inputs.continuous-run }}
-        uses: protocolbuffers/protobuf-ci/composer-setup@v5
-        with:
-          cache-prefix: php-${{ matrix.version }}
-          directory: php
-
       - name: Run tests
         if: ${{ !matrix.continuous-only || inputs.continuous-run }}
         uses: protocolbuffers/protobuf-ci/docker@v5
