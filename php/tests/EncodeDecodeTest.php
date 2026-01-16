@@ -621,6 +621,9 @@ class EncodeDecodeTest extends TestBase
     }
 
     public function testRecursiveMessage() {
+        if (getenv("USE_VALGRIND")) {
+            return;
+        }
         $payload = $this->makeRecursiveMessage(99)->serializeToString();
 
         $m = new TestMessage();
@@ -628,6 +631,9 @@ class EncodeDecodeTest extends TestBase
     }
 
     public function testOverlyRecursiveMessage() {
+        if (getenv("USE_VALGRIND")) {
+            return;
+        }
         $this->expectException(Exception::class);
         $payload = $this->makeRecursiveMessage(101)->serializeToString();
 
