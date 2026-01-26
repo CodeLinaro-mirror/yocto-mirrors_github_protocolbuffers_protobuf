@@ -18,5 +18,5 @@
 
 pub use crate::{
     proto, AsMut as _, AsView as _, Clear as _, ClearAndParse as _, CopyFrom as _, IntoMut as _,
-    IntoView as _, MergeFrom as _, Parse as _, Serialize as _, TakeFrom as _,
+    IntoView as _, MergeFrom as _, Parse as _, Serialize as _, Singular as _, TakeFrom as _,
 };
