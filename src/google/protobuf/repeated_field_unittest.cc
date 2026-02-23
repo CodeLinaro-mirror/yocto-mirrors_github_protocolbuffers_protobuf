@@ -1384,6 +1384,23 @@ TEST(RepeatedField, CheckedGetOrAbortTest) {
                "Index \\(-1\\) out of bounds of container with size \\(2\\)");
 }
 
+TEST(RepeatedField, SwapElementsBoundsCheckTest) {
+  RepeatedField<int> field;
+  field.Add(1);
+  field.Add(2);
+  field.Add(3);
+
+  // This should crash if bounds checks are enabled.
+  EXPECT_DEATH(field.SwapElements(0, 10),
+               "Index \\(10\\) out of bounds of container with size \\(3\\)");
+  EXPECT_DEATH(field.SwapElements(10, 0),
+               "Index \\(10\\) out of bounds of container with size \\(3\\)");
+  EXPECT_DEATH(field.SwapElements(0, -1),
+               "Index \\(-1\\) out of bounds of container with size \\(3\\)");
+  EXPECT_DEATH(field.SwapElements(-1, 0),
+               "Index \\(-1\\) out of bounds of container with size \\(3\\)");
+}
+
 }  // namespace
 
 }  // namespace protobuf
