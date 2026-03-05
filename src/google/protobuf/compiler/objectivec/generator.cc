@@ -324,7 +324,7 @@ bool ObjectiveCGenerator::GenerateAll(
             ExtensionGenerationMode::kClassBased;
       } else if (options[i].second == "migration") {
         generation_options.extension_generation_mode =
-            ExtensionGenerationMode::kMigration;
+            ExtensionGenerationMode::kClassBased;
       } else {
         *error = absl::StrCat(
             "error: Unknown value for extension_generation_mode. Expected one "
