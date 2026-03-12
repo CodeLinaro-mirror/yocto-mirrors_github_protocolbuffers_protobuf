@@ -367,6 +367,29 @@ class DynamicMessage final : public Message {
   internal::CachedSize cached_byte_size_;
 };
 
+using internal::MessageGlobalsBase;
+
+struct DynamicMessageGlobalsInternalType : MessageGlobalsBase {
+  union {
+    alignas(internal::kMaxMessageAlignment) DynamicMessage _default;  // NOLINT
+  };
+};
+
+namespace {
+inline int GlobalsSizeToMsgSize(int size) {
+  return size -
+         PROTOBUF_FIELD_OFFSET(DynamicMessageGlobalsInternalType, _default);
+}
+inline uint32_t MsgSizeToGlobalsSize(uint32_t size) {
+  return size +
+         PROTOBUF_FIELD_OFFSET(DynamicMessageGlobalsInternalType, _default);
+}
+inline void* DynamicMessageGlobalsToDefaultInstance(void* globals) {
+  return static_cast<char*>(globals) +
+         PROTOBUF_FIELD_OFFSET(DynamicMessageGlobalsInternalType, _default);
+}
+}  // namespace
+
 struct DynamicMessageFactory::TypeInfo {
   int has_bits_offset;
   int oneof_case_offset;
@@ -428,7 +451,12 @@ struct DynamicMessageFactory::TypeInfo {
   TypeInfo() = default;
 
   ~TypeInfo() {
-    delete class_data.prototype;
+    class_data.prototype->~MessageLite();
+    internal::SizedDelete(
+        const_cast<void*>(
+            MessageGlobalsBase::FromDefaultInstance(class_data.prototype)),
+        MsgSizeToGlobalsSize(class_data.message_creator.allocation_size()));
+
     delete class_data.reflection();
 
     auto* type = class_data.descriptor();
@@ -889,7 +917,7 @@ const Message* DynamicMessageFactory::GetPrototypeNoLock(
   // Decide all field offsets by packing in order.
   // We place the DynamicMessage object itself at the beginning of the allocated
   // space.
-  int size = sizeof(DynamicMessage);
+  int size = sizeof(DynamicMessageGlobalsInternalType);
   size = AlignOffset(size);
 
   // Next the has_bits, which is an array of uint32s.
@@ -936,7 +964,7 @@ const Message* DynamicMessageFactory::GetPrototypeNoLock(
       if (type_info->has_bits_offset == -1) {
         // At least one field in the message requires a hasbit, so allocate
         // hasbits.
-        type_info->has_bits_offset = size;
+        type_info->has_bits_offset = GlobalsSizeToMsgSize(size);
         uint32_t* has_bits_indices = new uint32_t[type->field_count()];
         for (int j = 0; j < type->field_count(); j++) {
           // Initialize to kNoHasbit, fields that need a hasbit will overwrite.
@@ -956,14 +984,14 @@ const Message* DynamicMessageFactory::GetPrototypeNoLock(
 
   // The oneof_case, if any. It is an array of uint32s.
   if (real_oneof_count > 0) {
-    type_info->oneof_case_offset = size;
+    type_info->oneof_case_offset = GlobalsSizeToMsgSize(size);
     size += real_oneof_count * sizeof(uint32_t);
     size = AlignOffset(size);
   }
 
   // The ExtensionSet, if any.
   if (type->extension_range_count() > 0) {
-    type_info->extensions_offset = size;
+    type_info->extensions_offset = GlobalsSizeToMsgSize(size);
     size += sizeof(ExtensionSet);
     size = AlignOffset(size);
   } else {
@@ -980,7 +1008,7 @@ const Message* DynamicMessageFactory::GetPrototypeNoLock(
     if (!InRealOneof(type->field(i))) {
       int field_size = FieldSpaceUsed(type->field(i));
       size = AlignTo(size, std::min(kSafeAlignment, field_size));
-      offsets[i] = size | FieldFlags(type->field(i));
+      offsets[i] = GlobalsSizeToMsgSize(size) | FieldFlags(type->field(i));
       size += field_size;
     }
   }
@@ -988,13 +1016,13 @@ const Message* DynamicMessageFactory::GetPrototypeNoLock(
   // The oneofs.
   for (int i = 0; i < type->real_oneof_decl_count(); i++) {
     size = AlignTo(size, kSafeAlignment);
-    offsets[type->field_count() + i] = size;
+    offsets[type->field_count() + i] = GlobalsSizeToMsgSize(size);
 
     for (int j = 0; j < type->real_oneof_decl(i)->field_count(); j++) {
       const FieldDescriptor* field = type->real_oneof_decl(i)->field(j);
       // oneof fields' offset is the one for the union.
       // They are already set above, so copy them.
-      offsets[field->index()] = size | FieldFlags(field);
+      offsets[field->index()] = GlobalsSizeToMsgSize(size) | FieldFlags(field);
     }
 
     size += kMaxOneofUnionSize;
@@ -1002,18 +1030,19 @@ const Message* DynamicMessageFactory::GetPrototypeNoLock(
 
   type_info->weak_field_map_offset = -1;
 
-  type_info->class_data.message_creator =
-      internal::MessageCreator(DynamicMessage::NewImpl, size, kSafeAlignment);
+  type_info->class_data.message_creator = internal::MessageCreator(
+      DynamicMessage::NewImpl, GlobalsSizeToMsgSize(size), kSafeAlignment);
 
   // Construct the reflection object.
 
   // Allocate the prototype fields.
-  void* base = internal::Allocate(size);
-  memset(base, 0, size);
+  void* globals_base = internal::Allocate(size);
+  memset(globals_base, 0, size);
+  auto* msg_base = DynamicMessageGlobalsToDefaultInstance(globals_base);
 
   // We have already locked the factory so we should not lock in the constructor
   // of dynamic message to avoid dead lock.
-  DynamicMessage* prototype = new (base) DynamicMessage(type_info, false);
+  DynamicMessage* prototype = new (msg_base) DynamicMessage(type_info, false);
 
   internal::ReflectionSchema schema = {
       static_cast<const Message*>(type_info->class_data.default_instance()),
