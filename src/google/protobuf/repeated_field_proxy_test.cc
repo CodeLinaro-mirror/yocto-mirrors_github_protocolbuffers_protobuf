@@ -1640,8 +1640,8 @@ TYPED_TEST(RepeatedNumericFieldProxyTest, Rebind) {
   auto field2 = this->MakeRepeatedFieldContainer();
   field2->Add(2);
 
-  auto proxy = field1.MakeProxy();
-  proxy = field2.MakeProxy();
+  auto proxy = field1.MakeConstProxy();
+  proxy = field2.MakeConstProxy();
 
   // Proxy should be rebound to field2 without having modified either field.
   EXPECT_THAT(proxy, ElementsAre(2));
