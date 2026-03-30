@@ -1181,6 +1181,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED UninterpretedOption
     }
     return *this;
   }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_UninterpretedOption_NamePart_globals_;
+  }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
       ABSL_ATTRIBUTE_LIFETIME_BOUND {
@@ -1294,7 +1297,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED UninterpretedOption
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -1336,11 +1340,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED UninterpretedOption
   // @@protoc_insertion_point(class_scope:google.protobuf.UninterpretedOption.NamePart)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<1, 2,
+                          0, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<1, 2,
-                                   0, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -1403,6 +1412,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED SourceCodeInfo_Loca
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_SourceCodeInfo_Location_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -1512,7 +1524,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED SourceCodeInfo_Loca
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -1629,11 +1642,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED SourceCodeInfo_Loca
   // @@protoc_insertion_point(class_scope:google.protobuf.SourceCodeInfo.Location)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<3, 5,
+                          0, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 5,
-                                   0, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -1701,6 +1719,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GeneratedCodeInfo_A
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_GeneratedCodeInfo_Annotation_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -1810,7 +1831,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GeneratedCodeInfo_A
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -1920,11 +1942,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GeneratedCodeInfo_A
   // @@protoc_insertion_point(class_scope:google.protobuf.GeneratedCodeInfo.Annotation)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<3, 5,
+                          1, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 5,
-                                   1, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -1991,6 +2018,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FieldOptions_Featur
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_FieldOptions_FeatureSupport_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -2100,7 +2130,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FieldOptions_Featur
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -2186,11 +2217,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FieldOptions_Featur
   // @@protoc_insertion_point(class_scope:google.protobuf.FieldOptions.FeatureSupport)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<3, 5,
+                          3, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 5,
-                                   3, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -2256,6 +2292,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FieldOptions_Editio
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_FieldOptions_EditionDefault_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -2365,7 +2404,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FieldOptions_Editio
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -2407,11 +2447,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FieldOptions_Editio
   // @@protoc_insertion_point(class_scope:google.protobuf.FieldOptions.EditionDefault)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<1, 2,
+                          1, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<1, 2,
-                                   1, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -2473,6 +2518,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FeatureSet_Visibili
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_FeatureSet_VisibilityFeature_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -2553,7 +2601,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FeatureSet_Visibili
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -2585,11 +2634,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FeatureSet_Visibili
   // @@protoc_insertion_point(class_scope:google.protobuf.FeatureSet.VisibilityFeature)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<0, 0,
+                          0, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<0, 0,
-                                   0, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -2635,6 +2689,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FeatureSet final : 
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_FeatureSet_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -2749,7 +2806,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FeatureSet final : 
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -3203,11 +3261,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FeatureSet final : 
   // @@protoc_insertion_point(class_scope:google.protobuf.FeatureSet)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<3, 8,
+                          8, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 8,
-                                   8, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -3277,6 +3340,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED ExtensionRangeOptio
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_ExtensionRangeOptions_Declaration_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -3386,7 +3452,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED ExtensionRangeOptio
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -3472,11 +3539,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED ExtensionRangeOptio
   // @@protoc_insertion_point(class_scope:google.protobuf.ExtensionRangeOptions.Declaration)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<3, 5,
+                          0, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 5,
-                                   0, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -3542,6 +3614,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumDescriptorProto
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_EnumDescriptorProto_EnumReservedRange_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -3651,7 +3726,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumDescriptorProto
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -3688,11 +3764,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumDescriptorProto
   // @@protoc_insertion_point(class_scope:google.protobuf.EnumDescriptorProto.EnumReservedRange)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<1, 2,
+                          0, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<1, 2,
-                                   0, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -3755,6 +3836,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED DescriptorProto_Res
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_DescriptorProto_ReservedRange_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -3864,7 +3948,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED DescriptorProto_Res
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -3901,11 +3986,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED DescriptorProto_Res
   // @@protoc_insertion_point(class_scope:google.protobuf.DescriptorProto.ReservedRange)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<1, 2,
+                          0, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<1, 2,
-                                   0, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -3968,6 +4058,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED UninterpretedOption
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_UninterpretedOption_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -4082,7 +4175,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED UninterpretedOption
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -4209,11 +4303,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED UninterpretedOption
   // @@protoc_insertion_point(class_scope:google.protobuf.UninterpretedOption)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<3, 7,
+                          1, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 7,
-                                   1, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -4281,6 +4380,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED SourceCodeInfo fina
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_SourceCodeInfo_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -4395,7 +4497,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED SourceCodeInfo fina
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -4619,11 +4722,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED SourceCodeInfo fina
   // @@protoc_insertion_point(class_scope:google.protobuf.SourceCodeInfo)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<0, 1,
+                          1, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<0, 1,
-                                   1, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -4686,6 +4794,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GeneratedCodeInfo f
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_GeneratedCodeInfo_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -4795,7 +4906,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GeneratedCodeInfo f
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -4829,11 +4941,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED GeneratedCodeInfo f
   // @@protoc_insertion_point(class_scope:google.protobuf.GeneratedCodeInfo)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<0, 1,
+                          1, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<0, 1,
-                                   1, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -4895,6 +5012,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FeatureSetDefaults_
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_FeatureSetDefaults_FeatureSetEditionDefault_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -5009,7 +5129,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FeatureSetDefaults_
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -5067,11 +5188,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FeatureSetDefaults_
   // @@protoc_insertion_point(class_scope:google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<2, 3,
+                          3, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 3,
-                                   3, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -5135,6 +5261,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED ServiceOptions fina
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_ServiceOptions_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -5249,7 +5378,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED ServiceOptions fina
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -5502,11 +5632,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED ServiceOptions fina
   // @@protoc_insertion_point(class_scope:google.protobuf.ServiceOptions)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<2, 3,
+                          2, 0,
+                          12>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 3,
-                                   2, 0,
-                                   12>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -5571,6 +5706,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED OneofOptions final 
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_OneofOptions_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -5685,7 +5823,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED OneofOptions final 
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -5925,11 +6064,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED OneofOptions final 
   // @@protoc_insertion_point(class_scope:google.protobuf.OneofOptions)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<2, 2,
+                          2, 0,
+                          7>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 2,
-                                   2, 0,
-                                   7>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -5993,6 +6137,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED MethodOptions final
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_MethodOptions_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -6107,7 +6254,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED MethodOptions final
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -6394,11 +6542,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED MethodOptions final
   // @@protoc_insertion_point(class_scope:google.protobuf.MethodOptions)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<3, 4,
+                          3, 0,
+                          12>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 4,
-                                   3, 0,
-                                   12>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -6464,6 +6617,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED MessageOptions fina
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_MessageOptions_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -6578,7 +6734,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED MessageOptions fina
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -6883,11 +7040,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED MessageOptions fina
   // @@protoc_insertion_point(class_scope:google.protobuf.MessageOptions)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<3, 7,
+                          2, 0,
+                          7>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 7,
-                                   2, 0,
-                                   7>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -6956,6 +7118,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FileOptions final :
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_FileOptions_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -7070,7 +7235,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FileOptions final :
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -7628,11 +7794,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FileOptions final :
   // @@protoc_insertion_point(class_scope:google.protobuf.FileOptions)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<5, 21,
+                          3, 0,
+                          12>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<5, 21,
-                                   3, 0,
-                                   12>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -7715,6 +7886,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FieldOptions final 
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_FieldOptions_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -7829,7 +8003,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FieldOptions final 
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -8340,11 +8515,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FieldOptions final 
   // @@protoc_insertion_point(class_scope:google.protobuf.FieldOptions)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<4, 14,
+                          8, 0,
+                          7>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<4, 14,
-                                   8, 0,
-                                   7>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -8420,6 +8600,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FeatureSetDefaults 
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_FeatureSetDefaults_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -8534,7 +8717,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FeatureSetDefaults 
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -8594,11 +8778,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FeatureSetDefaults 
   // @@protoc_insertion_point(class_scope:google.protobuf.FeatureSetDefaults)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<1, 3,
+                          3, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<1, 3,
-                                   3, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -8662,6 +8851,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED ExtensionRangeOptio
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_ExtensionRangeOptions_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -8776,7 +8968,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED ExtensionRangeOptio
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -9072,11 +9265,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED ExtensionRangeOptio
   // @@protoc_insertion_point(class_scope:google.protobuf.ExtensionRangeOptions)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<3, 4,
+                          4, 0,
+                          12>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 4,
-                                   4, 0,
-                                   12>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -9142,6 +9340,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumValueOptions fi
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_EnumValueOptions_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -9256,7 +9457,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumValueOptions fi
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -9539,11 +9741,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumValueOptions fi
   // @@protoc_insertion_point(class_scope:google.protobuf.EnumValueOptions)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<3, 5,
+                          3, 0,
+                          7>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 5,
-                                   3, 0,
-                                   7>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -9610,6 +9817,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumOptions final :
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_EnumOptions_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -9724,7 +9934,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumOptions final :
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -10003,11 +10214,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumOptions final :
   // @@protoc_insertion_point(class_scope:google.protobuf.EnumOptions)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<3, 5,
+                          2, 0,
+                          7>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 5,
-                                   2, 0,
-                                   7>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -10074,6 +10290,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED OneofDescriptorProt
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_OneofDescriptorProto_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -10188,7 +10407,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED OneofDescriptorProt
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -10234,11 +10454,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED OneofDescriptorProt
   // @@protoc_insertion_point(class_scope:google.protobuf.OneofDescriptorProto)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<1, 2,
+                          1, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<1, 2,
-                                   1, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -10301,6 +10526,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED MethodDescriptorPro
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_MethodDescriptorProto_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -10415,7 +10643,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED MethodDescriptorPro
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -10523,11 +10752,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED MethodDescriptorPro
   // @@protoc_insertion_point(class_scope:google.protobuf.MethodDescriptorProto)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<3, 6,
+                          1, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 6,
-                                   1, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -10594,6 +10828,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FieldDescriptorProt
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_FieldDescriptorProto_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -10708,7 +10945,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FieldDescriptorProt
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -10948,11 +11186,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FieldDescriptorProt
   // @@protoc_insertion_point(class_scope:google.protobuf.FieldDescriptorProto)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<4, 11,
+                          3, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<4, 11,
-                                   3, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -11024,6 +11267,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumValueDescriptor
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_EnumValueDescriptorProto_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -11138,7 +11384,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumValueDescriptor
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -11197,11 +11444,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumValueDescriptor
   // @@protoc_insertion_point(class_scope:google.protobuf.EnumValueDescriptorProto)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<2, 3,
+                          1, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 3,
-                                   1, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -11265,6 +11517,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED DescriptorProto_Ext
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_DescriptorProto_ExtensionRange_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -11379,7 +11634,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED DescriptorProto_Ext
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -11433,11 +11689,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED DescriptorProto_Ext
   // @@protoc_insertion_point(class_scope:google.protobuf.DescriptorProto.ExtensionRange)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<2, 3,
+                          1, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 3,
-                                   1, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -11501,6 +11762,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED ServiceDescriptorPr
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_ServiceDescriptorProto_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -11615,7 +11879,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED ServiceDescriptorPr
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -11683,11 +11948,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED ServiceDescriptorPr
   // @@protoc_insertion_point(class_scope:google.protobuf.ServiceDescriptorProto)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<2, 3,
+                          2, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<2, 3,
-                                   2, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -11751,6 +12021,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumDescriptorProto
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_EnumDescriptorProto_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -11865,7 +12138,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumDescriptorProto
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -11997,11 +12271,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED EnumDescriptorProto
   // @@protoc_insertion_point(class_scope:google.protobuf.EnumDescriptorProto)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<3, 6,
+                          4, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<3, 6,
-                                   4, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -12068,6 +12347,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED DescriptorProto fin
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_DescriptorProto_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -12182,7 +12464,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED DescriptorProto fin
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -12425,11 +12708,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED DescriptorProto fin
   // @@protoc_insertion_point(class_scope:google.protobuf.DescriptorProto)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<4, 11,
+                          9, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<4, 11,
-                                   9, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -12501,6 +12789,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FileDescriptorProto
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_FileDescriptorProto_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -12615,7 +12906,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FileDescriptorProto
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -12913,11 +13205,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FileDescriptorProto
   // @@protoc_insertion_point(class_scope:google.protobuf.FileDescriptorProto)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<4, 14,
+                          7, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<4, 14,
-                                   7, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -12992,6 +13289,9 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FileDescriptorSet f
       CopyFrom(from);
     }
     return *this;
+  }
+  static constexpr const void* PROTOBUF_NONNULL internal_message_globals() {
+    return &_FileDescriptorSet_globals_;
   }
 
   [[nodiscard]] inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
@@ -13106,7 +13406,8 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FileDescriptorSet f
 
  public:
   static constexpr auto InternalGenerateClassData_(
-      const MessageLite& prototype);
+      const MessageLite& prototype,
+      const ::google::protobuf::internal::TcParseTableBase* PROTOBUF_NULLABLE tc_table = nullptr);
 
   [[nodiscard]] ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
@@ -13329,11 +13630,16 @@ class PROTOBUF_EXPORT  PROTOBUF_FUTURE_ADD_EARLY_WARN_UNUSED FileDescriptorSet f
   // @@protoc_insertion_point(class_scope:google.protobuf.FileDescriptorSet)
  private:
   class _Internal;
+  using ParseTableT_ =
+      ::google::protobuf::internal::TcParseTable<0, 1,
+                          1, 0,
+                          2>;
+  static constexpr ParseTableT_ InternalGenerateParseTable_(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
   friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<0, 1,
-                                   1, 0,
-                                   2>
-      _table_;
+  #ifndef PROTOBUF_MESSAGE_GLOBALS
+  static const ParseTableT_ _table_;
+  #endif
 
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
