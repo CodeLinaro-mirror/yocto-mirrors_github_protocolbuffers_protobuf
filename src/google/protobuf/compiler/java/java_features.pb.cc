@@ -39,7 +39,7 @@ PROTOBUF_CONSTINIT ::google::protobuf::internal::ReflectionData
 namespace pb {
 template <typename>
 constexpr JavaFeatures_NestInFileClassFeature::JavaFeatures_NestInFileClassFeature(::_pbi::ConstantInitialized,
-                       const ::_pbi::ClassData* class_data)
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : ::google::protobuf::internal::ZeroFieldsBase(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -130,7 +130,7 @@ inline constexpr JavaFeatures::Impl_::Impl_(
 
 template <typename>
 constexpr JavaFeatures::JavaFeatures(::_pbi::ConstantInitialized,
-                       const ::_pbi::ClassData* class_data)
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : ::google::protobuf::Message(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data

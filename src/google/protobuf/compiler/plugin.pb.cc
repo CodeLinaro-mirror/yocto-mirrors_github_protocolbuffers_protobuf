@@ -57,7 +57,7 @@ inline constexpr Version::Impl_::Impl_(
 
 template <typename>
 constexpr Version::Version(::_pbi::ConstantInitialized,
-                       const ::_pbi::ClassData* class_data)
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : ::google::protobuf::Message(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -154,7 +154,7 @@ inline constexpr CodeGeneratorResponse_File::Impl_::Impl_(
 
 template <typename>
 constexpr CodeGeneratorResponse_File::CodeGeneratorResponse_File(::_pbi::ConstantInitialized,
-                       const ::_pbi::ClassData* class_data)
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : ::google::protobuf::Message(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -252,7 +252,7 @@ inline constexpr CodeGeneratorResponse::Impl_::Impl_(
 
 template <typename>
 constexpr CodeGeneratorResponse::CodeGeneratorResponse(::_pbi::ConstantInitialized,
-                       const ::_pbi::ClassData* class_data)
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : ::google::protobuf::Message(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -358,7 +358,7 @@ inline constexpr CodeGeneratorRequest::Impl_::Impl_(
 
 template <typename>
 constexpr CodeGeneratorRequest::CodeGeneratorRequest(::_pbi::ConstantInitialized,
-                       const ::_pbi::ClassData* class_data)
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : ::google::protobuf::Message(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
