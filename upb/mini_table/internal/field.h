@@ -140,14 +140,14 @@ UPB_INLINE bool UPB_PRIVATE(_upb_MiniTableField_HasHasbit)(
 UPB_INLINE char UPB_PRIVATE(_upb_MiniTableField_HasbitMask)(
     const struct upb_MiniTableField* f) {
   UPB_ASSERT(UPB_PRIVATE(_upb_MiniTableField_HasHasbit)(f));
-  const uint16_t index = f->presence;
+  const uint16_t index = (uint16_t)f->presence;
   return (char)(1 << (index % 8));
 }
 
 UPB_INLINE uint16_t UPB_PRIVATE(_upb_MiniTableField_HasbitOffset)(
     const struct upb_MiniTableField* f) {
   UPB_ASSERT(UPB_PRIVATE(_upb_MiniTableField_HasHasbit)(f));
-  const uint16_t index = f->presence;
+  const uint16_t index = (uint16_t)f->presence;
   return index / 8;
 }
 
@@ -189,7 +189,7 @@ UPB_PRIVATE(_upb_MiniTableField_Offset)(const struct upb_MiniTableField* f) {
 UPB_INLINE size_t UPB_PRIVATE(_upb_MiniTableField_OneofOffset)(
     const struct upb_MiniTableField* f) {
   UPB_ASSERT(upb_MiniTableField_IsInOneof(f));
-  return ~(ptrdiff_t)f->presence;
+  return (size_t)(~(ptrdiff_t)f->presence);
 }
 
 UPB_INLINE void UPB_PRIVATE(_upb_MiniTableField_CheckIsArray)(
@@ -211,7 +211,7 @@ UPB_INLINE void UPB_PRIVATE(_upb_MiniTableField_CheckIsMap)(
 UPB_INLINE size_t UPB_PRIVATE(_upb_MiniTableField_ElemSizeLg2)(
     const struct upb_MiniTableField* f) {
   const upb_FieldType field_type = upb_MiniTableField_Type(f);
-  return UPB_PRIVATE(_upb_FieldType_SizeLg2)(field_type);
+  return (size_t)UPB_PRIVATE(_upb_FieldType_SizeLg2)(field_type);
 }
 
 // LINT.ThenChange(//depot/google3/third_party/upb/bits/typescript/mini_table_field.ts)
