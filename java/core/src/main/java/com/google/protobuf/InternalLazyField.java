@@ -65,34 +65,158 @@ class InternalLazyField {
     this.corrupted = false;
   }
 
-  private boolean containsEmptyBytes() {
-    return bytes == null || bytes.isEmpty();
+  /**
+   * Merges the InternalLazyField from the given CodedInputStream with the given extension registry.
+   *
+   * <p>Precondition: the input stream should have already read the tag and be expected to read the
+   * size of the bytes next.
+   *
+   * @throws IOException only if an error occurs while reading the raw bytes from the input stream,
+   *     not for failures in parsing the read bytes.
+   * @throws InvalidProtobufRuntimeException if the lazy field is corrupted and cannot be merged
+   *     with a different extension registry.
+   */
+  static InternalLazyField mergeFrom(
+      InternalLazyField lazyField, CodedInputStream input, ExtensionRegistryLite extensionRegistry)
+      throws IOException {
+    ByteString inputBytes = input.readBytes();
+    if (lazyField.isEmpty()) {
+      return new InternalLazyField(lazyField.defaultInstance, extensionRegistry, inputBytes);
+    }
+
+    if (lazyField.hasBytes()) {
+      if (lazyField.extensionRegistry == extensionRegistry) {
+        return new InternalLazyField(
+            lazyField.defaultInstance, extensionRegistry, lazyField.bytes.concat(inputBytes));
+      }
+      // The extension registries are different, so we need to parse the bytes first to "consume"
+      // the extension registry of this lazy field.
+      lazyField.initializeValue(/* atMerge= */ true);
+
+      // If the lazy field is corrupted, instead of holding and concatenating the bytes, just
+      // throw an exception, as we cannot resolve two different extension registries.
+      if (lazyField.corrupted) {
+        throw new InvalidProtobufRuntimeException(
+            "Cannot merge invalid lazy field from bytes that is absent or with a different"
+                + " extension registry.");
+      }
+    }
+
+    return mergaValueFromBytes(lazyField, inputBytes, extensionRegistry);
   }
 
-  private void initializeValue() {
+  /**
+   * Merges a InternalLazyField from another InternalLazyField.
+   *
+   * @throws InvalidProtobufRuntimeException if either lazy field is corrupted and cannot be merged
+   *     with a different extension registry.
+   */
+  static InternalLazyField mergeFrom(InternalLazyField self, InternalLazyField other) {
+    if (self.defaultInstance != other.defaultInstance) {
+      throw new IllegalArgumentException(
+          "LazyFields with different default instances cannot be merged.");
+    }
+
+    // If either InternalLazyField is empty, return the other InternalLazyField.
+    if (self.isEmpty()) {
+      return other;
+    }
+    if (other.isEmpty()) {
+      return self;
+    }
+
+    // Fast path: concatenate the bytes if both LazyFields contain bytes and have the same extension
+    // registry, even if one or both are corrupted.
+    if (self.hasBytes() && other.hasBytes() && self.extensionRegistry == other.extensionRegistry) {
+      return new InternalLazyField(
+          self.defaultInstance, self.extensionRegistry, self.bytes.concat(other.bytes));
+    }
+
+    // Cannot concatenate the bytes right way. Try initializing the value first and merge from
+    // the other.
+    self.initializeValue(/* atMerge= */ true);
+    if (self.corrupted) {
+      // The self lazy field is corrupted, meaning that it contains invalid bytes to be
+      // concatenated. However, we should only do so if other has bytes and the extension registries
+      // are the same. Which has already been handled above.
+      throw new InvalidProtobufRuntimeException(
+          "Cannot merge invalid lazy field from bytes that is absent or with a different"
+              + " extension registry.");
+    }
+
+    // Merge from the other depending on whether the other contains bytes or value.
+    if (other.value != null) {
+      return new InternalLazyField(self.value.toBuilder().mergeFrom(other.value).build());
+    }
+
+    // Since other.value is null, other.bytes must be non-null.
+    return mergaValueFromBytes(self, other.bytes, other.extensionRegistry);
+  }
+
+  /**
+   * Merges the InternalLazyField from the given ByteString with the given extension registry.
+   *
+   * <p>It can throw a runtime exception if it cannot parse the bytes.
+   */
+  private static InternalLazyField mergaValueFromBytes(
+      InternalLazyField self, ByteString inputBytes, ExtensionRegistryLite extensionRegistry) {
+    try {
+      return new InternalLazyField(
+          self.value.toBuilder().mergeFrom(inputBytes, extensionRegistry).build());
+    } catch (InvalidProtocolBufferException e) {
+      // If the input bytes is corrupted, we should cancat bytes. However, we should only do so if
+      // the extension registries are the same AND self.bytes is present. This should have been
+      // handled in the mergeFrom function, so we just throw an exception here.
+      throw new InvalidProtobufRuntimeException(
+          "Cannot merge lazy field from invalid bytes with a different extension registry.", e);
+    }
+  }
+
+  private boolean hasBytes() {
+    return bytes != null;
+  }
+
+  private boolean isEmpty() {
+    if (bytes == null) {
+      return value == null || value.equals(defaultInstance);
+    }
+    return bytes.isEmpty();
+  }
+
+  private void initializeValue(boolean atMerge) {
     if (value != null) {
       return;
     }
 
     synchronized (this) {
       if (corrupted) {
-        return;
+        if (atMerge || !ExtensionRegistryLite.lazyExtensionEnabled()) {
+          return;
+        }
+        // It's unnecessary to throw exception here as it is unreachable. initializaValue can only
+        // be re-visited after a merge, but during the merge an exception has already been thrown
+        // for corrupted lazy fields or there was no need to initialize the value (i.e. concatenate
+        // bytes).
       }
       try {
-        if (!containsEmptyBytes()) {
+        if (hasBytes()) {
           value = defaultInstance.getParserForType().parseFrom(bytes, extensionRegistry);
         } else {
           value = defaultInstance;
         }
       } catch (InvalidProtocolBufferException e) {
-        corrupted = true;
-        value = null;
+        if (atMerge || !ExtensionRegistryLite.lazyExtensionEnabled()) {
+          corrupted = true;
+          value = null;
+          return;
+        }
+        throw new InvalidProtobufRuntimeException(e);
       }
     }
   }
 
   MessageLite getValue() {
-    initializeValue();
+    initializeValue(/* atMerge= */ false);
     return value == null ? defaultInstance : value;
   }
 
