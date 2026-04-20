@@ -2029,4 +2029,12 @@ TEST_F(RepeatedPtrFieldInsertionIteratorsTest, MoveProtos) {
 }  // namespace protobuf
 }  // namespace google
 
+// Code thunks to be dumped by the debugger to inspect the generated assemtbly.
+static auto& CodegenRepeatedPtrFieldGet(
+    const google::protobuf::RepeatedPtrField<std::string>& a, int idx) {
+  return a[idx];
+}
+
+static volatile int odr_use = absl::HashOf(&CodegenRepeatedPtrFieldGet);
+
 #include "google/protobuf/port_undef.inc"
