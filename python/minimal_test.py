@@ -89,6 +89,11 @@ class TestMessageExtension(unittest.TestCase):
     msg = unittest_pb2.TestAllTypes()
     self.assertRaises(AttributeError, getattr, msg, "Extensions")
 
+  def testEnumLoneSurrogateAssignment(self):
+    msg = unittest_pb2.TestAllTypes()
+    with self.assertRaises((ValueError, UnicodeEncodeError)):
+      msg.optional_nested_enum = "\ud800"
+
   def testClearStubMapField(self):
     msg = map_unittest_pb2.TestMapSubmessage()
     int32_map = msg.test_map.map_int32_int32
