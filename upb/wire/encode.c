@@ -848,7 +848,7 @@ upb_EncodeStatus upb_Encode(const upb_Message* msg, const upb_MiniTable* l,
   return _upb_Encode(msg, l, options, arena, buf, size, false);
 }
 
-upb_EncodeStatus UPB_PRIVATE(_upb_Encode_Field)(upb_encstate* e,
+upb_EncodeStatus UPB_PRIVATE(_upb_Encode_Field)(char* ptr, upb_encstate* e,
                                                 const upb_Message* msg,
                                                 const upb_MiniTableField* field,
                                                 char** buf, size_t* size,
@@ -856,7 +856,6 @@ upb_EncodeStatus UPB_PRIVATE(_upb_Encode_Field)(upb_encstate* e,
   e->options = options;
   e->depth = upb_EncodeOptions_GetEffectiveMaxDepth(options);
 
-  char* ptr = e->alloc.limit;
   if (encode_shouldencode(msg, field)) {
     ptr = encode_field(ptr, e, msg, field);
   }
@@ -866,13 +865,12 @@ upb_EncodeStatus UPB_PRIVATE(_upb_Encode_Field)(upb_encstate* e,
 }
 
 upb_EncodeStatus UPB_PRIVATE(_upb_Encode_Extension)(
-    upb_encstate* e, const upb_MiniTableExtension* ext,
+    char* ptr, upb_encstate* e, const upb_MiniTableExtension* ext,
     upb_MessageValue ext_val, bool is_message_set, char** buf, size_t* size,
     int options) {
   e->options = options;
   e->depth = upb_EncodeOptions_GetEffectiveMaxDepth(options);
 
-  char* ptr = e->alloc.limit;
   ptr = encode_ext(ptr, e, ext, ext_val, is_message_set);
   *size = upb_BackAlloc_Finish(&e->alloc, ptr);
   *buf = ptr;

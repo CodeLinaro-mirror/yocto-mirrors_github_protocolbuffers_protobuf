@@ -51,7 +51,7 @@ UPB_INLINE char* UPB_PRIVATE(_upb_encstate_init)(upb_encstate* e, jmp_buf* err,
 //
 // The caller must clean up the `upb_encstate` by calling
 // `_upb_mapsorter_destroy(&e->sorter)` when done.
-upb_EncodeStatus UPB_PRIVATE(_upb_Encode_Field)(upb_encstate* e,
+upb_EncodeStatus UPB_PRIVATE(_upb_Encode_Field)(char* ptr, upb_encstate* e,
                                                 const upb_Message* msg,
                                                 const upb_MiniTableField* field,
                                                 char** buf, size_t* size,
@@ -62,7 +62,7 @@ upb_EncodeStatus UPB_PRIVATE(_upb_Encode_Field)(upb_encstate* e,
 // The caller must clean up the `upb_encstate` by calling
 // `_upb_mapsorter_destroy(&e->sorter)` when done.
 upb_EncodeStatus UPB_PRIVATE(_upb_Encode_Extension)(
-    upb_encstate* e, const upb_MiniTableExtension* ext,
+    char* ptr, upb_encstate* e, const upb_MiniTableExtension* ext,
     upb_MessageValue ext_val, bool is_message_set, char** buf, size_t* size,
     int options);
 
