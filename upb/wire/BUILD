@@ -300,7 +300,6 @@ cc_library(
     ],
     deps = [
         "//upb/base",
-        "//upb/mem",
         "//upb/port",
     ],
 )
@@ -315,7 +314,6 @@ cc_library(
     deps = [
         ":eps_copy_input_stream_internal",
         "//upb/base",
-        "//upb/mem",
         "//upb/port",
     ],
 )
