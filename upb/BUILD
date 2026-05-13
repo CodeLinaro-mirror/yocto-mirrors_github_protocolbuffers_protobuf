@@ -5,6 +5,7 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_python//python:defs.bzl", "py_binary")
@@ -25,38 +26,42 @@ exports_files(
     visibility = ["//upb/cmake:__pkg__"],
 )
 
+UPB_CONFIG_VISIBILITY = [
+    "//benchmarks:__subpackages__",
+    "//hpb:__subpackages__",
+    "//hpb_generator:__subpackages__",
+    "//lua:__pkg__",
+    "//python:__pkg__",
+    "//upb:__subpackages__",
+    "//upb_generator:__subpackages__",
+]
+
 config_setting(
     name = "windows",
     constraint_values = ["@platforms//os:windows"],
-    visibility = [
-        "//benchmarks:__subpackages__",
-        "//hpb:__subpackages__",
-        "//hpb_generator:__subpackages__",
-        "//lua:__pkg__",
-        "//python:__pkg__",
-        "//upb:__subpackages__",
-        "//upb_generator:__subpackages__",
-    ],
+    visibility = UPB_CONFIG_VISIBILITY,
 )
 
 bool_flag(
     name = "fasttable_enabled",
     build_setting_default = False,
-    visibility = [
-        "//upb/bazel:__pkg__",
-    ],
+    scope = "universal",
+    visibility = UPB_CONFIG_VISIBILITY,
 )
 
 config_setting(
-    name = "fasttable_enabled_setting",
+    name = "fasttable_enabled_setting_flag",
     flag_values = {"//upb:fasttable_enabled": "true"},
-    visibility = [
-        "//benchmarks:__subpackages__",
-        "//lua:__pkg__",
-        "//python:__pkg__",
-        "//upb:__subpackages__",
-        "//upb_generator:__subpackages__",
+    visibility = UPB_CONFIG_VISIBILITY,
+)
+
+selects.config_setting_group(
+    name = "fasttable_enabled_setting",
+    match_all = [
+        ":fasttable_enabled_setting_flag",
+        "//buildenv/platforms/settings:any_64bit",
     ],
+    visibility = UPB_CONFIG_VISIBILITY,
 )
 
 upb_proto_library_copts(
@@ -110,7 +115,8 @@ cc_library(
         ":fasttable_enabled_setting": [
             "//upb/wire/decode_fast:field_parsers",
         ],
-        "//conditions:default": [],
+        "//conditions:default": [
+        ],
     }),
 )
 

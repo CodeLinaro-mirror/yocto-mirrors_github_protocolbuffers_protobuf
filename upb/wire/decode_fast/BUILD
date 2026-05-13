@@ -20,6 +20,8 @@ FASTTABLE_COPTS = UPB_DEFAULT_COPTS + select({
     "//conditions:default": [],
 })
 
+# Most code in this folder is only meant to build with fasttable-enabled.
+# Exceptions are {combinations,data,select}.h, which include neutral definitions.
 bool_flag(
     name = "debug_trace",
     build_setting_default = False,
@@ -30,22 +32,30 @@ config_setting(
     flag_values = {":debug_trace": "True"},
 )
 
+_UPB_FASTTABLE_SRCS = [
+    "cardinality.c",
+    "cardinality.h",
+    "field_extension.c",
+    "field_fixed.c",
+    "field_generic.c",
+    "field_helpers.h",
+    "field_message.c",
+    "field_mismatch.c",
+    "field_string.c",
+    "field_unknown.c",
+    "field_varint.c",
+]
+
 cc_library(
     name = "field_parsers",
-    srcs = [
-        "cardinality.c",
-        "cardinality.h",
-        "field_extension.c",
-        "field_fixed.c",
-        "field_generic.c",
-        "field_helpers.h",
-        "field_message.c",
-        "field_mismatch.c",
-        "field_string.c",
-        "field_unknown.c",
-        "field_varint.c",
-    ],
-    hdrs = ["field_parsers.h"],
+    srcs = select({
+        "//upb:fasttable_enabled_setting": _UPB_FASTTABLE_SRCS,
+        "//conditions:default": [],
+    }),
+    hdrs = select({
+        "//upb:fasttable_enabled_setting": ["field_parsers.h"],
+        "//conditions:default": [],
+    }),
     copts = FASTTABLE_COPTS,
     defines = select({
         ":debug_trace_setting": ["UPB_TRACE_FASTDECODER=1"],
@@ -56,44 +66,56 @@ cc_library(
         "//upb:__pkg__",
         "//upb/mini_descriptor:__pkg__",
     ],
-    deps = [
-        ":combinations",
-        ":data",
-        ":dispatch",
-        ":select",
-        "//third_party/utf8_range",
-        "//upb/base",
-        "//upb/base:internal",
-        "//upb/message",
-        "//upb/message:internal",
-        "//upb/message:types",
-        "//upb/mini_table",
-        "//upb/mini_table:internal",
-        "//upb/port",
-        "//upb/wire:decoder",
-        "//upb/wire:eps_copy_input_stream",
-        "//upb/wire:eps_copy_input_stream_internal",
-        "//upb/wire:reader",
-    ],
+    deps = select({
+        "//upb:fasttable_enabled_setting": [
+            ":combinations",
+            ":data",
+            ":dispatch",
+            ":select",
+            "//third_party/utf8_range",
+            "//upb/base",
+            "//upb/base:internal",
+            "//upb/message",
+            "//upb/message:internal",
+            "//upb/message:types",
+            "//upb/mini_table",
+            "//upb/mini_table:internal",
+            "//upb/port",
+            "//upb/wire",  # buildcleaner: keep
+            "//upb/wire:decoder",
+            "//upb/wire:eps_copy_input_stream",
+            "//upb/wire:eps_copy_input_stream_internal",
+            "//upb/wire:reader",
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
     name = "dispatch",
-    srcs = ["dispatch.c"],
-    hdrs = ["dispatch.h"],
+    srcs = select({
+        "//upb:fasttable_enabled_setting": ["dispatch.c"],
+        "//conditions:default": [],
+    }),
+    hdrs = select({
+        "//upb:fasttable_enabled_setting": ["dispatch.h"],
+        "//conditions:default": [],
+    }),
     copts = FASTTABLE_COPTS,
     features = UPB_DEFAULT_FEATURES,
     visibility = ["//upb/wire:__pkg__"],
-    deps = [
-        ":data",
-        "//upb/message",
-        "//upb/mini_table",
-        "//upb/mini_table:internal",
-        "//upb/port",
-        "//upb/wire:decoder",
-        "//upb/wire:eps_copy_input_stream",
-        "//upb/wire:eps_copy_input_stream_internal",
-    ],
+    deps = select({
+        "//upb:fasttable_enabled_setting": [
+            ":data",
+            "//upb/message",
+            "//upb/mini_table",
+            "//upb/mini_table:internal",
+            "//upb/port",
+            "//upb/wire:decoder",
+            "//upb/wire:eps_copy_input_stream_internal",
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
@@ -128,7 +150,6 @@ cc_test(
         "//upb/mem",
         "//upb/mini_table:internal",
         "//upb/port",
-        "//upb/wire",  # buildcleaner: keep
         "//upb/wire/test_util:field_types",
         "//upb/wire/test_util:make_mini_table",
         "@abseil-cpp//absl/base:core_headers",
@@ -137,6 +158,8 @@ cc_test(
     ],
 )
 
+# These targets only contain neutral enum / type definitions and are safe to build
+# even when fasttable is disabled.
 cc_library(
     name = "combinations",
     hdrs = ["combinations.h"],
@@ -169,20 +192,29 @@ cc_library(
 
 cc_library(
     name = "function_array",
-    srcs = ["function_array.c"],
-    hdrs = ["function_array.h"],
+    srcs = select({
+        "//upb:fasttable_enabled_setting": ["function_array.c"],
+        "//conditions:default": [],
+    }),
+    hdrs = select({
+        "//upb:fasttable_enabled_setting": ["function_array.h"],
+        "//conditions:default": [],
+    }),
     copts = FASTTABLE_COPTS,
     features = UPB_DEFAULT_FEATURES,
     visibility = [
         "//upb:__pkg__",
         "//upb/mini_descriptor:__pkg__",
     ],
-    deps = [
-        ":combinations",
-        ":field_parsers",
-        "//upb/mini_table:internal",
-        "//upb/port",
-    ],
+    deps = select({
+        "//upb:fasttable_enabled_setting": [
+            ":combinations",
+            ":field_parsers",
+            "//upb/mini_table:internal",
+            "//upb/port",
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_binary(
