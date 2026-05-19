@@ -22,18 +22,24 @@
 // Must be last.
 #include "upb/port/def.inc"
 
-UPB_FORCEINLINE void _upb_FastDecoder_PickHandlerForExtensionOrUnknown(
+UPB_FORCEINLINE bool _upb_FastDecoder_PickHandlerForExtensionOrUnknown(
     struct upb_Decoder* d, const upb_MiniTable* table, uint16_t tag,
     upb_DecodeFastNext* next) {
   uint32_t field_num;
   if (UPB_LIKELY((tag & 0x80) == 0)) {
     field_num = (uint8_t)tag >> 3;
   } else if ((tag & 0x8000) == 0) {
+    if (UPB_UNLIKELY((tag & 0xFF80) == 0x80)) {
+      // Detect a 0-valued tag or a "2-byte" tag that is an overlong 1-byte
+      // tag. Fasttable isn't set up to deal with overlong varint tags (which
+      // will not match the canonical tag assigned to a slot) so fallback.
+      // (Fallback will also handle erroring on 0-valued fields.)
+      return UPB_DECODEFAST_EXIT(kUpb_DecodeFastNext_FallbackToMiniTable, next);
+    }
     field_num = _upb_DecodeFast_Tag2FieldNumber(tag);
   } else {
     // Tag >=2048.
-    UPB_DECODEFAST_EXIT(kUpb_DecodeFastNext_FallbackToMiniTable, next);
-    return;
+    return UPB_DECODEFAST_EXIT(kUpb_DecodeFastNext_FallbackToMiniTable, next);
   }
 
   // Assert that the field is either truly unknown or has a mismatched wire
@@ -47,11 +53,11 @@ UPB_FORCEINLINE void _upb_FastDecoder_PickHandlerForExtensionOrUnknown(
 
   if (d->extreg && upb_ExtensionRegistry_Lookup(d->extreg, table, field_num)) {
     _upb_Decoder_Trace(d, 'e');
-    UPB_DECODEFAST_EXIT(kUpb_DecodeFastNext_FallbackToMiniTable, next);
-    return;
+    return UPB_DECODEFAST_EXIT(kUpb_DecodeFastNext_FallbackToMiniTable, next);
   }
 
   *next = kUpb_DecodeFastNext_DecodeUnknown;
+  return true;
 }
 
 UPB_PRESERVE_NONE upb_FastDecoder_Return
