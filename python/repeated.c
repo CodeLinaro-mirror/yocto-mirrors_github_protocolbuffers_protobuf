@@ -215,6 +215,84 @@ PyObject* PyUpb_RepeatedContainer_Extend(PyObject* _self, PyObject* value) {
     }
   } else {
     upb_Arena* arena = PyUpb_Arena_Get(self->arena);
+
+#if !defined(Py_LIMITED_API) || Py_LIMITED_API + 0 >= 0x030B0000
+    Py_buffer view;
+    if (PyObject_GetBuffer(value, &view, PyBUF_RECORDS_RO) == 0) {
+      const char* format = view.format;
+      if (format != NULL && view.ndim == 1 &&
+          (view.strides == NULL || view.itemsize == view.strides[0])) {
+        const char fmt = format[0];
+        const int view_size = view.len / view.itemsize;
+        bool types_match = false;
+
+        switch (upb_FieldDef_CType(f)) {
+          case kUpb_CType_Int32:
+          case kUpb_CType_Enum:
+            if (fmt == 'i' || (fmt == 'l' && view.itemsize == 4))
+              types_match = true;
+            break;
+          case kUpb_CType_Int64:
+            if (fmt == 'q' || (fmt == 'l' && view.itemsize == 8))
+              types_match = true;
+            break;
+          case kUpb_CType_UInt32:
+            if (fmt == 'I') types_match = true;
+            break;
+          case kUpb_CType_UInt64:
+            if (fmt == 'Q') types_match = true;
+            break;
+          case kUpb_CType_Float:
+            if (fmt == 'f') types_match = true;
+            break;
+          case kUpb_CType_Double:
+            if (fmt == 'd') types_match = true;
+            break;
+          case kUpb_CType_Bool:
+            if (fmt == '?' || fmt == 'B') types_match = true;
+            break;
+          default:
+            break;
+        }
+
+        if (types_match) {
+          if (upb_Array_Resize(arr, start_size + view_size, arena)) {
+            char* dst = (char*)upb_Array_MutableDataPtr(arr);
+            memcpy(dst + (start_size * view.itemsize), view.buf, view.len);
+          }
+          PyBuffer_Release(&view);
+          Py_DECREF(it);
+          if (PyErr_Occurred()) {
+            upb_Array_Resize(arr, start_size, NULL);
+            return NULL;
+          }
+          Py_RETURN_NONE;
+        }
+
+        if (fmt == 'O') {
+          PyObject** array = (PyObject**)view.buf;
+          for (Py_ssize_t i = 0; i < view_size; ++i) {
+            upb_MessageValue msgval;
+            if (!PyUpb_PyToUpb(array[i], f, &msgval, arena)) {
+              break;
+            }
+            upb_Array_Append(arr, msgval, arena);
+          }
+          PyBuffer_Release(&view);
+          Py_DECREF(it);
+          if (PyErr_Occurred()) {
+            upb_Array_Resize(arr, start_size, NULL);
+            return NULL;
+          }
+          Py_RETURN_NONE;
+        }
+      }
+      PyBuffer_Release(&view);
+    } else {
+      PyErr_Clear();
+    }
+#endif  // Py_LIMITED_API
+
     Py_ssize_t size = PyObject_Size(value);
     if (size < 0) {
       // Some iterables may not have len. Size() will return -1 and

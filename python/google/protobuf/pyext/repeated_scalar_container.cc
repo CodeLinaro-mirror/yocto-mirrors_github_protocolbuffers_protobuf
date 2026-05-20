@@ -11,15 +11,13 @@
 #include "google/protobuf/pyext/repeated_scalar_container.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
-#include <memory>
 #include <string>
 
+#include "absl/types/span.h"
 #include "google/protobuf/descriptor.h"
-#include "google/protobuf/dynamic_message.h"
 #include "google/protobuf/message.h"
-#include "google/protobuf/pyext/descriptor.h"
-#include "google/protobuf/pyext/descriptor_pool.h"
 #include "google/protobuf/pyext/message.h"
 #include "google/protobuf/pyext/scoped_pyobject_ptr.h"
 
@@ -440,8 +438,130 @@ static int AssSubscript(PyObject* pself, PyObject* slice, PyObject* value) {
   return InternalAssignRepeatedField(self, new_list.get());
 }
 
+// Returns true if the given PyObject* value has a contiguous 1D view.
+// If so, the view is filled in and the function returns true.
+// Otherwise, the function returns false.
+// view must be released by the caller if the function returns true.
+static bool GetContiguous1DView(PyObject* value, Py_buffer* view) {
+  if (PyObject_GetBuffer(value, view, PyBUF_RECORDS_RO) != 0) {
+    PyErr_Clear();
+    return false;
+  }
+  if (view->format == nullptr) {
+    PyBuffer_Release(view);
+    return false;
+  }
+  if (((view->ndim == 1) &&
+       (view->strides == nullptr || view->itemsize == view->strides[0]))) {
+    return true;
+  }
+
+  PyBuffer_Release(view);
+  return false;
+}
+
 PyObject* Extend(RepeatedScalarContainer* self, PyObject* value) {
   cmessage::AssureWritable(self->parent);
+
+  Py_buffer view;
+  if (GetContiguous1DView(value, &view)) {
+    const FieldDescriptor* field_descriptor = self->parent_field_descriptor;
+    const char* format = view.format;
+    const char fmt = format[0];
+    Message* message = self->parent->message;
+    const size_t size = static_cast<size_t>(view.len / view.itemsize);
+    const Reflection* reflection = message->GetReflection();
+
+    // Fast path for contiguous 1D views.
+    // See https://docs.python.org/3/library/struct.html#format-characters
+    switch (field_descriptor->cpp_type()) {
+      case FieldDescriptor::CPPTYPE_INT32:
+        if (fmt == 'i' || (fmt == 'l' && view.itemsize == 4)) {
+          reflection
+              ->GetMutableRepeatedFieldRef<int32_t>(message, field_descriptor)
+              .AddRange(
+                  absl::MakeSpan(static_cast<const int32_t*>(view.buf), size));
+          PyBuffer_Release(&view);
+          Py_RETURN_NONE;
+        }
+        break;
+      case FieldDescriptor::CPPTYPE_INT64:
+        if (fmt == 'q' || (fmt == 'l' && view.itemsize == 8)) {
+          reflection
+              ->GetMutableRepeatedFieldRef<int64_t>(message, field_descriptor)
+              .AddRange(
+                  absl::MakeSpan(static_cast<const int64_t*>(view.buf), size));
+          PyBuffer_Release(&view);
+          Py_RETURN_NONE;
+        }
+        break;
+      case FieldDescriptor::CPPTYPE_UINT32:
+        if (fmt == 'I') {
+          reflection
+              ->GetMutableRepeatedFieldRef<uint32_t>(message, field_descriptor)
+              .AddRange(
+                  absl::MakeSpan(static_cast<const uint32_t*>(view.buf), size));
+          PyBuffer_Release(&view);
+          Py_RETURN_NONE;
+        }
+        break;
+      case FieldDescriptor::CPPTYPE_UINT64:
+        if (fmt == 'Q') {
+          reflection
+              ->GetMutableRepeatedFieldRef<uint64_t>(message, field_descriptor)
+              .AddRange(
+                  absl::MakeSpan(static_cast<const uint64_t*>(view.buf), size));
+          PyBuffer_Release(&view);
+          Py_RETURN_NONE;
+        }
+        break;
+      case FieldDescriptor::CPPTYPE_FLOAT:
+        if (fmt == 'f') {
+          reflection
+              ->GetMutableRepeatedFieldRef<float>(message, field_descriptor)
+              .AddRange(
+                  absl::MakeSpan(static_cast<const float*>(view.buf), size));
+          PyBuffer_Release(&view);
+          Py_RETURN_NONE;
+        }
+        break;
+      case FieldDescriptor::CPPTYPE_DOUBLE:
+        if (fmt == 'd') {
+          reflection
+              ->GetMutableRepeatedFieldRef<double>(message, field_descriptor)
+              .AddRange(
+                  absl::MakeSpan(static_cast<const double*>(view.buf), size));
+          PyBuffer_Release(&view);
+          Py_RETURN_NONE;
+        }
+        break;
+      case FieldDescriptor::CPPTYPE_BOOL:
+        if (fmt == '?' || fmt == 'B') {
+          reflection
+              ->GetMutableRepeatedFieldRef<bool>(message, field_descriptor)
+              .AddRange(
+                  absl::MakeSpan(static_cast<const bool*>(view.buf), size));
+          PyBuffer_Release(&view);
+          Py_RETURN_NONE;
+        }
+        break;
+      default:
+        break;
+    }
+
+    if (format[0] == 'O') {
+      PyObject** array = static_cast<PyObject**>(view.buf);
+      for (size_t i = 0; i < size; ++i) {
+        if (ScopedPyObjectPtr(Append(self, array[i])) == nullptr) {
+          PyBuffer_Release(&view);
+          return nullptr;
+        }
+      }
+      PyBuffer_Release(&view);
+      Py_RETURN_NONE;
+    }
+    PyBuffer_Release(&view);
+  }
 
   ScopedPyObjectPtr iter(PyObject_GetIter(value));
   if (iter == nullptr) {
@@ -908,7 +1028,7 @@ PyTypeObject RepeatedScalarContainer_Type = {
 #if PY_VERSION_HEX >= 0x03080000
     0,  //  tp_vectorcall_offset
 #else
-    nullptr,             //  tp_print
+    nullptr,  //  tp_print
 #endif
     nullptr,                                //  tp_getattr
     nullptr,                                //  tp_setattr

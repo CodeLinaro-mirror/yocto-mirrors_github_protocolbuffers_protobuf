@@ -24,6 +24,7 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -1630,6 +1631,76 @@ TEST_F(GeneratedMessageReflectionCordAccessorsTest, SetStringFromCord) {
   EXPECT_EQ("cord", message.optional_bytes_cord());
 }
 
+TEST_F(GeneratedMessageReflectionCordAccessorsTest, SetStringFromStringView) {
+  reflection_->SetStringView(&message_, optional_string_,
+                             absl::string_view("foo"));
+  reflection_->SetStringView(&message_, optional_string_piece_,
+                             absl::string_view("bar"));
+  reflection_->SetStringView(&message_, optional_cord_,
+                             absl::string_view("baz"));
+  extensions_reflection_->SetStringView(&extensions_message_,
+                                        optional_string_extension_,
+                                        absl::string_view("moo"));
+
+  EXPECT_TRUE(message_.has_optional_string());
+  EXPECT_TRUE(message_.has_optional_string_piece());
+  EXPECT_TRUE(message_.has_optional_cord());
+  EXPECT_TRUE(
+      extensions_message_.HasExtension(unittest::optional_string_extension));
+
+  EXPECT_EQ("foo", message_.optional_string());
+  EXPECT_EQ("bar", std::string(
+                       reflection_->GetCord(message_, optional_string_piece_)));
+  EXPECT_EQ("baz", std::string(reflection_->GetCord(message_, optional_cord_)));
+  EXPECT_EQ("moo", extensions_message_.GetExtension(
+                       unittest::optional_string_extension));
+
+  unittest::TestCord message;
+  const Descriptor* descriptor = unittest::TestCord::descriptor();
+  const Reflection* reflection = message.GetReflection();
+
+  reflection->SetStringView(&message,
+                            descriptor->FindFieldByName("optional_bytes_cord"),
+                            absl::string_view("cord"));
+  EXPECT_TRUE(message.has_optional_bytes_cord());
+  EXPECT_EQ("cord", message.optional_bytes_cord());
+}
+
+TEST_F(GeneratedMessageReflectionCordAccessorsTest, SetStringFromRValueString) {
+  std::string foo = "foo";
+  std::string bar = "bar";
+  std::string baz = "baz";
+  std::string moo = "moo";
+  reflection_->SetString(&message_, optional_string_, std::move(foo));
+  reflection_->SetString(&message_, optional_string_piece_, std::move(bar));
+  reflection_->SetString(&message_, optional_cord_, std::move(baz));
+  extensions_reflection_->SetString(&extensions_message_,
+                                    optional_string_extension_, std::move(moo));
+
+  EXPECT_TRUE(message_.has_optional_string());
+  EXPECT_TRUE(message_.has_optional_string_piece());
+  EXPECT_TRUE(message_.has_optional_cord());
+  EXPECT_TRUE(
+      extensions_message_.HasExtension(unittest::optional_string_extension));
+
+  EXPECT_EQ("foo", message_.optional_string());
+  EXPECT_EQ("bar", std::string(
+                       reflection_->GetCord(message_, optional_string_piece_)));
+  EXPECT_EQ("baz", std::string(reflection_->GetCord(message_, optional_cord_)));
+  EXPECT_EQ("moo", extensions_message_.GetExtension(
+                       unittest::optional_string_extension));
+
+  unittest::TestCord message;
+  const Descriptor* descriptor = unittest::TestCord::descriptor();
+  const Reflection* reflection = message.GetReflection();
+
+  reflection->SetString(&message,
+                        descriptor->FindFieldByName("optional_bytes_cord"),
+                        std::string("cord"));
+  EXPECT_TRUE(message.has_optional_bytes_cord());
+  EXPECT_EQ("cord", message.optional_bytes_cord());
+}
+
 TEST_F(GeneratedMessageReflectionCordAccessorsTest, SetOneofStringFromCord) {
   unittest::TestOneof2 message;
   const Descriptor* descriptor = unittest::TestOneof2::descriptor();
@@ -1659,6 +1730,75 @@ TEST_F(GeneratedMessageReflectionCordAccessorsTest, SetOneofStringFromCord) {
 
   reflection->SetString(&message, descriptor->FindFieldByName("foo_bytes_cord"),
                         absl::Cord("bytes_cord"));
+  EXPECT_TRUE(message.has_foo_bytes_cord());
+  EXPECT_EQ("bytes_cord", message.foo_bytes_cord());
+}
+
+TEST_F(GeneratedMessageReflectionCordAccessorsTest,
+       SetOneofStringFromStringView) {
+  unittest::TestOneof2 message;
+  const Descriptor* descriptor = unittest::TestOneof2::descriptor();
+  const Reflection* reflection = message.GetReflection();
+
+  reflection->SetStringView(&message, descriptor->FindFieldByName("foo_string"),
+                            absl::string_view("foo"));
+  EXPECT_TRUE(message.has_foo_string());
+  EXPECT_EQ("foo", message.foo_string());
+
+  reflection->SetStringView(&message, descriptor->FindFieldByName("foo_bytes"),
+                            absl::string_view("bytes"));
+  EXPECT_TRUE(message.has_foo_bytes());
+  EXPECT_EQ("bytes", message.foo_bytes());
+
+  reflection->SetStringView(&message, descriptor->FindFieldByName("foo_cord"),
+                            absl::string_view("cord"));
+  EXPECT_EQ("cord", std::string(reflection->GetCord(
+                        message, descriptor->FindFieldByName("foo_cord"))));
+
+  reflection->SetStringView(&message,
+                            descriptor->FindFieldByName("foo_string_piece"),
+                            absl::string_view("string_piece"));
+  EXPECT_EQ("string_piece",
+            reflection->GetCord(
+                message, descriptor->FindFieldByName("foo_string_piece")));
+
+  reflection->SetStringView(&message,
+                            descriptor->FindFieldByName("foo_bytes_cord"),
+                            absl::string_view("bytes_cord"));
+  EXPECT_TRUE(message.has_foo_bytes_cord());
+  EXPECT_EQ("bytes_cord", message.foo_bytes_cord());
+}
+
+TEST_F(GeneratedMessageReflectionCordAccessorsTest,
+       SetOneofStringFromRValueString) {
+  unittest::TestOneof2 message;
+  const Descriptor* descriptor = unittest::TestOneof2::descriptor();
+  const Reflection* reflection = message.GetReflection();
+
+  reflection->SetString(&message, descriptor->FindFieldByName("foo_string"),
+                        std::string("foo"));
+  EXPECT_TRUE(message.has_foo_string());
+  EXPECT_EQ("foo", message.foo_string());
+
+  reflection->SetString(&message, descriptor->FindFieldByName("foo_bytes"),
+                        std::string("bytes"));
+  EXPECT_TRUE(message.has_foo_bytes());
+  EXPECT_EQ("bytes", message.foo_bytes());
+
+  reflection->SetString(&message, descriptor->FindFieldByName("foo_cord"),
+                        std::string("cord"));
+  EXPECT_EQ("cord", std::string(reflection->GetCord(
+                        message, descriptor->FindFieldByName("foo_cord"))));
+
+  reflection->SetString(&message,
+                        descriptor->FindFieldByName("foo_string_piece"),
+                        std::string("string_piece"));
+  EXPECT_EQ("string_piece",
+            reflection->GetCord(
+                message, descriptor->FindFieldByName("foo_string_piece")));
+
+  reflection->SetString(&message, descriptor->FindFieldByName("foo_bytes_cord"),
+                        std::string("bytes_cord"));
   EXPECT_TRUE(message.has_foo_bytes_cord());
   EXPECT_EQ("bytes_cord", message.foo_bytes_cord());
 }

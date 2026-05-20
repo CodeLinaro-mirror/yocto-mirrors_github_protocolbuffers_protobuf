@@ -44,6 +44,22 @@ np_2_bool_array = np.zeros(shape=(2,), dtype=np.bool_)
 np_11_bool_array = np.zeros(shape=(1, 1), dtype=np.bool_)
 np_22_bool_array = np.zeros(shape=(2, 2), dtype=np.bool_)
 
+np_object_scalar = np.array(0, dtype=object)
+np_1_object_array_int = np.array([0], dtype=object)
+np_2_object_array_int = np.array([0, 1], dtype=object)
+np_11_object_array_int = np.array([[0]], dtype=object)
+np_22_object_array_int = np.array([[0, 1], [0, 1]], dtype=object)
+
+np_1_object_array_float = np.array([0.0], dtype=object)
+np_2_object_array_float = np.array([0.0, 1.0], dtype=object)
+np_11_object_array_float = np.array([[0.0]], dtype=object)
+np_22_object_array_float = np.array([[0.0, 1.0], [0.0, 1.0]], dtype=object)
+
+np_1_object_array_bool = np.array([False], dtype=object)
+np_2_object_array_bool = np.array([False, True], dtype=object)
+np_11_object_array_bool = np.array([[False]], dtype=object)
+np_22_object_array_bool = np.array([[False, True], [False, True]], dtype=object)
+
 
 @testing_refleaks.TestCase
 class NumpyIntProtoTest(unittest.TestCase):
@@ -55,6 +71,23 @@ class NumpyIntProtoTest(unittest.TestCase):
 
     message.repeated_uint64[:] = np_1_uint_array
     message.repeated_uint64[:] = np_2_uint_array
+
+  def testNumpyDim1ObjectArrayToRepeated_IsValid(self):
+    message.repeated_int64[:] = np_1_object_array_int
+    message.repeated_int64[:] = np_2_object_array_int
+    message.repeated_int64[:] = []
+    message.repeated_int64.extend(np_1_object_array_int)
+    message.repeated_int64.extend(np_2_object_array_int)
+
+  def testNumpyDim2ObjectArrayToRepeated_RaisesTypeError(self):
+    with self.assertRaises(TypeError):
+      message.repeated_int64[:] = np_11_object_array_int
+    with self.assertRaises(TypeError):
+      message.repeated_int64[:] = np_22_object_array_int
+    with self.assertRaises(TypeError):
+      message.repeated_int64.extend(np_11_object_array_int)
+    with self.assertRaises(TypeError):
+      message.repeated_int64.extend(np_22_object_array_int)
 
   # Assigning dim 2 ndarray of ints to repeated field should fail
   def testNumpyDim2IntArrayToRepeated_RaisesTypeError(self):
@@ -98,6 +131,14 @@ class NumpyIntProtoTest(unittest.TestCase):
     with self.assertRaises(TypeError):
       message.optional_uint64 = np_22_uint_array
 
+  def testNumpyObjectArrayToScalar_RaisesTypeError(self):
+    with self.assertRaises(TypeError):
+      message.optional_int64 = np_1_object_array_int
+    with self.assertRaises(TypeError):
+      message.optional_int64 = np_11_object_array_int
+    with self.assertRaises(TypeError):
+      message.optional_int64 = np_22_object_array_int
+
   # Assigning any ndarray of floats to scalar field should fail
   def testNumpyFloatArrayToScalar_RaisesTypeError(self):
     with self.assertRaises(TypeError):
@@ -115,6 +156,23 @@ class NumpyFloatProtoTest(unittest.TestCase):
   def testNumpyDim1FloatArrayToRepeated_IsValid(self):
     message.repeated_float[:] = np_1_float_array
     message.repeated_float[:] = np_2_float_array
+
+  def testNumpyDim1ObjectArrayToRepeated_IsValid(self):
+    message.repeated_float[:] = np_1_object_array_float
+    message.repeated_float[:] = np_2_object_array_float
+    message.repeated_float[:] = []
+    message.repeated_float.extend(np_1_object_array_float)
+    message.repeated_float.extend(np_2_object_array_float)
+
+  def testNumpyDim2ObjectArrayToRepeated_RaisesTypeError(self):
+    with self.assertRaises(TypeError):
+      message.repeated_float[:] = np_11_object_array_float
+    with self.assertRaises(TypeError):
+      message.repeated_float[:] = np_22_object_array_float
+    with self.assertRaises(TypeError):
+      message.repeated_float.extend(np_11_object_array_float)
+    with self.assertRaises(TypeError):
+      message.repeated_float.extend(np_22_object_array_float)
 
   # Assigning dim 2 ndarray of floats to repeated field should fail
   def testNumpyDim2FloatArrayToRepeated_RaisesTypeError(self):
@@ -136,6 +194,14 @@ class NumpyFloatProtoTest(unittest.TestCase):
     with self.assertRaises(TypeError):
       message.optional_float = np_22_float_array
 
+  def testNumpyObjectArrayToScalar_RaisesTypeError(self):
+    with self.assertRaises(TypeError):
+      message.optional_float = np_1_object_array_float
+    with self.assertRaises(TypeError):
+      message.optional_float = np_11_object_array_float
+    with self.assertRaises(TypeError):
+      message.optional_float = np_22_object_array_float
+
 
 @testing_refleaks.TestCase
 class NumpyBoolProtoTest(unittest.TestCase):
@@ -144,6 +210,23 @@ class NumpyBoolProtoTest(unittest.TestCase):
   def testNumpyDim1BoolArrayToRepeated_IsValid(self):
     message.repeated_bool[:] = np_1_bool_array
     message.repeated_bool[:] = np_2_bool_array
+
+  def testNumpyDim1ObjectArrayToRepeated_IsValid(self):
+    message.repeated_bool[:] = np_1_object_array_bool
+    message.repeated_bool[:] = np_2_object_array_bool
+    message.repeated_bool[:] = []
+    message.repeated_bool.extend(np_1_object_array_bool)
+    message.repeated_bool.extend(np_2_object_array_bool)
+
+  def testNumpyDim2ObjectArrayToRepeated_RaisesTypeError(self):
+    with self.assertRaises(TypeError):
+      message.repeated_bool[:] = np_11_object_array_bool
+    with self.assertRaises(TypeError):
+      message.repeated_bool[:] = np_22_object_array_bool
+    with self.assertRaises(TypeError):
+      message.repeated_bool.extend(np_11_object_array_bool)
+    with self.assertRaises(TypeError):
+      message.repeated_bool.extend(np_22_object_array_bool)
 
   # Assigning dim 2 ndarray of bool to repeated field should fail
   def testNumpyDim2BoolArrayToRepeated_RaisesTypeError(self):
@@ -164,6 +247,14 @@ class NumpyBoolProtoTest(unittest.TestCase):
       message.optional_bool = np_11_bool_array
     with self.assertRaises(TypeError):
       message.optional_bool = np_22_bool_array
+
+  def testNumpyObjectArrayToScalar_RaisesTypeError(self):
+    with self.assertRaises(TypeError):
+      message.optional_bool = np_1_object_array_bool
+    with self.assertRaises(TypeError):
+      message.optional_bool = np_11_object_array_bool
+    with self.assertRaises(TypeError):
+      message.optional_bool = np_22_object_array_bool
 
 
 @testing_refleaks.TestCase

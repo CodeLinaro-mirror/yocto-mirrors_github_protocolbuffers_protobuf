@@ -15,6 +15,7 @@ serialization code in the whole library.
 
 __author__ = 'gps@google.com (Gregory P. Smith)'
 
+import array
 import collections
 import copy
 import math
