@@ -37,7 +37,7 @@ typedef struct {
 static UPB_PRESERVE_MOST void _upb_FastDecoder_AddEnumValueToUnknown(
     upb_Decoder* d, upb_Message* msg, uint64_t data, uint64_t val,
     const upb_MiniTable* table) {
-  uint16_t field_index = upb_DecodeFastData_GetFieldIndex(data);
+  uint16_t field_index = upb_DecodeFastData_GetIndex(data);
   const upb_MiniTableField* field =
       upb_MiniTable_GetFieldByIndex(table, field_index);
   _upb_Decoder_AddEnumValueToUnknown(d, msg, field, val);
@@ -165,7 +165,7 @@ void upb_DecodeFast_ClosedEnum(upb_Decoder* d, const char** ptr,
                                upb_DecodeFastNext* ret,
                                upb_DecodeFast_Cardinality card,
                                upb_DecodeFast_TagSize tagsize, uint64_t data2) {
-  uint16_t field_index = upb_DecodeFastData_GetFieldIndex(*data);
+  uint16_t field_index = upb_DecodeFastData_GetIndex(*data);
   const upb_MiniTableField* field =
       upb_MiniTable_GetFieldByIndex(table, field_index);
   const upb_MiniTableEnum* enum_table = upb_MiniTable_GetSubEnumTable(field);
