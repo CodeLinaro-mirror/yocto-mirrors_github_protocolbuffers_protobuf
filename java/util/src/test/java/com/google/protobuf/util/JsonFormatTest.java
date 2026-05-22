@@ -2307,4 +2307,44 @@ public class JsonFormatTest {
     assertThat(JsonFormat.printer().print(message))
         .isEqualTo("{\n  \"optionalFloat\": -0.0,\n  \"optionalDouble\": -0.0\n}");
   }
+
+  @Test
+  public void testLegacyLenientDefault() throws Exception {
+    // By default, parser is lenient and accepts unquoted keys.
+    TestMap.Builder builder = TestMap.newBuilder();
+    JsonFormat.parser().merge("{int32ToInt32Map: {1: 2}}", builder);
+    assertThat(builder.getInt32ToInt32MapMap().get(1).intValue()).isEqualTo(2);
+  }
+
+  @Test
+  public void testStrictParsingRejectsMalformedJson() throws Exception {
+    // With legacyLenient(false), it should reject unquoted keys.
+    TestMap.Builder builder = TestMap.newBuilder();
+    assertThrows(
+        InvalidProtocolBufferException.class,
+        () ->
+            JsonFormat.parser()
+                .usingLegacyLenient(false)
+                .merge("{int32ToInt32Map: {1: 2}}", builder));
+  }
+
+  @Test
+  public void testLegacyLenientDefaultReader() throws Exception {
+    // By default, parser is lenient and accepts unquoted keys.
+    TestMap.Builder builder = TestMap.newBuilder();
+    JsonFormat.parser().merge(new StringReader("{int32ToInt32Map: {1: 2}}"), builder);
+    assertThat(builder.getInt32ToInt32MapMap().get(1).intValue()).isEqualTo(2);
+  }
+
+  @Test
+  public void testStrictParsingRejectsMalformedJsonReader() throws Exception {
+    // With legacyLenient(false), it should reject unquoted keys.
+    TestMap.Builder builder = TestMap.newBuilder();
+    assertThrows(
+        InvalidProtocolBufferException.class,
+        () ->
+            JsonFormat.parser()
+                .usingLegacyLenient(false)
+                .merge(new StringReader("{int32ToInt32Map: {1: 2}}"), builder));
+  }
 }

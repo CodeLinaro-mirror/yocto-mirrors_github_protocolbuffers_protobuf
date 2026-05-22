@@ -17,6 +17,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.Strictness;
 import com.google.gson.stream.JsonReader;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
@@ -489,7 +490,8 @@ public class JsonFormat {
         TypeRegistry.getEmptyTypeRegistry(),
         ExtensionRegistry.getEmptyRegistry(),
         false,
-        Parser.DEFAULT_RECURSION_LIMIT);
+        Parser.DEFAULT_RECURSION_LIMIT,
+        true);
   }
 
   /** A Parser parses the ProtoJSON format into a protobuf message. */
@@ -499,6 +501,7 @@ public class JsonFormat {
     private final ExtensionRegistry extensionRegistry;
     private final boolean ignoringUnknownFields;
     private final int recursionLimit;
+    private final boolean legacyLenient;
 
     // The default parsing recursion limit is aligned with the proto binary parser.
     private static final int DEFAULT_RECURSION_LIMIT = 100;
@@ -508,12 +511,14 @@ public class JsonFormat {
         TypeRegistry oldRegistry,
         ExtensionRegistry extensionRegistry,
         boolean ignoreUnknownFields,
-        int recursionLimit) {
+        int recursionLimit,
+        boolean legacyLenient) {
       this.registry = registry;
       this.oldRegistry = oldRegistry;
       this.extensionRegistry = extensionRegistry;
       this.ignoringUnknownFields = ignoreUnknownFields;
       this.recursionLimit = recursionLimit;
+      this.legacyLenient = legacyLenient;
     }
 
     /**
@@ -532,7 +537,8 @@ public class JsonFormat {
           oldRegistry,
           extensionRegistry,
           ignoringUnknownFields,
-          recursionLimit);
+          recursionLimit,
+          legacyLenient);
     }
 
     /**
@@ -547,7 +553,12 @@ public class JsonFormat {
         throw new IllegalArgumentException("Only one registry is allowed.");
       }
       return new Parser(
-          registry, oldRegistry, extensionRegistry, ignoringUnknownFields, recursionLimit);
+          registry,
+          oldRegistry,
+          extensionRegistry,
+          ignoringUnknownFields,
+          recursionLimit,
+          legacyLenient);
     }
 
     /**
@@ -559,7 +570,12 @@ public class JsonFormat {
         throw new NullPointerException();
       }
       return new Parser(
-          registry, oldRegistry, extensionRegistry, ignoringUnknownFields, recursionLimit);
+          registry,
+          oldRegistry,
+          extensionRegistry,
+          ignoringUnknownFields,
+          recursionLimit,
+          legacyLenient);
     }
 
     /**
@@ -567,7 +583,30 @@ public class JsonFormat {
      * encountered. The new Parser clones all other configurations from this Parser.
      */
     public Parser ignoringUnknownFields() {
-      return new Parser(this.registry, oldRegistry, extensionRegistry, true, recursionLimit);
+      return new Parser(
+          this.registry, oldRegistry, extensionRegistry, true, recursionLimit, legacyLenient);
+    }
+
+    /**
+     * Sets whether to use the legacy lenient JSON parsing mode.
+     *
+     * <p>If {@code true} (the default), the parser will use {@link Strictness#LEGACY_STRICT} which
+     * GSON's JsonParser internally upgrades to {@link Strictness#LENIENT} for backward
+     * compatibility, silently accepting malformed JSON (e.g., unquoted keys, trailing commas).
+     *
+     * <p>If {@code false}, {@link Strictness#STRICT} is used, which strictly enforces RFC 8259.
+     *
+     * <p>The default is currently {@code true}. We intend to change the default to {@code false} in
+     * a future release.
+     */
+    public Parser usingLegacyLenient(boolean legacyLenient) {
+      return new Parser(
+          registry,
+          oldRegistry,
+          extensionRegistry,
+          ignoringUnknownFields,
+          recursionLimit,
+          legacyLenient);
     }
 
     /**
@@ -580,7 +619,12 @@ public class JsonFormat {
       // TODO: Investigate the allocation overhead and optimize for
       // mobile.
       new ParserImpl(
-              registry, oldRegistry, extensionRegistry, ignoringUnknownFields, recursionLimit)
+              registry,
+              oldRegistry,
+              extensionRegistry,
+              ignoringUnknownFields,
+              recursionLimit,
+              legacyLenient)
           .merge(json, builder);
     }
 
@@ -595,14 +639,24 @@ public class JsonFormat {
       // TODO: Investigate the allocation overhead and optimize for
       // mobile.
       new ParserImpl(
-              registry, oldRegistry, extensionRegistry, ignoringUnknownFields, recursionLimit)
+              registry,
+              oldRegistry,
+              extensionRegistry,
+              ignoringUnknownFields,
+              recursionLimit,
+              legacyLenient)
           .merge(json, builder);
     }
 
     // For testing only.
     Parser usingRecursionLimit(int recursionLimit) {
       return new Parser(
-          registry, oldRegistry, extensionRegistry, ignoringUnknownFields, recursionLimit);
+          registry,
+          oldRegistry,
+          extensionRegistry,
+          ignoringUnknownFields,
+          recursionLimit,
+          legacyLenient);
     }
   }
 
@@ -1411,6 +1465,7 @@ public class JsonFormat {
     private final ExtensionRegistry extensionRegistry;
     private final boolean ignoringUnknownFields;
     private final int recursionLimit;
+    private final boolean legacyLenient;
     private int currentDepth;
 
     ParserImpl(
@@ -1418,19 +1473,21 @@ public class JsonFormat {
         TypeRegistry oldRegistry,
         ExtensionRegistry extensionRegistry,
         boolean ignoreUnknownFields,
-        int recursionLimit) {
+        int recursionLimit,
+        boolean legacyLenient) {
       this.registry = registry;
       this.oldRegistry = oldRegistry;
       this.extensionRegistry = extensionRegistry;
       this.ignoringUnknownFields = ignoreUnknownFields;
       this.recursionLimit = recursionLimit;
+      this.legacyLenient = legacyLenient;
       this.currentDepth = 0;
     }
 
     void merge(Reader json, Message.Builder builder) throws IOException {
       try {
         JsonReader reader = new JsonReader(json);
-        reader.setLenient(false);
+        reader.setStrictness(legacyLenient ? Strictness.LEGACY_STRICT : Strictness.STRICT);
         merge(JsonParser.parseReader(reader), builder);
       } catch (JsonIOException e) {
         // Unwrap IOException.
@@ -1448,7 +1505,7 @@ public class JsonFormat {
     void merge(String json, Message.Builder builder) throws InvalidProtocolBufferException {
       try {
         JsonReader reader = new JsonReader(new StringReader(json));
-        reader.setLenient(false);
+        reader.setStrictness(legacyLenient ? Strictness.LEGACY_STRICT : Strictness.STRICT);
         merge(JsonParser.parseReader(reader), builder);
       } catch (RuntimeException e) {
         // We convert all exceptions from JSON parsing to our own exceptions.
