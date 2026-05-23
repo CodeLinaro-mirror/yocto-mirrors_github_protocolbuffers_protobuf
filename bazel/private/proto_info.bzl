@@ -9,6 +9,33 @@
 Definition of ProtoInfo provider.
 """
 
+visibility([
+    "//bazel/common",
+    "//bazel/private",
+])
+
+def _create_file_descriptor_set_extensions(*, source_code_info):
+    if type(source_code_info) != "File":
+        fail("file_descriptor_set_extensions.source_code_info expected to be a File")
+    return {"source_code_info": source_code_info}
+
+FileDescriptorSetExtensionsInfo, _unused_raw_file_descriptor_set_extensions_info = provider(
+    doc = """Internal only; do not use. Split FileDescriptorSet outputs carrying metadata about
+        `direct_descriptor_set` that is omitted from the primary descriptor set.""",
+    fields = {
+        "source_code_info": "(File) FileDescriptorSet containing only SourceCodeInfo and file paths.",
+    },
+    init = _create_file_descriptor_set_extensions,
+)
+
+_ProtoInternalInfo = provider(
+    doc = "Internal only; do not use. Private implementation details on `ProtoInfo.internal_do_not_use`.",
+    fields = {
+        "file_descriptor_set_extensions": "(FileDescriptorSetExtensionsInfo|struct|None) Split descriptor set outputs.",
+        "option_deps_descriptor_sets": "(depset[File]) Transitive regular descriptor sets for direct `option_deps`.",
+    },
+)
+
 def _uniq(iterable):
     unique_elements = {element: None for element in iterable}
     return list(unique_elements.keys())
@@ -34,7 +61,7 @@ def _from_root(root, repo, relpath):
         #   - with sibling layout: `{root}/package/path`
         return _join(root, "" if repo.startswith("../") else repo, relpath)
 
-def _create_proto_info(*, srcs, deps, descriptor_set, option_deps = [], proto_path = "", workspace_root = "", bin_dir = None, allow_exports = None, extension_declarations = []):
+def _create_proto_info(*, srcs, deps, descriptor_set, file_descriptor_set_extensions = None, option_deps = [], proto_path = "", workspace_root = "", bin_dir = None, allow_exports = None, extension_declarations = []):
     """Constructs ProtoInfo.
 
     Args:
@@ -42,6 +69,8 @@ def _create_proto_info(*, srcs, deps, descriptor_set, option_deps = [], proto_pa
       deps: ([ProtoInfo]) List of dependencies
       option_deps: ([ProtoInfo]) List of option dependencies
       descriptor_set: (File) Descriptor set for this Proto
+      file_descriptor_set_extensions: (struct) Internal only; do not use. Struct
+        containing split descriptor set files
       proto_path: (str) Path that should be stripped from files in srcs. When
         stripping is needed, the files should be symlinked into `_virtual_imports/target_name`
         directory. Only such paths are accepted.
@@ -67,6 +96,16 @@ def _create_proto_info(*, srcs, deps, descriptor_set, option_deps = [], proto_pa
         fail("option_deps parameter should not be set when srcs is empty")
     if type(descriptor_set) != "File":
         fail("descriptor_set parameter expected to be a File")
+    if file_descriptor_set_extensions != None:
+        if type(file_descriptor_set_extensions) != "struct":
+            fail("file_descriptor_set_extensions parameter expected to be a struct")
+        for field in dir(file_descriptor_set_extensions):
+            if field in ("to_json", "to_proto"):
+                continue
+            if field != "source_code_info":
+                fail("file_descriptor_set_extensions has unsupported field '%s'" % field)
+        if getattr(file_descriptor_set_extensions, "source_code_info", None) != None and type(file_descriptor_set_extensions.source_code_info) != "File":
+            fail("file_descriptor_set_extensions.source_code_info expected to be a File")
     if proto_path:
         if "_virtual_imports/" not in proto_path:
             fail("proto_path needs to contain '_virtual_imports' directory")
@@ -116,6 +155,17 @@ def _create_proto_info(*, srcs, deps, descriptor_set, option_deps = [], proto_pa
         transitive = [dep.transitive_extension_declarations for dep in protoc_deps],
     )
 
+    internal_do_not_use = _ProtoInternalInfo(
+        file_descriptor_set_extensions = file_descriptor_set_extensions,
+        # Direct option_deps (and their transitive regular deps) are needed by
+        # protoc to build its DescriptorPool during code generation. We could
+        # theoretically try to prune option_deps in the future, but that would
+        # require too much complexity to do now.
+        option_deps_descriptor_sets = depset(
+            transitive = [dep.transitive_descriptor_sets for dep in option_deps],
+        ),
+    )
+
     proto_info = dict(
         direct_sources = srcs,
         transitive_sources = transitive_sources,
@@ -125,6 +175,7 @@ def _create_proto_info(*, srcs, deps, descriptor_set, option_deps = [], proto_pa
         transitive_proto_path = transitive_proto_path,
         check_deps_sources = check_deps_sources,
         transitive_extension_declarations = transitive_extension_declarations,
+        internal_do_not_use = internal_do_not_use,
     )
     if allow_exports:
         proto_info["allow_exports"] = allow_exports
@@ -169,6 +220,21 @@ ProtoInfo, _ = provider(
         "transitive_extension_declarations": """(depset[File]) The extension
             declaration files associated with this rule and all transitive
             dependencies.""",
+        "internal_do_not_use": """(struct) Private implementation details for protobuf Bazel rules.
+            Do not access or depend on this field; its contents may change or be removed without
+            notice.
+            Fields:
+               file_descriptor_set_extensions: (struct|None) Struct containing FileDescriptorSet
+                 paths with metadata about direct_descriptor_set not normally included in the
+                 primary FileDescriptorSet output.
+                 Supported fields:
+                    source_code_info: (File) FileDescriptorSet containing only SourceCodeInfo and
+                      file paths.
+               option_deps_descriptor_sets: (depset[File]) Transitive regular descriptor sets for
+                 each direct `option_dep`, required for `protoc` to build its `DescriptorPool`. We
+                 could theoretically try to prune `option_deps` in the future, but that would
+                 require too much complexity to do now.
+            """,
     },
     init = _create_proto_info,
 )

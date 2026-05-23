@@ -21,6 +21,9 @@ def bazel_proto_library_test_suite(name):
         _test_descriptor_sets_rule_with_srcs_calls_protoc,
         _test_descriptor_sets_rule_without_srcs_writes_empty_file,
         _test_descriptor_sets_are_exposed_in_provider,
+        _test_internal_do_not_use_fields,
+        _test_proto_info_forwards_file_descriptor_set_extensions,
+        _test_proto_info_rejects_invalid_file_descriptor_set_extensions,
         _test_descriptor_set_output_strict_deps,
         _test_descriptor_set_output_strict_deps_multiple_srcs,
         _test_strip_import_prefix_without_deps,
@@ -174,6 +177,151 @@ def _test_descriptor_sets_are_exposed_in_provider_impl(env, targets):
     env.expect.that_depset_of_files(provider.transitive_descriptor_sets).contains_exactly([
         package + "/" + name + "_no_srcs-descriptor-set.proto.bin",
     ])
+
+def _test_internal_do_not_use_fields(name):
+    util.helper_target(proto_library, name = name + "_opt_dep_dep", srcs = ["opt_dep_dep.proto"])
+    util.helper_target(proto_library, name = name + "_opt_inner_opt", srcs = ["opt_inner_opt.proto"])
+    util.helper_target(
+        proto_library,
+        name = name + "_direct_opt",
+        srcs = ["direct_opt.proto"],
+        deps = [name + "_opt_dep_dep"],
+        option_deps = [name + "_opt_inner_opt"],
+    )
+    util.helper_target(proto_library, name = name + "_dep_opt", srcs = ["dep_opt.proto"])
+    util.helper_target(
+        proto_library,
+        name = name + "_regular_dep",
+        srcs = ["regular_dep.proto"],
+        option_deps = [name + "_dep_opt"],
+    )
+    util.helper_target(
+        proto_library,
+        name = name + "_top",
+        srcs = ["top.proto"],
+        deps = [name + "_regular_dep"],
+        option_deps = [name + "_direct_opt"],
+    )
+
+    util.helper_target(
+        proto_library,
+        name = name + "_alias_empty",
+        deps = [name + "_regular_dep"],
+    )
+
+    analysis_test(
+        name = name,
+        target = [
+            name + "_top",
+            name + "_opt_dep_dep",
+            name + "_alias_empty",
+        ],
+        impl = _test_internal_do_not_use_fields_impl,
+    )
+
+def _test_internal_do_not_use_fields_impl(env, targets):
+    top = targets[0]
+    package = top.label.package
+    name = top.label.name[:-len("_top")]
+    provider = top[ProtoInfo]
+
+    env.expect.that_bool(hasattr(provider, "file_descriptor_set_extensions")).equals(False)
+    env.expect.that_bool(hasattr(provider, "option_deps_descriptor_sets")).equals(False)
+    env.expect.that_bool(hasattr(provider, "transitive_protoc_descriptor_set")).equals(False)
+
+    internal = provider.internal_do_not_use
+
+    env.expect.that_bool(internal.file_descriptor_set_extensions == None).equals(True)
+    env.expect.that_depset_of_files(provider.transitive_descriptor_sets).contains_exactly([
+        package + "/" + name + "_top-descriptor-set.proto.bin",
+        package + "/" + name + "_regular_dep-descriptor-set.proto.bin",
+    ])
+    env.expect.that_depset_of_files(internal.option_deps_descriptor_sets).contains_exactly([
+        package + "/" + name + "_direct_opt-descriptor-set.proto.bin",
+        package + "/" + name + "_opt_dep_dep-descriptor-set.proto.bin",
+    ])
+
+    no_opt = targets[1]
+    env.expect.that_depset_of_files(no_opt[ProtoInfo].internal_do_not_use.option_deps_descriptor_sets).contains_exactly([])
+
+    alias_empty = targets[2]
+    alias_internal = alias_empty[ProtoInfo].internal_do_not_use
+    env.expect.that_bool(alias_internal.file_descriptor_set_extensions == None).equals(True)
+    env.expect.that_depset_of_files(alias_internal.option_deps_descriptor_sets).contains_exactly([])
+    env.expect.that_int(len(alias_empty.actions)).equals(1)
+
+def _forward_proto_info_impl(ctx):
+    out = ctx.actions.declare_file(ctx.label.name + "-descriptor-set.proto.bin")
+    ctx.actions.write(out, "")
+    if ctx.attr.invalid_extensions:
+        ext = struct(bad_field = out)
+    elif ctx.attr.dep:
+        ext = ctx.attr.dep[ProtoInfo].internal_do_not_use.file_descriptor_set_extensions
+    else:
+        sci = ctx.actions.declare_file(ctx.label.name + "-source_code_info-set.proto.bin")
+        ctx.actions.write(sci, "")
+        ext = struct(source_code_info = sci)
+    return [
+        ProtoInfo(
+            srcs = ctx.files.srcs,
+            deps = [],
+            descriptor_set = out,
+            file_descriptor_set_extensions = ext,
+            workspace_root = ctx.label.workspace_root,
+        ),
+    ]
+
+_forward_proto_info = rule(
+    implementation = _forward_proto_info_impl,
+    attrs = {
+        "srcs": attr.label_list(allow_files = [".proto"]),
+        "dep": attr.label(providers = [ProtoInfo]),
+        "invalid_extensions": attr.bool(default = False),
+    },
+    provides = [ProtoInfo],
+)
+
+def _test_proto_info_forwards_file_descriptor_set_extensions(name):
+    util.helper_target(
+        _forward_proto_info,
+        name = name + "_struct",
+        srcs = ["custom.proto"],
+    )
+
+    analysis_test(
+        name = name,
+        target = [
+            name + "_struct",
+        ],
+        impl = _test_proto_info_forwards_file_descriptor_set_extensions_impl,
+    )
+
+def _test_proto_info_forwards_file_descriptor_set_extensions_impl(env, targets):
+    custom_target = targets[0]
+    prefix = custom_target.label.name[:-len("_struct")]
+    custom_sci = custom_target[ProtoInfo].internal_do_not_use.file_descriptor_set_extensions.source_code_info
+    env.expect.that_file(custom_sci).basename().equals(
+        prefix + "_struct-source_code_info-set.proto.bin",
+    )
+
+def _test_proto_info_rejects_invalid_file_descriptor_set_extensions(name):
+    util.helper_target(
+        _forward_proto_info,
+        name = name + "_bad",
+        srcs = ["bad.proto"],
+        invalid_extensions = True,
+    )
+    analysis_test(
+        name = name,
+        target = name + "_bad",
+        impl = _test_proto_info_rejects_invalid_file_descriptor_set_extensions_impl,
+        expect_failure = True,
+    )
+
+def _test_proto_info_rejects_invalid_file_descriptor_set_extensions_impl(env, target):
+    env.expect.that_target(target).failures().contains_predicate(
+        matching.str_matches("*file_descriptor_set_extensions has unsupported field 'bad_field'*"),
+    )
 
 def _test_descriptor_set_output_strict_deps(name):
     util.helper_target(proto_library, name = name + "_nodeps", srcs = ["nodeps.proto"])

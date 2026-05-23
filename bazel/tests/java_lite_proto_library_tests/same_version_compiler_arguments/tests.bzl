@@ -8,13 +8,19 @@
 """Tests for same version compiler arguments."""
 
 load("@rules_java//java/common:java_info.bzl", "JavaInfo")
+load("@rules_testing//lib:truth.bzl", "matching")
 
 def _test_same_version_compiler_arguments(env, target):
     genproto = env.expect.that_target(target).action_named("GenProto")
     genproto.argv().contains("{package}/baz.proto")
+    genproto.argv().contains_predicate(
+        matching.any(
+            matching.equals_wrapper("-I."),
+            matching.equals_wrapper("--descriptor_set_in"),
+        ),
+    )
     genproto.argv().contains_at_least([
         "--java_out=lite:{bindir}/{package}/baz_proto-lite-src.jar",
-        "-I.",
         "{package}/baz.proto",
     ]).in_order()
     genproto.argv().not_contains("--java_out=lite,immutable:{bindir}/{package}/foo_proto-lite-src.jar")
