@@ -75,7 +75,9 @@ void upb_DecodeFast_Message(upb_Decoder* d, const char** ptr, upb_Message* msg,
                                        card == kUpb_DecodeFast_Repeated};
 
   if (subtablep == NULL) {
-    UPB_DECODEFAST_EXIT(kUpb_DecodeFastNext_FallbackToMiniTable, ret);
+    // Unlinked messages are treated as unknown fields. Go straight to unknown
+    // decoder.
+    UPB_DECODEFAST_EXIT(kUpb_DecodeFastNext_DecodeUnknown, ret);
     return;
   }
 
