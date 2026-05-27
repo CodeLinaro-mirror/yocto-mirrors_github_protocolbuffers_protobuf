@@ -93,6 +93,8 @@ class _ExtensionDict(object):
     # WARNING:  We are relying on setdefault() being atomic.  This is true
     #   in CPython but we haven't investigated others.  This warning appears
     #   in several other locations in this file.
+    if self._extended_message._frozen:
+      result._SetFrozen()
     result = self._extended_message._fields.setdefault(extension_handle, result)
 
     return result
@@ -134,6 +136,8 @@ class _ExtensionDict(object):
 
     _VerifyExtensionHandle(self._extended_message, extension_handle)
 
+    self._extended_message._AssureWritable()
+
     if (
         extension_handle.is_repeated
         or extension_handle.cpp_type == FieldDescriptor.CPPTYPE_MESSAGE
@@ -154,6 +158,7 @@ class _ExtensionDict(object):
     self._extended_message._Modified()
 
   def __delitem__(self, extension_handle):
+    self._extended_message._AssureWritable()
     self._extended_message.ClearExtension(extension_handle)
 
   def _FindExtensionByName(self, name):

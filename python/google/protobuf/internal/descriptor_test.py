@@ -280,12 +280,13 @@ class DescriptorTest(unittest.TestCase):
         self.my_service.GetOptions(), descriptor_pb2.ServiceOptions()
     )
 
-  @unittest.skipIf(
-      api_implementation.Type() == 'python', 'Not fixed yet in pure Python'
-  )
   @unittest.skipIf(api_implementation.Type() == 'cpp', 'Not fixed yet in C++')
   @unittest.skipIf(
       api_implementation.Type() == 'upb',
+      'Needs to wait for a breaking change release in OSS'
+  )
+  @unittest.skipIf(
+      api_implementation.Type() == 'python',
       'Needs to wait for a breaking change release in OSS'
   )
   def testModifyFrozenMessage(self):
