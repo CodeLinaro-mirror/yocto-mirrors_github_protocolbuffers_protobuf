@@ -21,6 +21,7 @@ cc_library(
     hdrs = [
         "decode.h",
         "encode.h",
+        "enum.h",
     ],
     copts = UPB_DEFAULT_COPTS,
     features = UPB_DEFAULT_FEATURES,
@@ -42,6 +43,8 @@ cc_test(
     srcs = ["decode_test.cc"],
     deps = [
         ":json",
+        ":json_enumval_custom_string_upb_proto",
+        ":json_enumval_custom_string_upb_reflection_proto",
         ":test_upb_proto",
         ":test_upb_proto_reflection",
         "//:struct_upb_proto",
@@ -58,6 +61,8 @@ cc_test(
     srcs = ["encode_test.cc"],
     deps = [
         ":json",
+        ":json_enumval_custom_string_upb_proto",
+        ":json_enumval_custom_string_upb_reflection_proto",
         ":test_upb_proto",
         ":test_upb_proto_reflection",
         "//:struct_upb_proto",
@@ -88,6 +93,18 @@ upb_proto_reflection_library(
     deps = [":test_proto"],
 )
 
+upb_c_proto_library(
+    name = "json_enumval_custom_string_upb_proto",
+    testonly = 1,
+    deps = ["//src/google/protobuf/json:json_enumval_custom_string_proto"],
+)
+
+upb_proto_reflection_library(
+    name = "json_enumval_custom_string_upb_reflection_proto",
+    testonly = 1,
+    deps = ["//src/google/protobuf/json:json_enumval_custom_string_proto"],
+)
+
 filegroup(
     name = "test_srcs",
     srcs = glob(
@@ -105,6 +122,6 @@ filegroup(
         [
             "**/*test.proto",
         ],
-    ),
+    ) + ["//src/google/protobuf/json:json_enumval_custom_string_proto"],
     visibility = ["//upb:__pkg__"],
 )
