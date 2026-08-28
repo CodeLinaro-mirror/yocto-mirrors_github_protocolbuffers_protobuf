@@ -342,6 +342,64 @@ module CommonTests
     end
   end
 
+  def test_rptfield_eq
+    # Arm 1: Comparison to empty Array []
+    assert_equal [], Google::Protobuf::RepeatedField.new(:int32)
+    assert_equal Google::Protobuf::RepeatedField.new(:int32), []
+    assert_equal [], Google::Protobuf::RepeatedField.new(:int64)
+    assert_equal Google::Protobuf::RepeatedField.new(:int64), []
+    assert_equal [], Google::Protobuf::RepeatedField.new(:string)
+    assert_equal Google::Protobuf::RepeatedField.new(:string), []
+    assert_equal [], Google::Protobuf::RepeatedField.new(:message, proto_module::TestMessage)
+    assert_equal Google::Protobuf::RepeatedField.new(:message, proto_module::TestMessage), []
+    assert_equal [], Google::Protobuf::RepeatedField.new(:enum, proto_module::TestEnum)
+    assert_equal Google::Protobuf::RepeatedField.new(:enum, proto_module::TestEnum), []
+
+    # Same-type comparisons (baseline)
+    l1 = Google::Protobuf::RepeatedField.new(:int32)
+    l2 = Google::Protobuf::RepeatedField.new(:int32)
+    assert_equal l1, l2
+    l1.push 1
+    l2.push 1
+    assert_equal l1, l2
+    assert_equal [1], l1
+    assert_equal l1, [1]
+
+    # Arm 2: Comparison to empty RepeatedField of different internal type
+    if !defined?(JRUBY_VERSION) && Google::Protobuf::IMPLEMENTATION == :NATIVE
+      # CRuby Native enforces strict element type & descriptor equality
+      refute_equal Google::Protobuf::RepeatedField.new(:int32), Google::Protobuf::RepeatedField.new(:int64)
+      refute_equal Google::Protobuf::RepeatedField.new(:int32), Google::Protobuf::RepeatedField.new(:string)
+      refute_equal Google::Protobuf::RepeatedField.new(:int32), Google::Protobuf::RepeatedField.new(:message, proto_module::TestMessage)
+      refute_equal Google::Protobuf::RepeatedField.new(:message, proto_module::TestMessage), Google::Protobuf::RepeatedField.new(:message, proto_module::TestMessage2)
+    else
+      # JRuby Native and FFI (at HEAD) evaluate empty repeated fields of different types as equal
+      assert_equal Google::Protobuf::RepeatedField.new(:int32), Google::Protobuf::RepeatedField.new(:int64)
+      assert_equal Google::Protobuf::RepeatedField.new(:int32), Google::Protobuf::RepeatedField.new(:string)
+      assert_equal Google::Protobuf::RepeatedField.new(:int32), Google::Protobuf::RepeatedField.new(:message, proto_module::TestMessage)
+      assert_equal Google::Protobuf::RepeatedField.new(:message, proto_module::TestMessage), Google::Protobuf::RepeatedField.new(:message, proto_module::TestMessage2)
+    end
+
+    # Arm 3: Comparison to non-empty RepeatedField of different internal type
+    if Google::Protobuf::IMPLEMENTATION == :FFI
+      omit "FFI RepeatedField#== crashes on mismatched element types at HEAD"
+    elsif defined?(JRUBY_VERSION) && Google::Protobuf::IMPLEMENTATION == :NATIVE
+      # JRuby Native delegates RepeatedField#== to Array#==, ignoring protobuf types
+      assert_equal Google::Protobuf::RepeatedField.new(:int32, [1]), Google::Protobuf::RepeatedField.new(:int64, [1])
+    else
+      # CRuby Native enforces strict type equality
+      refute_equal Google::Protobuf::RepeatedField.new(:int32, [1]), Google::Protobuf::RepeatedField.new(:int64, [1])
+    end
+
+    # Arm 3 where elements themselves are unequal in Ruby
+    if Google::Protobuf::IMPLEMENTATION != :FFI
+      msg1 = Google::Protobuf::RepeatedField.new(:message, proto_module::TestMessage, [proto_module::TestMessage.new])
+      msg2 = Google::Protobuf::RepeatedField.new(:message, proto_module::TestMessage2, [proto_module::TestMessage2.new])
+      refute_equal msg1, msg2
+      refute_equal Google::Protobuf::RepeatedField.new(:int32, [1]), msg1
+    end
+  end
+
   def test_rptfield_array_ducktyping
     l = Google::Protobuf::RepeatedField.new(:int32)
     length_methods = %w(count length size)
@@ -564,6 +622,40 @@ module CommonTests
     refute_same m, m2
     refute_same m["a"], m2["a"]
     refute_same m["b"], m2["b"]
+  end
+
+  def test_map_eq
+    # Arm 1: Comparison to empty Hash {}
+    assert_equal Google::Protobuf::Map.new(:string, :int32), {}
+    assert_equal Google::Protobuf::Map.new(:string, :int64), {}
+    assert_equal Google::Protobuf::Map.new(:int32, :string), {}
+    assert_equal Google::Protobuf::Map.new(:string, :message, proto_module::TestMessage), {}
+    assert_equal Google::Protobuf::Map.new(:string, :enum, proto_module::TestEnum), {}
+
+    # Same-type comparisons (baseline)
+    m1 = Google::Protobuf::Map.new(:string, :int32)
+    m2 = Google::Protobuf::Map.new(:string, :int32)
+    assert_equal m1, m2
+    m1["a"] = 1
+    m2["a"] = 1
+    assert_equal m1, m2
+    assert_equal m1, {"a" => 1}
+
+    # Arm 2: Comparison to empty Map of different internal type (strict across all backends)
+    refute_equal Google::Protobuf::Map.new(:string, :int32), Google::Protobuf::Map.new(:string, :int64)
+    refute_equal Google::Protobuf::Map.new(:string, :int32), Google::Protobuf::Map.new(:int32, :int32)
+    refute_equal Google::Protobuf::Map.new(:string, :message, proto_module::TestMessage),
+                 Google::Protobuf::Map.new(:string, :message, proto_module::TestMessage2)
+    refute_equal Google::Protobuf::Map.new(:string, :enum, proto_module::TestEnum),
+                 Google::Protobuf::Map.new(:string, :int32)
+
+    # Arm 3: Comparison to non-empty Map of different internal type (strict across all backends)
+    refute_equal Google::Protobuf::Map.new(:string, :int32, {"a" => 1}),
+                 Google::Protobuf::Map.new(:string, :int64, {"a" => 1})
+    refute_equal Google::Protobuf::Map.new(:string, :int32, {"1" => 1}),
+                 Google::Protobuf::Map.new(:int32, :int32, {1 => 1})
+    refute_equal Google::Protobuf::Map.new(:string, :message, proto_module::TestMessage, {"a" => proto_module::TestMessage.new}),
+                 Google::Protobuf::Map.new(:string, :message, proto_module::TestMessage2, {"a" => proto_module::TestMessage2.new})
   end
 
   def test_oneof_descriptors
