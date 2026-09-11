@@ -154,7 +154,6 @@ def internal_py_test(deps = [], **kwargs):
             "@com_google_absl_py//absl/testing:parameterized",
         ],
         target_compatible_with = select({
-            "@system_python//:supported": [],
             "//conditions:default": ["@platforms//:incompatible"],
         }),
         **kwargs

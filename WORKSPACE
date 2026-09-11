@@ -199,7 +199,7 @@ switched_rules_by_language(
     cc = True,
 )
 
-load("@system_python//:pip.bzl", "pip_parse")
+# load("@system_python//:pip.bzl", "pip_parse")
 
 pip_parse(
     name = "protobuf_pip_deps",
