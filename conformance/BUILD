@@ -63,6 +63,7 @@ cc_library(
         ":conformance_cc_proto",
         ":failure_list_trie_node",
         ":fork_pipe_runner",
+        ":recording_test_runner",
         ":test_runner",
         "//src/google/protobuf",
         "//src/google/protobuf:descriptor_legacy",
@@ -75,6 +76,7 @@ cc_library(
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:str_format",
+        "@abseil-cpp//absl/types:optional",
     ],
 )
 
@@ -122,6 +124,7 @@ test_suite(
         "binary_wireformat_test",
         "failure_list_trie_node_test",
         "naming_test",
+        "recording_test_runner_test",
         "test_manager_test",
         "testee_test",
     ],
@@ -206,6 +209,35 @@ cc_library(
 )
 
 cc_library(
+    name = "recording_test_runner",
+    srcs = ["recording_test_runner.cc"],
+    hdrs = ["recording_test_runner.h"],
+    deps = [
+        ":conformance_cc_proto",
+        ":test_runner",
+        "//src/google/protobuf",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/base:nullability",
+        "@abseil-cpp//absl/strings:str_format",
+        "@abseil-cpp//absl/strings:string_view",
+    ],
+)
+
+cc_test(
+    name = "recording_test_runner_test",
+    srcs = ["recording_test_runner_test.cc"],
+    deps = [
+        ":conformance_cc_proto",
+        ":recording_test_runner",
+        ":test_runner",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:string_view",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "binary_wireformat",
     testonly = 1,
     srcs = ["binary_wireformat.cc"],
@@ -219,13 +251,13 @@ cc_library(
 
 cc_library(
     name = "test_manager",
-    testonly = True,
+    testonly = 1,
     srcs = ["test_manager.cc"],
     hdrs = ["test_manager.h"],
     deps = [
         ":conformance_cc_proto",
         ":failure_list_trie_node",
-        "//src/google/protobuf/stubs",
+        "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/container:btree",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/container:flat_hash_set",
@@ -234,6 +266,7 @@ cc_library(
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:string_view",
+        "@abseil-cpp//absl/types:optional",
     ],
 )
 
@@ -314,9 +347,17 @@ cc_test(
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/types:optional",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
     ],
+)
+
+cc_library(
+    name = "global_test_environment",
+    testonly = 1,
+    hdrs = ["global_test_environment.h"],
+    deps = [":test_manager"],
 )
 
 cc_test(
