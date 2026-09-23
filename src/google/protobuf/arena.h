@@ -571,28 +571,27 @@ class PROTOBUF_EXPORT PROTOBUF_ALIGNAS(8)
     // protobuf container types like RepeatedPtrField and Map. It is internal to
     // protobuf and is not guaranteed to be stable. Non-proto types should not
     // rely on this protocol.
-    template <typename U>
-    static char DestructorSkippable(
-        const typename U::DestructorSkippable_* PROTOBUF_NULLABLE);
-    template <typename U>
-    static double DestructorSkippable(...);
-
-    typedef std::integral_constant<
-        bool, sizeof(DestructorSkippable<T>(static_cast<const T*>(nullptr))) ==
-                      sizeof(char) ||
-                  std::is_trivially_destructible<T>::value>
-        is_destructor_skippable;
+    template <typename U, typename = void>
+    struct has_destructor_skippable : std::false_type {};
 
     template <typename U>
-    static char ArenaConstructable(
-        const typename U::InternalArenaConstructable_* PROTOBUF_NULLABLE);
-    template <typename U>
-    static double ArenaConstructable(...);
+    struct has_destructor_skippable<
+        U, std::void_t<typename U::DestructorSkippable_>> : std::true_type {};
 
-    typedef std::integral_constant<bool, sizeof(ArenaConstructable<T>(
-                                             static_cast<const T*>(nullptr))) ==
-                                             sizeof(char)>
-        is_arena_constructable;
+    using is_destructor_skippable =
+        std::bool_constant<has_destructor_skippable<T>::value ||
+                           std::is_trivially_destructible_v<T>>;
+
+    template <typename U, typename = void>
+    struct has_arena_constructable : std::false_type {};
+
+    template <typename U>
+    struct has_arena_constructable<
+        U, std::void_t<typename U::InternalArenaConstructable_>>
+        : std::true_type {};
+
+    using is_arena_constructable =
+        std::bool_constant<has_arena_constructable<T>::value>;
 
     // Note that by this point, for types `U` which overload `FieldArenaRep<U>`,
     // `T` is the arena representation `FieldArenaRep<U>::Type` and is expected
