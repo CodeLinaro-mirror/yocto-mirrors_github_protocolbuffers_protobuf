@@ -28,6 +28,7 @@
 #include "absl/types/optional.h"
 #include "conformance/binary_wireformat.h"
 #include "conformance/conformance.pb.h"
+#include "conformance/failure_list.h"
 #include "conformance/global_test_environment.h"
 #include "conformance/mock_test_runner.h"
 #include "conformance/result_ledger.h"
@@ -50,9 +51,26 @@ ResultLedger* global_ledger = nullptr;
 
 }  // namespace
 
-ResultLedger& GetGlobalResultLedger() {
+const FailureList& GetGlobalFailureList() {
   ABSL_CHECK(global_ledger != nullptr);
-  return *global_ledger;
+  return global_ledger->failure_list();
+}
+
+void ReportSuccess(absl::string_view test_name) {
+  ABSL_CHECK(global_ledger != nullptr);
+  global_ledger->ReportSuccess(test_name).IgnoreError();
+}
+
+void ReportFailure(absl::string_view test_name, TestPriority priority,
+                   absl::string_view failure_message) {
+  ABSL_CHECK(global_ledger != nullptr);
+  global_ledger->ReportFailure(test_name, priority, failure_message)
+      .IgnoreError();
+}
+
+void ReportSkip(absl::string_view test_name, absl::string_view skip_reason) {
+  ABSL_CHECK(global_ledger != nullptr);
+  global_ledger->ReportSkip(test_name, skip_reason).IgnoreError();
 }
 
 }  // namespace internal
@@ -93,9 +111,9 @@ using ::testing::Values;
 // `response`.  The matchers never look at the input payload itself, only at
 // its format, so the input is empty.
 //
-// The leaf matchers never touch the ResultLedger; the tests make sure of it by
-// not installing one at all while they run.  Only YieldsTest below installs
-// one.
+// The leaf matchers never touch the failure list; the tests make sure of it
+// by not installing one at all while they run.  Only YieldsTest below
+// installs one.
 TestResult CreateResult(absl::string_view test_name, WireFormat input_format,
                         WireFormat output_format,
                         ConformanceResponse response) {
@@ -1108,26 +1126,6 @@ TEST_F(YieldsTest, UnlistedFailureIsCountedOnceDespiteGtestRetrying) {
               ElementsAre(FieldsAre(kP0Foo, kNotAParseError, absl::nullopt)));
 }
 
-TEST_F(YieldsTest, StaleVerdictIsNeverReplayedForAnotherResult) {
-  // A long-lived matcher that checked a result which has since been destroyed
-  // must not replay that verdict for a different result, even one that reuses
-  // the same address: the replay is keyed to the result's name as well.
-  auto first_matcher = Yields(IsParseError());
-  {
-    TestResult first = Run(kPayload2, TestPriority::kP0, "first");
-    EXPECT_NONFATAL_FAILURE(EXPECT_THAT(first, first_matcher),
-                            "Should have failed to parse, but didn't.");
-  }
-  TestResult second = Run(kParseError, TestPriority::kP0, "second");
-  EXPECT_THAT(second, Yields(IsParseError()));
-
-  EXPECT_THAT(Explain(first_matcher, second),
-              Rejects(HasSubstr("was already checked")));
-  EXPECT_EQ(GetCounts(ledger_),
-            (Counts{/*expected_successes=*/1, /*expected_failures=*/0,
-                    /*unexpected_successes=*/0, /*unexpected_failures=*/1}));
-}
-
 TEST_F(YieldsTest, PayloadBytesMismatchRecordsTheLegacyOctalMessage) {
   EXPECT_NONFATAL_FAILURE(
       EXPECT_THAT(Run(kPayload2), Yields(RawPayload(VarintField(1, 1)))),
@@ -1419,6 +1417,10 @@ TEST_F(YieldsTest, RuntimeErrorKeepsTheInnerMatchersFailureMessage) {
   EXPECT_NONFATAL_FAILURE(
       EXPECT_THAT(Run(kRuntimeError), Yields(IsParseError())),
       "Should have failed to parse, but raised an error instead.");
+  EXPECT_EQ(GetCounts(ledger_), (Counts{/*expected_successes=*/0,
+                                        /*expected_failures=*/0,
+                                        /*unexpected_successes=*/0,
+                                        /*unexpected_failures=*/1}));
   EXPECT_THAT(
       ledger_.UnexpectedFailures(),
       ElementsAre(FieldsAre(
@@ -1483,28 +1485,26 @@ TEST_F(YieldsTest, NotComposes) {
                     /*unexpected_successes=*/0, /*unexpected_failures=*/1}));
 }
 
-TEST_F(YieldsTest, CheckingAPassedResultAgainFails) {
+TEST_F(YieldsTest, CheckingAPassedResultAgainIsJudgedButNotCounted) {
   // Whatever the second matcher is, including the very same object.
   auto matcher = Yields(IsParseError());
   TestResult result = Run(kParseError);
   EXPECT_THAT(result, matcher);
 
-  EXPECT_NONFATAL_FAILURE(
-      EXPECT_THAT(result, matcher),
-      "TestResult for Required.Proto2.ProtobufInput.foo.ProtobufOutput was "
-      "already checked; each result may be checked exactly once");
-  EXPECT_NONFATAL_FAILURE(EXPECT_THAT(result, Yields(IsParseError())),
-                          "was already checked");
+  EXPECT_THAT(result, matcher);
+  EXPECT_THAT(result, Yields(IsParseError()));
   EXPECT_NONFATAL_FAILURE(EXPECT_THAT(result, Yields(Not(IsParseError()))),
-                          "was already checked");
+                          "which doesn't match (is not a parse error)");
+  // The first check is the one that counts.
   EXPECT_EQ(GetCounts(ledger_), (Counts{/*expected_successes=*/1}));
+  EXPECT_THAT(ledger_.UnexpectedFailures(), IsEmpty());
 }
 
-TEST_F(YieldsTest, CheckingAFailedResultAgainReplaysTheFailure) {
+TEST_F(YieldsTest, CheckingAFailedResultAgainRepeatsTheFailure) {
   // gtest re-evaluates a failing matcher, through the same matcher object, to
-  // explain the failure.  The matcher replays its own failed verdict, so the
-  // ledger hears about the test only once.  Any other matcher finds the
-  // result already checked.
+  // explain the failure.  That evaluation reaches the same verdict, and the
+  // ledger hears about the test once.  So does any other matcher: a second
+  // check is judged on its own but never counted.
   auto matcher = Yields(IsParseError());
   TestResult result = Run(kPayload2);
   EXPECT_NONFATAL_FAILURE(EXPECT_THAT(result, matcher),
@@ -1514,9 +1514,9 @@ TEST_F(YieldsTest, CheckingAFailedResultAgainReplaysTheFailure) {
               Rejects(absl::StrCat(kNotAParseError,
                                    "\nUnexpected failure for test: ", kP0Foo)));
   EXPECT_THAT(Explain(Yields(IsParseError()), result),
-              Rejects(HasSubstr("was already checked")));
-  EXPECT_THAT(Explain(Yields(WhenParsed(_)), result),
-              Rejects(HasSubstr("was already checked")));
+              Rejects(absl::StrCat(kNotAParseError,
+                                   "\nUnexpected failure for test: ", kP0Foo)));
+  EXPECT_THAT(Explain(Yields(WhenParsed(_)), result), Accepts(IsEmpty()));
   EXPECT_EQ(GetCounts(ledger_), (Counts{/*expected_successes=*/0,
                                         /*expected_failures=*/0,
                                         /*unexpected_successes=*/0,
@@ -1525,16 +1525,18 @@ TEST_F(YieldsTest, CheckingAFailedResultAgainReplaysTheFailure) {
               ElementsAre(FieldsAre(kP0Foo, kNotAParseError, absl::nullopt)));
 }
 
-TEST_F(YieldsTest, ACopyOfACheckedResultIsAlreadyChecked) {
+TEST_F(YieldsTest, ACopyOfACheckedResultIsNotCountedAgain) {
   TestResult original = Run(kPayload2);
   EXPECT_NONFATAL_FAILURE(EXPECT_THAT(original, Yields(IsParseError())),
                           "Should have failed to parse, but didn't.");
 
-  // The ledger knows the test by name, so a copy of the result is checked
-  // too and the ledger hears nothing more.
+  // The ledger knows the test by name, so a copy of the result counts as
+  // checked too: a check of it is judged on its own and the ledger hears
+  // nothing more.
   TestResult copy = original;
   EXPECT_THAT(Explain(Yields(IsParseError()), copy),
-              Rejects(HasSubstr("was already checked")));
+              Rejects(HasSubstr("Unexpected failure for test")));
+  EXPECT_THAT(Explain(Yields(WhenParsed(_)), copy), Accepts(IsEmpty()));
   EXPECT_EQ(GetCounts(ledger_), (Counts{/*expected_successes=*/0,
                                         /*expected_failures=*/0,
                                         /*unexpected_successes=*/0,
