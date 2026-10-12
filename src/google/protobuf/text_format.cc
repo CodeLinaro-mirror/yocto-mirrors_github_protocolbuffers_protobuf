@@ -22,6 +22,7 @@
 #include <iterator>
 #include <limits>
 #include <memory>
+#include <numeric>
 #include <random>
 #include <string>
 #include <utility>
@@ -2705,139 +2706,33 @@ class MapEntryMessageComparator {
 };
 
 namespace internal {
+void GetMapPrintOrder(const Message& message, const Reflection* reflection,
+                      const FieldDescriptor* field, std::vector<int>& result) {
+  std::sort(result.begin(), result.end(), [&](int i, int j) {
+    const Message& m_i = reflection->GetRepeatedMessage(message, field, i);
+    const Reflection* r_i = m_i.GetReflection();
+    const Message& m_j = reflection->GetRepeatedMessage(message, field, j);
+    const Reflection* r_j = m_j.GetReflection();
 
-struct MapEntries {
-  std::vector<std::unique_ptr<const Message>> owned_entries;
-  std::vector<const Message*> all_entries;
-};
+    const FieldDescriptor* key = field->message_type()->map_key();
+    switch (key->cpp_type()) {
+      case FieldDescriptor::CPPTYPE_STRING:
+        return r_i->GetString(m_i, key) < r_j->GetString(m_j, key);
+      case FieldDescriptor::CPPTYPE_INT64:
+        return r_i->GetInt64(m_i, key) < r_j->GetInt64(m_j, key);
+      case FieldDescriptor::CPPTYPE_INT32:
+        return r_i->GetInt32(m_i, key) < r_j->GetInt32(m_j, key);
+      case FieldDescriptor::CPPTYPE_UINT64:
+        return r_i->GetUInt64(m_i, key) < r_j->GetUInt64(m_j, key);
+      case FieldDescriptor::CPPTYPE_UINT32:
+        return r_i->GetUInt32(m_i, key) < r_j->GetUInt32(m_j, key);
+      case FieldDescriptor::CPPTYPE_BOOL:
+        return r_i->GetBool(m_i, key) < r_j->GetBool(m_j, key);
 
-class MapFieldPrinterHelper {
- public:
-  // DynamicMapSorter::Sort cannot be used because it enforces syncing with
-  // repeated field.
-  static MapEntries SortMap(const Message& message,
-                            const Reflection* reflection,
-                            const FieldDescriptor* field);
-  static void CopyKey(const MapKey& key, Message* message,
-                      const FieldDescriptor* field_desc);
-  static void CopyValue(const MapValueConstRef& value, Message* message,
-                        const FieldDescriptor* field_desc);
-};
-
-MapEntries MapFieldPrinterHelper::SortMap(const Message& message,
-                                          const Reflection* reflection,
-                                          const FieldDescriptor* field) {
-  const MapFieldBase& base = *reflection->GetMapData(message, field);
-
-  std::vector<const Message*> all_entries;
-  std::vector<std::unique_ptr<const Message>> owned_entries;
-  if (base.IsRepeatedFieldValid()) {
-    const RepeatedPtrField<Message>& map_field =
-        reflection->GetRepeatedPtrFieldInternal<Message>(
-            message, field,
-            Reflection::GetRepeatedFieldIntent::kHiddenOrInternal);
-    all_entries.reserve(map_field.size());
-    for (int i = 0; i < map_field.size(); ++i) {
-      all_entries.push_back(
-          const_cast<RepeatedPtrField<Message>*>(&map_field)->Mutable(i));
+      default:
+        return i < j;  // Avoid UB, but should not happen.
     }
-  } else {
-    // TODO: For performance, instead of creating map entry message
-    // for each element, just store map keys and sort them.
-    const Descriptor* map_entry_desc = field->message_type();
-    const Message* prototype =
-        reflection->GetMessageFactory()->GetPrototype(map_entry_desc);
-    all_entries.reserve(reflection->MapSize(message, field));
-    owned_entries.reserve(reflection->MapSize(message, field));
-    for (ConstMapIterator iter = reflection->ConstMapBegin(&message, field);
-         iter != reflection->ConstMapEnd(&message, field); ++iter) {
-      std::unique_ptr<Message> map_entry_message =
-          absl::WrapUnique(prototype->New());
-      CopyKey(iter.GetKey(), map_entry_message.get(), map_entry_desc->field(0));
-      CopyValue(iter.GetValueRef(), map_entry_message.get(),
-                map_entry_desc->field(1));
-      all_entries.push_back(map_entry_message.get());
-      owned_entries.push_back(std::move(map_entry_message));
-    }
-  }
-
-  std::stable_sort(all_entries.begin(), all_entries.end(),
-                   MapEntryMessageComparator(field->message_type()));
-  return {std::move(owned_entries), std::move(all_entries)};
-}
-
-void MapFieldPrinterHelper::CopyKey(const MapKey& key, Message* message,
-                                    const FieldDescriptor* field_desc) {
-  const Reflection* reflection = message->GetReflection();
-  switch (field_desc->cpp_type()) {
-    case FieldDescriptor::CPPTYPE_DOUBLE:
-    case FieldDescriptor::CPPTYPE_FLOAT:
-    case FieldDescriptor::CPPTYPE_ENUM:
-    case FieldDescriptor::CPPTYPE_MESSAGE:
-      ABSL_LOG(ERROR) << "Not supported.";
-      break;
-    case FieldDescriptor::CPPTYPE_STRING:
-      reflection->SetString(message, field_desc,
-                            std::string(key.GetStringValue()));
-      return;
-    case FieldDescriptor::CPPTYPE_INT64:
-      reflection->SetInt64(message, field_desc, key.GetInt64Value());
-      return;
-    case FieldDescriptor::CPPTYPE_INT32:
-      reflection->SetInt32(message, field_desc, key.GetInt32Value());
-      return;
-    case FieldDescriptor::CPPTYPE_UINT64:
-      reflection->SetUInt64(message, field_desc, key.GetUInt64Value());
-      return;
-    case FieldDescriptor::CPPTYPE_UINT32:
-      reflection->SetUInt32(message, field_desc, key.GetUInt32Value());
-      return;
-    case FieldDescriptor::CPPTYPE_BOOL:
-      reflection->SetBool(message, field_desc, key.GetBoolValue());
-      return;
-  }
-}
-
-void MapFieldPrinterHelper::CopyValue(const MapValueConstRef& value,
-                                      Message* message,
-                                      const FieldDescriptor* field_desc) {
-  const Reflection* reflection = message->GetReflection();
-  switch (field_desc->cpp_type()) {
-    case FieldDescriptor::CPPTYPE_DOUBLE:
-      reflection->SetDouble(message, field_desc, value.GetDoubleValue());
-      return;
-    case FieldDescriptor::CPPTYPE_FLOAT:
-      reflection->SetFloat(message, field_desc, value.GetFloatValue());
-      return;
-    case FieldDescriptor::CPPTYPE_ENUM:
-      reflection->SetEnumValue(message, field_desc, value.GetEnumValue());
-      return;
-    case FieldDescriptor::CPPTYPE_MESSAGE: {
-      Message* sub_message = value.GetMessageValue().New();
-      sub_message->CopyFrom(value.GetMessageValue());
-      reflection->SetAllocatedMessage(message, sub_message, field_desc);
-      return;
-    }
-    case FieldDescriptor::CPPTYPE_STRING:
-      reflection->SetString(message, field_desc,
-                            std::string(value.GetStringValue()));
-      return;
-    case FieldDescriptor::CPPTYPE_INT64:
-      reflection->SetInt64(message, field_desc, value.GetInt64Value());
-      return;
-    case FieldDescriptor::CPPTYPE_INT32:
-      reflection->SetInt32(message, field_desc, value.GetInt32Value());
-      return;
-    case FieldDescriptor::CPPTYPE_UINT64:
-      reflection->SetUInt64(message, field_desc, value.GetUInt64Value());
-      return;
-    case FieldDescriptor::CPPTYPE_UINT32:
-      reflection->SetUInt32(message, field_desc, value.GetUInt32Value());
-      return;
-    case FieldDescriptor::CPPTYPE_BOOL:
-      reflection->SetBool(message, field_desc, value.GetBoolValue());
-      return;
-  }
+  });
 }
 }  // namespace internal
 
@@ -2862,13 +2757,14 @@ void TextFormat::Printer::PrintField(const Message& message,
   }
 
   if (generator->failed()) return;
-  bool is_map = field->is_map();
-  const internal::MapEntries map_entries =
-      is_map
-          ? internal::MapFieldPrinterHelper::SortMap(message, reflection, field)
-          : internal::MapEntries();
 
-  for (int j = 0; j < count; ++j) {
+  std::vector<int> order(count);
+  std::iota(order.begin(), order.end(), 0);
+  if (field->is_map()) {
+    internal::GetMapPrintOrder(message, reflection, field, order);
+  }
+
+  for (int j : order) {
     if (generator->failed()) return;
     const int field_index = field->is_repeated() ? j : -1;
 
@@ -2882,8 +2778,7 @@ void TextFormat::Printer::PrintField(const Message& message,
       const FastFieldValuePrinter* printer = GetFieldPrinter(field);
       const Message& sub_message =
           field->is_repeated()
-              ? (is_map ? *map_entries.all_entries[j]
-                        : reflection->GetRepeatedMessage(message, field, j))
+              ? reflection->GetRepeatedMessage(message, field, j)
               : reflection->GetMessage(message, field);
       printer->PrintMessageStart(sub_message, field_index, count,
                                  single_line_mode_, generator);

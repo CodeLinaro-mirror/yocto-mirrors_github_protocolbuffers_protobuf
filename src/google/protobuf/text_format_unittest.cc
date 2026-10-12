@@ -1095,6 +1095,51 @@ TEST_F(TextFormatTest, CompactRepeatedFieldPrinter) {
       text);
 }
 
+class CustomMapPrinter : public TextFormat::FastFieldValuePrinter {
+ public:
+  void PrintFieldName(const Message& message, int field_index, int field_count,
+                      const Reflection* reflection,
+                      const FieldDescriptor* field,
+                      TextFormat::BaseTextGenerator* generator) const override {
+    const Message& entry =
+        reflection->GetRepeatedMessage(message, field, field_index);
+    generator->PrintString(entry.GetReflection()->GetString(
+        entry, field->message_type()->map_key()));
+  }
+  // To prevent compiler complaining about Woverloaded-virtual
+  void PrintFieldName(const Message& message, const Reflection* reflection,
+                      const FieldDescriptor* field,
+                      TextFormat::BaseTextGenerator* generator) const override {
+  }
+};
+
+TEST_F(TextFormatTest, CustomMapPrinter) {
+  TextFormat::Printer printer;
+  ASSERT_TRUE(printer.RegisterFieldValuePrinter(
+      unittest::RedactedFields::default_instance()
+          .descriptor()
+          ->FindFieldByNumber(
+              unittest::RedactedFields::kMapUnredactedStringFieldNumber),
+      new CustomMapPrinter));
+
+  proto2_unittest::RedactedFields message;
+  message.mutable_map_unredacted_string()->try_emplace("b", "a");
+  message.mutable_map_unredacted_string()->try_emplace("a", "b");
+
+  std::string text;
+  ASSERT_TRUE(printer.PrintToString(message, &text));
+  EXPECT_EQ(
+      "a {\n"
+      "  key: \"a\"\n"
+      "  value: \"b\"\n"
+      "}\n"
+      "b {\n"
+      "  key: \"b\"\n"
+      "  value: \"a\"\n"
+      "}\n",
+      text);
+}
+
 // Print strings into multiple line, with indentation. Use this to test
 // BaseTextGenerator::Indent and BaseTextGenerator::Outdent.
 class MultilineStringPrinter : public TextFormat::FastFieldValuePrinter {
