@@ -84,6 +84,9 @@ SerialArena* PROTOBUF_NULLABLE GetSerialArena(Arena* PROTOBUF_NULLABLE);
 template <typename Type>
 class GenericTypeHandler;  // defined in repeated_field.h
 
+// Defined in message_lite.h
+Arena* GetArena(const MessageLite& message);
+
 // This struct maps field types to the types that we will use to represent them
 // when allocated on an arena. This is necessary because fields no longer own an
 // arena pointer, but can be allocated directly on an arena. In this case, we
