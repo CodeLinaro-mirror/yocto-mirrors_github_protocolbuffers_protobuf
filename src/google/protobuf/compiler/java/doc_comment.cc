@@ -127,7 +127,7 @@ static void WriteDocCommentBodyForLocation(io::Printer* printer,
                                            const SourceLocation& location,
                                            const Options options,
                                            const bool kdoc) {
-  if (options.strip_nonfunctional_codegen) {
+  if (options.strip_nonfunctional_codegen || options.strip_doc_comments) {
     // TODO: Remove once prototiller can avoid making
     // extraneous formatting changes to comments.
     return;
@@ -266,7 +266,7 @@ void WriteDeprecatedJavadoc(io::Printer* printer, const FieldDescriptor* field,
 
   printer->Print(" * @deprecated $name$ is deprecated.\n", "name",
                  field->full_name());
-  if (!options.strip_nonfunctional_codegen) {
+  if (!options.strip_nonfunctional_codegen && !options.strip_doc_comments) {
     printer->Print(" *     See $file$;l=$line$\n", "file",
                    field->file()->name(), "line", startLine);
   }
