@@ -68,9 +68,13 @@ static upb_UnknownToMessageRet upb_MiniTable_ParseUnknownMessage(
     const upb_Extension* ext = (const upb_Extension*)unknown->value.extension;
     const upb_MiniTableField* f = upb_Extension_MiniTableField(ext);
     // Extension promotion `upb_Message_GetOrPromoteExtension` currently only
-    // supports Message types. If we find a primitive type, fail gracefully to
-    // avoid invalid access/crashes.
-    if (upb_MiniTableField_CType(f) != kUpb_CType_Message) {
+    // supports singular Message types, since it assumes that the extension
+    // holds a upb_Message*. Unlike canonical extensions, a non-canonical
+    // extension may hold a repeated field whose CType is also
+    // kUpb_CType_Message. If we find any other kind of field, fail gracefully
+    // to avoid invalid access/crashes.
+    if (upb_MiniTableField_CType(f) != kUpb_CType_Message ||
+        !upb_MiniTableField_IsScalar(f)) {
       ret.status = kUpb_UnknownToMessage_ParseError;
       return ret;
     }
