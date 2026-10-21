@@ -10,7 +10,7 @@ def _test_same_version_compiler_arguments(env, target):
         "-I.",
         "{package}/baz.proto",
     ]).in_order()
-    genproto.argv().not_contains("--java_out=shared,immutable:{bindir}/{package}/foo_proto-speed-src.jar")
+    genproto.argv().not_contains("--java_out=shared,immutable,strip_doc_comments:{bindir}/{package}/foo_proto-speed-src.jar")
     java_info = env.expect.that_target(target).provider(JavaInfo)
     java_info.transitive_runtime_jars().contains_at_least([
         "{package}/libbaz_proto-speed.jar",

@@ -648,6 +648,122 @@ TEST_F(JavaGeneratorTest, OneofHasBitsBuildPartial) {
       "parseOneofMsg(input, extensionRegistry);"));
 }
 
+TEST_F(JavaGeneratorTest, StripDocComments) {
+  CreateTempFile("strip_comments.proto",
+                 R"schema(
+    syntax = "proto2";
+    package proto2_unittest;
+    option java_outer_classname = "StripCommentsProto";
+
+    // Leading comment on message StripFoo.
+    message StripFoo {
+      // Leading comment on field bar.
+      optional int32 bar = 1;
+      // Leading comment on deprecated field baz.
+      optional string baz = 2 [deprecated = true];
+    }
+  )schema");
+
+  RunProtoc(
+      "protocol_compiler --proto_path=$tmpdir --java_out=$tmpdir "
+      "strip_comments.proto");
+  ExpectNoErrors();
+
+  EXPECT_TRUE(FileContainsSubstring(PACKAGE_PREFIX
+                                    "proto2_unittest/StripCommentsProto.java",
+                                    "Leading comment on message StripFoo."));
+  EXPECT_TRUE(FileContainsSubstring(PACKAGE_PREFIX
+                                    "proto2_unittest/StripCommentsProto.java",
+                                    "Leading comment on field bar."));
+  EXPECT_TRUE(FileContainsSubstring(PACKAGE_PREFIX
+                                    "proto2_unittest/StripCommentsProto.java",
+                                    "See strip_comments.proto;l="));
+
+  // Now compile with --java_opt=strip_doc_comments
+  RunProtoc(
+      "protocol_compiler --proto_path=$tmpdir "
+      "--java_opt=strip_doc_comments --java_out=$tmpdir "
+      "strip_comments.proto");
+  ExpectNoErrors();
+
+  EXPECT_FALSE(FileContainsSubstring(PACKAGE_PREFIX
+                                     "proto2_unittest/StripCommentsProto.java",
+                                     "Leading comment on message StripFoo."));
+  EXPECT_FALSE(FileContainsSubstring(PACKAGE_PREFIX
+                                     "proto2_unittest/StripCommentsProto.java",
+                                     "Leading comment on field bar."));
+  EXPECT_FALSE(FileContainsSubstring(PACKAGE_PREFIX
+                                     "proto2_unittest/StripCommentsProto.java",
+                                     "See strip_comments.proto;l="));
+}
+
+TEST_F(JavaGeneratorTest, StripDocCommentsBitForBitIdentical) {
+  CreateTempDir("out1");
+  CreateTempDir("out2");
+
+  CreateTempFile("identical.proto",
+                 R"schema(
+    syntax = "proto2";
+    package proto2_unittest;
+    option java_outer_classname = "IdenticalProto";
+
+    // Version 1 message comment.
+    message TestMessage {
+      // Version 1 field comment.
+      optional int32 val = 1;
+      // Version 1 deprecated comment.
+      optional string name = 2 [deprecated = true];
+    }
+  )schema");
+
+  RunProtoc(
+      "protocol_compiler --proto_path=$tmpdir "
+      "--java_opt=strip_doc_comments --java_out=$tmpdir/out1 "
+      "identical.proto");
+  ExpectNoErrors();
+
+  // Rewrite identical.proto with different comments and line shifts.
+  CreateTempFile("identical.proto",
+                 R"schema(
+    syntax = "proto2";
+    package proto2_unittest;
+    option java_outer_classname = "IdenticalProto";
+
+    // Completely rewritten Version 2 message comment.
+    // An additional comment line.
+    // A third comment line.
+    message TestMessage {
+      // Different comment on val with more explanation.
+      optional int32 val = 1;
+
+      // Rewritten deprecated comment.
+      // Another line.
+      // Yet another line.
+      optional string name = 2 [deprecated = true];
+    }
+  )schema");
+
+  RunProtoc(
+      "protocol_compiler --proto_path=$tmpdir "
+      "--java_opt=strip_doc_comments --java_out=$tmpdir/out2 "
+      "identical.proto");
+  ExpectNoErrors();
+
+  std::string content1;
+  std::string content2;
+  EXPECT_TRUE(
+      File::GetContents(absl::StrCat(temp_directory(), "/out1/", PACKAGE_PREFIX,
+                                     "proto2_unittest/IdenticalProto.java"),
+                        &content1, true)
+          .ok());
+  EXPECT_TRUE(
+      File::GetContents(absl::StrCat(temp_directory(), "/out2/", PACKAGE_PREFIX,
+                                     "proto2_unittest/IdenticalProto.java"),
+                        &content2, true)
+          .ok());
+  EXPECT_EQ(content1, content2);
+}
+
 }  // namespace
 }  // namespace java
 }  // namespace compiler
