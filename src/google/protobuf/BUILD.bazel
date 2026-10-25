@@ -584,6 +584,13 @@ cc_library(
 )
 
 cc_library(
+    name = "private_access",
+    hdrs = ["private_access.h"],
+    strip_include_prefix = "/src",
+    deps = [],
+)
+
+cc_library(
     name = "string_block",
     hdrs = ["string_block.h"],
     strip_include_prefix = "/src",
@@ -639,6 +646,7 @@ cc_library(
         ":arena_cleanup",
         ":internal_visibility",
         ":port",
+        ":private_access",
         ":string_block",
         "//src/google/protobuf/stubs:lite",
         "@abseil-cpp//absl/base:core_headers",
@@ -738,7 +746,6 @@ cc_library(
         "micro_string.cc",
         "offset_ptr.cc",
         "parse_context.cc",
-        "private_access.cc",
         "raw_ptr.cc",
         "repeated_field.cc",
         "repeated_ptr_field.cc",
