@@ -19,17 +19,31 @@
 // Must be last.
 #include "upb/port/def.inc"
 
+namespace std {
+template <>
+struct default_delete<::upb_Arena> {
+  template <typename U>
+  void operator()(U* ptr) const {
+    if (ptr != nullptr) {
+      ::upb_Arena_Free(const_cast<::upb_Arena*>(ptr));
+    }
+  }
+};
+template <>
+struct default_delete<const ::upb_Arena> : default_delete<::upb_Arena> {};
+}  // namespace std
+
+using upb_ArenaPtr = std::unique_ptr<upb_Arena>;
+
 namespace upb {
 
 class Arena {
  public:
   // A simple arena with no initial memory block and the default allocator.
-  Arena() : ptr_(upb_Arena_New(), upb_Arena_Free) {}
+  Arena() : ptr_(upb_Arena_New()) {}
   Arena(char* initial_block, size_t size)
-      : ptr_(upb_Arena_Init(initial_block, size, &upb_alloc_global),
-             upb_Arena_Free) {}
-  explicit Arena(size_t size)
-      : ptr_(upb_Arena_NewSized(size), upb_Arena_Free) {}
+      : ptr_(upb_Arena_Init(initial_block, size, &upb_alloc_global)) {}
+  explicit Arena(size_t size) : ptr_(upb_Arena_NewSized(size)) {}
 
   upb_Arena* ptr() const { return ptr_.get(); }
 
@@ -49,7 +63,7 @@ class Arena {
   }
 
  protected:
-  std::unique_ptr<upb_Arena, decltype(&upb_Arena_Free)> ptr_;
+  upb_ArenaPtr ptr_;
 };
 }  // namespace upb
 
