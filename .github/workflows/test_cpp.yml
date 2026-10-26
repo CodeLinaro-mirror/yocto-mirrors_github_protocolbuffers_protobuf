@@ -436,6 +436,7 @@ jobs:
           image: us-docker.pkg.dev/protobuf-build/containers/test/linux/32bit@sha256:d6028ab408c49932836cdc514116f06886d7f6868a4d430630aa52adc5aee2fc
           platform: linux/386
           credentials: ${{ secrets.GAR_SERVICE_ACCOUNT }}
+          extra-flags: --security-opt seccomp=unconfined
           entrypoint: bash
           command: >-
               -c 'set -ex;
