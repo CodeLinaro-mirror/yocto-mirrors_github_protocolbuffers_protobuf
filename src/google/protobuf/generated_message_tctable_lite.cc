@@ -1183,7 +1183,7 @@ PROTOBUF_ALWAYS_INLINE const char* TcParser::PackedVarint(
   // pending hasbits now:
   SyncHasbits(msg, hasbits, table);
   auto& field = RefAt<RepeatedField<FieldType>>(msg, data.offset());
-  return ctx->ReadPackedVarintWithField(
+  ptr = ctx->ReadPackedVarintWithField(
       ptr, msg->GetArena(),
       [](uint64_t varint) {
         FieldType val;
@@ -1199,6 +1199,11 @@ PROTOBUF_ALWAYS_INLINE const char* TcParser::PackedVarint(
         return val;
       },
       field);
+
+  if (ABSL_PREDICT_FALSE(ptr == nullptr)) {
+    PROTOBUF_MUSTTAIL return Error(PROTOBUF_TC_PARAM_NO_DATA_PASS);
+  }
+  PROTOBUF_MUSTTAIL return ToTagDispatch(PROTOBUF_TC_PARAM_NO_DATA_PASS);
 }
 
 PROTOBUF_NOINLINE const char* TcParser::FastV8P1(PROTOBUF_TC_PARAM_DECL) {
@@ -1426,13 +1431,18 @@ PROTOBUF_ALWAYS_INLINE const char* TcParser::PackedEnum(
   Arena* arena = msg->GetArena();
   const TcParseTableBase::FieldAux aux = *table->field_aux(data.aux_idx());
   PrefetchEnumData(xform_val, aux);
-  return ctx->ReadPackedVarint(ptr, [=](int32_t value) {
+  ptr = ctx->ReadPackedVarint(ptr, [=](int32_t value) {
     if (!EnumIsValidAux(value, xform_val, aux)) {
       AddUnknownEnum(msg, table, FastDecodeTag(saved_tag), value);
     } else {
       field->AddWithArena(arena, value);
     }
   });
+
+  if (ABSL_PREDICT_FALSE(ptr == nullptr)) {
+    PROTOBUF_MUSTTAIL return Error(PROTOBUF_TC_PARAM_NO_DATA_PASS);
+  }
+  PROTOBUF_MUSTTAIL return ToTagDispatch(PROTOBUF_TC_PARAM_NO_DATA_PASS);
 }
 
 PROTOBUF_NOINLINE const char* TcParser::FastErR1(PROTOBUF_TC_PARAM_DECL) {
@@ -1570,7 +1580,7 @@ PROTOBUF_ALWAYS_INLINE const char* TcParser::PackedEnumSmallRange(
   const uint8_t max = data.aux_idx();
   Arena* arena = msg->GetArena();
 
-  return ctx->ReadPackedVarint(
+  ptr = ctx->ReadPackedVarint(
       ptr,
       [=](int32_t v) {
         if (ABSL_PREDICT_FALSE(min > v || v > max)) {
@@ -1605,6 +1615,11 @@ PROTOBUF_ALWAYS_INLINE const char* TcParser::PackedEnumSmallRange(
             static_cast<int32_t>(std::min(
                 new_size, int64_t{std::numeric_limits<int32_t>::max()})));
       });
+
+  if (ABSL_PREDICT_FALSE(ptr == nullptr)) {
+    PROTOBUF_MUSTTAIL return Error(PROTOBUF_TC_PARAM_NO_DATA_PASS);
+  }
+  PROTOBUF_MUSTTAIL return ToTagDispatch(PROTOBUF_TC_PARAM_NO_DATA_PASS);
 }
 
 PROTOBUF_NOINLINE const char* TcParser::FastEr0P1(PROTOBUF_TC_PARAM_DECL) {
@@ -2373,7 +2388,7 @@ const char* TcParser::MpPackedVarintT(PROTOBUF_TC_PARAM_DECL) {
   if (is_validated_enum) {
     const TcParseTableBase::FieldAux aux = *table->field_aux(entry.aux_idx);
     PrefetchEnumData(xform_val, aux);
-    return ctx->ReadPackedVarint(ptr, [=](int32_t value) {
+    ptr = ctx->ReadPackedVarint(ptr, [=](int32_t value) {
       if (!EnumIsValidAux(value, xform_val, aux)) {
         AddUnknownEnum(msg, table, data.tag(), value);
       } else {
@@ -2381,7 +2396,7 @@ const char* TcParser::MpPackedVarintT(PROTOBUF_TC_PARAM_DECL) {
       }
     });
   } else {
-    return ctx->ReadPackedVarint(ptr, [=](uint64_t value) {
+    ptr = ctx->ReadPackedVarint(ptr, [=](uint64_t value) {
       field->AddWithArena(
           arena, is_zigzag ? (sizeof(FieldType) == 8
                                   ? WireFormatLite::ZigZagDecode64(value)
@@ -2390,6 +2405,11 @@ const char* TcParser::MpPackedVarintT(PROTOBUF_TC_PARAM_DECL) {
                            : value);
     });
   }
+
+  if (ABSL_PREDICT_FALSE(ptr == nullptr)) {
+    PROTOBUF_MUSTTAIL return Error(PROTOBUF_TC_PARAM_NO_DATA_PASS);
+  }
+  PROTOBUF_MUSTTAIL return ToTagDispatch(PROTOBUF_TC_PARAM_NO_DATA_PASS);
 }
 
 template <bool is_split>
