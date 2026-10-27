@@ -444,6 +444,10 @@ class PROTOBUF_EXPORT Message : public MessageLite {
   bool AbslParseFlagImpl(absl::string_view text, std::string& error);
   std::string AbslUnparseFlagImpl() const;
 
+  static void SimpleSharedDtor(MessageLite& msg) {
+    msg._internal_metadata_.Delete<UnknownFieldSet>();
+  }
+
   size_t ComputeUnknownFieldsSize(
       size_t total_size, const internal::CachedSize* cached_size) const;
   size_t MaybeComputeUnknownFieldsSize(

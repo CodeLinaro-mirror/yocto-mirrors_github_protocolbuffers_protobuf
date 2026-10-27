@@ -754,6 +754,10 @@ class PROTOBUF_EXPORT MessageLite {
     return internal::InternalVisibility{};
   }
 
+  static void SimpleSharedDtor(MessageLite& msg) {
+    msg._internal_metadata_.Delete<std::string>();
+  }
+
   // Split helpers
   template <typename Msg, typename T, typename Split>
   static PROTOBUF_ALWAYS_INLINE decltype(auto) GetSplitField(
