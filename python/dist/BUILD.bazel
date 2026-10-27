@@ -250,6 +250,33 @@ selects.config_setting_group(
     visibility = ["//python:__subpackages__"],
 )
 
+# Limited API wheels are built with the newest Python headers (see
+# limited_api_headers_version below), so the rules_python version alone does
+# not determine the python_tag of the wheel. These settings only match when we
+# are not building for the limited API.
+config_setting(
+    name = "python_version_system",
+    flag_values = {
+        "//python:python_version": "system",
+    },
+)
+
+[
+    selects.config_setting_group(
+        name = "full_api_python_" + version,
+        match_all = [
+            ":python_version_system",
+            "@rules_python//python/config_settings:is_python_" + version,
+        ],
+    )
+    for version in [
+        "3.11",
+        "3.12",
+        "3.13",
+        "3.14",
+    ]
+]
+
 pkg_files(
     name = "generated_bootstrap",
     srcs = [
@@ -387,12 +414,12 @@ py_wheel(
     }),
     python_requires = ">=3.11",
     # LINT.IfChange(python_tag)
-    python_tag = selects.with_or({
+    python_tag = select({
         "//python:limited_api_3.11": "cp311",
-        "@rules_python//python/config_settings:is_python_3.11": "cp311",
-        "@rules_python//python/config_settings:is_python_3.12": "cp312",
-        "@rules_python//python/config_settings:is_python_3.13": "cp313",
-        "@rules_python//python/config_settings:is_python_3.14": "cp314",
+        ":full_api_python_3.11": "cp311",
+        ":full_api_python_3.12": "cp312",
+        ":full_api_python_3.13": "cp313",
+        ":full_api_python_3.14": "cp314",
         "//conditions:default": "cp311",
     }),
     # LINT.ThenChange(
@@ -473,6 +500,13 @@ py_wheel(
 py_dist(
     name = "dist",
     binary_wheel = ":binary_wheel",
+    # The limited API wheels below are compatible with any Python version >=
+    # the given version, but they are compiled against the headers of this
+    # (newer) Python version. CPython supports building for an older limited
+    # API with newer headers, and newer headers contain important fixes, such
+    # as Py_INCREF() and Py_DECREF() being aware of immortal objects
+    # (https://github.com/protocolbuffers/protobuf/issues/30861).
+    limited_api_headers_version = "3.14",
     # Limited API: these wheels will satisfy any Python version >= the
     # given version.
     #
