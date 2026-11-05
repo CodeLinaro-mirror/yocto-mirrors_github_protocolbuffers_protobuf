@@ -17,25 +17,28 @@ jobs:
     strategy:
       fail-fast: false   # Don't cancel all jobs if one fails.
       matrix:
+        # Runs on both profiles of the composite Linux image (`latest`: Clang 23 /
+        # Rust 1.99.1 / Bazel 9.2.0, `floor`: Clang 14 / Rust 1.90.0 / Bazel 8.7.0;
+        # floor carries Rust 1.90 so `cargo publish --workspace` runs on both).
+        profile: [latest, floor]
         config:
           - { name: "Bzlmod and Workspace", flags: --enable_bzlmod --enable_workspace }
           - { name: Optimized, flags: --config=opt }
           - { name: ASAN, flags: --config=asan }
+          - { name: Cargo, bazel_cmd: run, targets: "//rust/release_crates:cargo_test" }
 
         include:
           - targets: "//rust/... //src/google/protobuf/compiler/rust/..."
-          - image: "us-docker.pkg.dev/protobuf-build/containers/common/linux/bazel:9.2.0-4d8e80ef93b0219fb907af9dd4596b92946995d8"
           - bazel_cmd: "test"
+          # Image per profile, pinned by digest. The digests are those of
+          # composite:latest-rust-v1 and composite:floor-rust-v1, built from
+          # protocolbuffers/build-support@5cb666e (test/linux/composite).
+          - profile: latest
+            image: "us-docker.pkg.dev/protobuf-build/containers/test/linux/composite@sha256:eaeeb31b9e774eac41042c2420bf121c623c4f80ab58271568a2f3bf109c9b28"
+          - profile: floor
+            image: "us-docker.pkg.dev/protobuf-build/containers/test/linux/composite@sha256:a5ff29d31974464f3c2d6858a072a16720770f222fcf24d6d2467d78cf430a6f"
 
-          # Override cases with custom images
-          - config: { name: Cargo }
-            # We need Rust 1.90 so that we can use the new workspace publishing
-            # feature.
-            image: "us-docker.pkg.dev/protobuf-build/containers/release/linux/rust:9.0.0-1.90.0-98863a45066747115144a8a8fb4818189d1e0761"
-            bazel_cmd: "run"
-            targets: "//rust/release_crates:cargo_test"
-
-    name: Linux ${{ matrix.config.name }}
+    name: Linux ${{ matrix.config.name }}${{ matrix.profile == 'floor' && ' (floor)' || '' }}
     runs-on: ubuntu-22-4core
     steps:
       - name: Checkout pending changes
@@ -48,9 +51,10 @@ jobs:
           image: ${{ matrix.image }}
           credentials: ${{ secrets.GAR_SERVICE_ACCOUNT }}
           bazel-cache: rust_linux
-          bazel: >-
-            ${{ matrix.bazel_cmd }} --crosstool_top=//toolchain:clang_suite --@rules_rust//rust/settings:experimental_use_cc_common_link=True
-            ${{ matrix.targets }} ${{ matrix.config.flags }}
+          bash: >-
+            bazel ${{ matrix.config.bazel_cmd || matrix.bazel_cmd }}
+            --@rules_rust//rust/settings:experimental_use_cc_common_link=True
+            ${{ matrix.config.targets || matrix.targets }} ${{ matrix.config.flags }} $BAZEL_FLAGS
 
   windows:
     strategy:
